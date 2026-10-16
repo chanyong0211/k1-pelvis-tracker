@@ -1,0 +1,1683 @@
+{
+ "meta": {
+  "rev": 13,
+  "savedAt": "2026-10-16T07:40:53Z",
+  "title": "dev12 하체 정책 설계",
+  "subtitle": "상위 층이 내는 골반 명령(속도·높이·pitch·roll)을 따라 다리 12 관절로 걷고 서는 정책. 이번 학습은 걷기와 서기만."
+ },
+ "groups": [
+  {
+   "id": "cmd",
+   "name": "명령",
+   "role": "actor",
+   "desc": "상위 층(카메라·조종기·상체 정책)이 내는 명령 — 골반 명령 + 상체 목표"
+  },
+  {
+   "id": "prop",
+   "name": "고유 감각",
+   "role": "actor",
+   "desc": "IMU·관절 엔코더 — 실기에서 읽는 값"
+  },
+  {
+   "id": "code",
+   "name": "인코더 출력",
+   "role": "code",
+   "desc": "관측 이력에서 추정해 actor 에 넘기는 값"
+  },
+  {
+   "id": "priv",
+   "name": "특권 정보",
+   "role": "critic",
+   "desc": "시뮬 참값 — critic 만 보고 배포 때 버린다"
+  },
+  {
+   "id": "act",
+   "name": "정책 출력",
+   "role": "action",
+   "desc": "정책이 50 Hz 로 내는 행동"
+  },
+  {
+   "id": "ext",
+   "name": "정책 밖 입력",
+   "role": "external",
+   "desc": "정책을 거치지 않고 바로 PD 로 가는 목표"
+  }
+ ],
+ "items": [
+  {
+   "id": "c_vx",
+   "group": "cmd",
+   "name": "앞뒤 속도 vx*",
+   "dim": 1,
+   "range": "−0.4–0.8 m/s (낮을수록 최대 속도를 줄임)",
+   "noise": "",
+   "hist": true,
+   "src": "dev2",
+   "note": "heading 틀",
+   "on": true
+  },
+  {
+   "id": "c_vy",
+   "group": "cmd",
+   "name": "옆 속도 vy*",
+   "dim": 1,
+   "range": "±0.4 m/s",
+   "noise": "",
+   "hist": true,
+   "src": "dev2",
+   "note": "",
+   "on": true
+  },
+  {
+   "id": "c_wz",
+   "group": "cmd",
+   "name": "회전 속도 ωz*",
+   "dim": 1,
+   "range": "±1.0 rad/s",
+   "noise": "",
+   "hist": true,
+   "src": "dev2",
+   "note": "",
+   "on": true
+  },
+  {
+   "id": "c_h",
+   "group": "cmd",
+   "name": "골반 높이 z*",
+   "dim": 1,
+   "range": "서기 0.33–0.77 m · 걷기 0.42–0.77 m (하한은 열어 두고 학습 중 확인)",
+   "noise": "",
+   "hist": true,
+   "src": "dev12",
+   "note": "바닥 기준. 높이–숙임 지도 안에서만 뽑는다",
+   "on": true
+  },
+  {
+   "id": "c_pitch",
+   "group": "cmd",
+   "name": "골반 pitch θ*",
+   "dim": 1,
+   "range": "θ_min(높이)–45°, 몸을 세울 수 있는 높이에선 −5° 까지",
+   "noise": "",
+   "hist": true,
+   "src": "dev12",
+   "note": "앞으로 숙임 +. 낮을수록 더 숙여야 한다 (발목 ±45° 때문)",
+   "on": true
+  },
+  {
+   "id": "c_roll",
+   "group": "cmd",
+   "name": "골반 roll φ*",
+   "dim": 1,
+   "range": "서기에서만. 최대 roll = 골반 0.67 m 위 10°, 0.67 m 아래 min(10°, 1.5 × (숙임 여유 − 2°)). 숙임 여유 = θ − θ_min(z). roll 을 뽑으면 숙임을 θ_min(z) + 2° + |roll|/1.5 이상으로 올린다. 걸을 때 0",
+   "noise": "",
+   "hist": true,
+   "src": "dev12",
+   "note": "10-16: scripts/roll_vs_lean.py 표에 보수적으로 맞춘 식. 0.67 m 위는 15–18° 까지 되지만 1단계 상한 10° 유지",
+   "on": true
+  },
+  {
+   "id": "c_up",
+   "group": "cmd",
+   "name": "상체 목표 (현재, 저역 필터)",
+   "dim": 11,
+   "range": "허리 yaw + 팔 10",
+   "noise": "",
+   "hist": false,
+   "src": "dev10 v2 방식 (ReferenceComposer)",
+   "note": "PD 에 가는 바로 그 목표. 인코더 이력에는 넣지 않는다",
+   "on": true
+  },
+  {
+   "id": "c_updot",
+   "group": "cmd",
+   "name": "상체 목표 변화율",
+   "dim": 11,
+   "range": "한 스텝 차분 (rad/스텝)",
+   "noise": "",
+   "hist": false,
+   "src": "dev10 v2 (delta)",
+   "note": "미래를 몰라도 팔이 어느 쪽으로 움직이는 중인지 알려 준다. dev10 은 미래 창을 같은 프레임 복사로 채웠다 — 실제 미래 정보는 없었다",
+   "on": true
+  },
+  {
+   "id": "c_freq",
+   "group": "cmd",
+   "name": "걸음 주기 f",
+   "dim": 1,
+   "range": "1.5–3.5 Hz",
+   "noise": "",
+   "hist": true,
+   "src": "HugWBC",
+   "note": "걷기·서기만 학습 → 걸음 시계 항목은 뺀다",
+   "on": false
+  },
+  {
+   "id": "c_swing",
+   "group": "cmd",
+   "name": "발 높이 l",
+   "dim": 1,
+   "range": "0.10–0.35 m",
+   "noise": "",
+   "hist": true,
+   "src": "HugWBC",
+   "note": "걸음 시계 항목",
+   "on": false
+  },
+  {
+   "id": "c_phase",
+   "group": "cmd",
+   "name": "위상 차 ψ · 디딤 비율",
+   "dim": 2,
+   "range": "ψ 0 / 0.5, 디딤 0.5",
+   "noise": "",
+   "hist": true,
+   "src": "HugWBC",
+   "note": "걸음 시계 항목",
+   "on": false
+  },
+  {
+   "id": "c_waist",
+   "group": "cmd",
+   "name": "허리 yaw 명령 w",
+   "dim": 1,
+   "range": "±1.0 rad",
+   "noise": "",
+   "hist": true,
+   "src": "HugWBC",
+   "note": "허리는 상체 11 바깥 목표로 간다",
+   "on": false
+  },
+  {
+   "id": "c_flag",
+   "group": "cmd",
+   "name": "상체 개입 표시 I(t)",
+   "dim": 1,
+   "range": "0 / 1",
+   "noise": "",
+   "hist": true,
+   "src": "HugWBC",
+   "note": "상체는 늘 바깥 목표라 필요 없다",
+   "on": false
+  },
+  {
+   "id": "p_angvel",
+   "group": "prop",
+   "name": "골반 각속도",
+   "dim": 3,
+   "range": "",
+   "noise": "±0.2 rad/s",
+   "hist": true,
+   "src": "dev2",
+   "note": "",
+   "on": true
+  },
+  {
+   "id": "p_grav",
+   "group": "prop",
+   "name": "중력 방향 (골반 틀)",
+   "dim": 3,
+   "range": "",
+   "noise": "±0.05",
+   "hist": true,
+   "src": "dev2",
+   "note": "",
+   "on": true
+  },
+  {
+   "id": "p_qpos",
+   "group": "prop",
+   "name": "관절 위치 (상체 포함)",
+   "dim": 23,
+   "range": "기본 자세 기준",
+   "noise": "±0.01 rad",
+   "hist": true,
+   "src": "dev2",
+   "note": "상체 자세를 알아야 균형을 잡는다",
+   "on": true
+  },
+  {
+   "id": "p_qvel",
+   "group": "prop",
+   "name": "관절 속도 (상체 포함)",
+   "dim": 23,
+   "range": "",
+   "noise": "±1.5 rad/s",
+   "hist": true,
+   "src": "dev2",
+   "note": "",
+   "on": true
+  },
+  {
+   "id": "p_act",
+   "group": "prop",
+   "name": "이전 행동 (다리)",
+   "dim": 12,
+   "range": "",
+   "noise": "",
+   "hist": true,
+   "src": "dev2",
+   "note": "dev2 는 23",
+   "on": true
+  },
+  {
+   "id": "p_clock",
+   "group": "prop",
+   "name": "걸음 시계 sin(2π·위상)",
+   "dim": 2,
+   "range": "",
+   "noise": "",
+   "hist": true,
+   "src": "HugWBC",
+   "note": "걸음 시계 항목",
+   "on": false
+  },
+  {
+   "id": "e_vel",
+   "group": "code",
+   "name": "추정 몸 속도",
+   "dim": 3,
+   "range": "",
+   "noise": "",
+   "hist": false,
+   "src": "dev2",
+   "note": "회귀 정답 = 참 몸 속도",
+   "on": true
+  },
+  {
+   "id": "e_h",
+   "group": "code",
+   "name": "추정 골반 높이",
+   "dim": 1,
+   "range": "",
+   "noise": "",
+   "hist": false,
+   "src": "HugWBC 논문",
+   "note": "회귀 정답 = 참 높이. dev2 코드에 추가해야 한다 (10-16 결정)",
+   "on": true
+  },
+  {
+   "id": "e_lat",
+   "group": "code",
+   "name": "잠재 (β-VAE)",
+   "dim": 16,
+   "range": "",
+   "noise": "",
+   "hist": false,
+   "src": "dev2",
+   "note": "",
+   "on": true
+  },
+  {
+   "id": "v_lin",
+   "group": "priv",
+   "name": "참 몸 속도",
+   "dim": 3,
+   "range": "",
+   "noise": "",
+   "hist": false,
+   "src": "dev2",
+   "note": "속도 추정 정답. dev2 는 critic 관측 위치로 정답을 자른다 — 순서 주의",
+   "on": true
+  },
+  {
+   "id": "v_h",
+   "group": "priv",
+   "name": "참 골반 높이",
+   "dim": 1,
+   "range": "",
+   "noise": "",
+   "hist": false,
+   "src": "HugWBC",
+   "note": "높이 추정 정답",
+   "on": true
+  },
+  {
+   "id": "v_slow",
+   "group": "priv",
+   "name": "골반 두 걸음 평균 높이·pitch·roll",
+   "dim": 3,
+   "range": "",
+   "noise": "",
+   "hist": false,
+   "src": "dev12",
+   "note": "이동 중 추종 보상이 두 걸음 평균에 걸리므로 critic 이 그 상태를 봐야 한다",
+   "on": true
+  },
+  {
+   "id": "v_contact",
+   "group": "priv",
+   "name": "발 접촉력 xyz",
+   "dim": 6,
+   "range": "",
+   "noise": "",
+   "hist": false,
+   "src": "HugWBC",
+   "note": "",
+   "on": true
+  },
+  {
+   "id": "v_fric",
+   "group": "priv",
+   "name": "마찰 계수",
+   "dim": 1,
+   "range": "",
+   "noise": "",
+   "hist": false,
+   "src": "HugWBC",
+   "note": "",
+   "on": true
+  },
+  {
+   "id": "v_mass",
+   "group": "priv",
+   "name": "몸통 추가 질량",
+   "dim": 1,
+   "range": "",
+   "noise": "",
+   "hist": false,
+   "src": "dev12",
+   "note": "",
+   "on": true
+  },
+  {
+   "id": "v_upper",
+   "group": "priv",
+   "name": "상체 목표 11",
+   "dim": 11,
+   "range": "",
+   "noise": "",
+   "hist": false,
+   "src": "dev12",
+   "note": "actor 관측(상체 목표 현재값)으로 옮겨서 critic 특권에서는 뺀다 (critic 은 actor 관측을 함께 본다)",
+   "on": false
+  },
+  {
+   "id": "v_upper_lvl",
+   "group": "priv",
+   "name": "상체 무작위 단계",
+   "dim": 1,
+   "range": "0–1",
+   "noise": "",
+   "hist": false,
+   "src": "HugWBC",
+   "note": "",
+   "on": true
+  },
+  {
+   "id": "v_delay",
+   "group": "priv",
+   "name": "동작 지연",
+   "dim": 1,
+   "range": "0–20 ms",
+   "noise": "",
+   "hist": false,
+   "src": "dev12",
+   "note": "",
+   "on": true
+  },
+  {
+   "id": "v_scan",
+   "group": "priv",
+   "name": "지형 높이 스캔",
+   "dim": 187,
+   "range": "",
+   "noise": "",
+   "hist": false,
+   "src": "dev2",
+   "note": "평지라 뺀다",
+   "on": false
+  },
+  {
+   "id": "a_legs",
+   "group": "act",
+   "name": "다리 12 관절 PD 목표",
+   "dim": 12,
+   "range": "기본 자세 + 0.25 × 행동",
+   "noise": "",
+   "hist": false,
+   "src": "dev2",
+   "note": "",
+   "on": true
+  },
+  {
+   "id": "a_upper",
+   "group": "act",
+   "name": "상체 11 관절 행동",
+   "dim": 11,
+   "range": "",
+   "noise": "",
+   "hist": false,
+   "src": "dev2",
+   "note": "상체는 바깥 목표 → 정책 출력에서 뺀다 (dev2 armfixed 방식)",
+   "on": false
+  },
+  {
+   "id": "x_upper",
+   "group": "ext",
+   "name": "상체 11 목표 (허리 yaw + 팔 10)",
+   "dim": 11,
+   "range": "학습: 무작위 커리큘럼 · 실기: 상위 층",
+   "noise": "",
+   "hist": false,
+   "src": "dev2 armfixed 확장",
+   "note": "저역 필터(스텝당 0.2)를 거친 값이 PD 목표가 된다",
+   "on": true
+  }
+ ],
+ "net": {
+  "histSteps": 5,
+  "encHidden": "128, 64",
+  "actorHidden": "512, 256, 128",
+  "criticHidden": "512, 256, 128",
+  "actionScale": "0.25",
+  "hz": "50",
+  "algo": "PPO + DreamWaQ 인코더 (dev2 벤더 rsl_rl)",
+  "losses": "PPO + 속도·높이 회귀 + 관측 재구성 + β·KL + 좌우 대칭 0.5",
+  "envs": "4,096",
+  "start": "처음부터 (dev2 뼈대, 10-16 결정)"
+ },
+ "tables": {
+  "commands": {
+   "title": "명령 생성",
+   "desc": "학습 중 명령을 어떻게 뽑나. 걷기·서기만.",
+   "cols": [
+    {
+     "key": "on",
+     "label": "넣기",
+     "type": "check"
+    },
+    {
+     "key": "name",
+     "label": "항목",
+     "type": "text"
+    },
+    {
+     "key": "value",
+     "label": "값",
+     "type": "long"
+    },
+    {
+     "key": "note",
+     "label": "메모",
+     "type": "long"
+    }
+   ],
+   "rows": [
+    {
+     "id": "cm1",
+     "on": true,
+     "name": "걷기·서기 비율",
+     "value": "걷기 75 % · 서기 25 % (서기 = 속도 0, 자세 명령은 계속 바뀐다)",
+     "note": "HugWBC 는 서기 10 % · 75/25 비율은 초안 (근거 없음)"
+    },
+    {
+     "id": "cm2",
+     "on": true,
+     "name": "속도 뽑기",
+     "value": "10 s 마다 범위 안 균일, |v| < 0.1 m/s 면 0, 바뀔 때 0.5 s 램프",
+     "note": "10 s 재추첨은 cyclo_lab·HugWBC 와 같음. 0.1 m/s 문턱·0.5 s 램프는 초안 (근거 없음)"
+    },
+    {
+     "id": "cm3",
+     "on": true,
+     "name": "자세 뽑기",
+     "value": "자세(높이·pitch·roll) 목표는 3–5 s 마다 새로 (속도 명령은 10 s 그대로). 새 값까지는 변화 속도 제한(높이 0.2 m/s · pitch 30°/s · roll 20°/s)으로 옮긴다. 범위는 커리큘럼 표",
+     "note": "10-16 사용자 결정 (1–3 s → 10 s → 3–5 s). 판정은 명령이 새 값에 도달하고 2 s 뒤부터라, 판정에 쓰이는 시간은 약 24 % (10 s 면 72 %). 변화 속도 제한 값은 초안"
+    },
+    {
+     "id": "cm4",
+     "on": true,
+     "name": "높이–숙임 지도",
+     "value": "숙임 하한 θ_min(z): 0.63 m 위 0°, 0.615 m 5°, 0.595 m 10°, 0.575 m 15°, 0.55 m 20°, 0.525 m 25°, 0.495 m 30°, 0.455 m 35°, 0.40 m 40°, 0.33 m 45° (사이는 선형 보간, 하드 관절 한계 기준). 높이를 먼저 뽑고 숙임은 θ_min(z) 이상에서 뽑는다. 설계 소프트 한계(다리 pitch 0.98) 때문에 0.63 m 아래에서는 실제 숙임 하한을 θ_min(z) + 2° 로 둔다",
+     "note": "dev12/scripts/lowest_posture.py (10-16). 45° 넘게 숙이면 고관절 한계로 오히려 높아진다"
+    },
+    {
+     "id": "cm5",
+     "on": true,
+     "name": "높이 하한 (열어 둠)",
+     "value": "서기 0.33 m · 걷기 0.42 m 까지 열어 두고, 실제 한계는 커리큘럼 하한 로그로 확인한다",
+     "note": "정적 계산 값: 서기 = 하드 관절 한계(무릎 135°), 걷기 = 한 발 지지 무릎·고관절 정적 토크 ≤ 72.6 N·m 의 70 % + 흔드는 발 5 cm"
+    },
+    {
+     "id": "cm6",
+     "on": true,
+     "name": "roll 규칙",
+     "value": "서기에서만. 최대 roll = 골반 0.67 m 위 10°, 0.67 m 아래 min(10°, 1.5 × (숙임 여유 − 2°)). 숙임 여유 = θ − θ_min(z). roll 을 뽑으면 숙임을 θ_min(z) + 2° + |roll|/1.5 이상으로 올린다. 걸을 때 0",
+     "note": "scripts/roll_vs_lean_20261016.txt — 숙임 하한에 붙어 있으면 발목이 이미 한계라 roll 이 거의 안 된다 (0.55–0.62 m 에서 여유 +2° → 0–1°, +6° → 9–19°)"
+    },
+    {
+     "id": "cm8",
+     "on": true,
+     "name": "높이별 최대 속도",
+     "value": "앞뒤 최대 속도를 높이에 따라 선형으로 줄인다: 0.77 m 0.8 m/s → 0.42 m 0.3 m/s",
+     "note": "초안 (근거 없음). 낮은 자세 속도 추종을 보고 조정"
+    },
+    {
+     "id": "cm9",
+     "on": true,
+     "name": "상위 층 숙임 규칙",
+     "value": "실기·조종기: 숙임 = max(요청 숙임, θ_min(높이) + 2°(0.63 m 아래), roll 이 있으면 θ_min(높이) + 2° + |roll|/1.5 (0.67 m 아래)). 높이만 내리면 숙임은 자동으로 따라온다",
+     "note": "학습과 같은 지도를 쓴다"
+    },
+    {
+     "id": "cm11",
+     "on": true,
+     "name": "걷기·서기 전환 규칙",
+     "value": "속도 명령은 높이 명령이 걷기 범위(걷기 하한 이상, 최저 0.42 m)일 때만 0 이 아니다. 서기→걷기로 바뀔 때 높이가 걷기 하한 아래면 먼저 높이를 걷기 하한 이상으로 올리고(변화 속도 제한), roll 을 0 으로 돌린 뒤 속도 램프를 시작한다",
+     "note": "사용자 10-16: 실기에서는 상위 정책이 0.42 m 아래에서 이동 명령을 내지 않는다 → 학습 명령도 같은 규칙. 전환 성공률 지표는 두지 않는다"
+    },
+    {
+     "id": "cm12",
+     "on": true,
+     "name": "리셋 (에피소드 시작)",
+     "value": "50 % 선 자세(기본 자세), 50 % 지금 열린 범위 안 무작위 자세(높이–숙임 지도·roll 함수 안)에서 정지 상태로 시작. 시작 명령 = 그 자세 그대로, 속도 0",
+     "note": "10-16 결정. 낮은 자세 관절값은 lowest_posture.py 의 IK 로 미리 표를 만든다. 늘 선 자세에서 시작하면 낮은 자세 경험이 적다"
+    },
+    {
+     "id": "cm10",
+     "on": true,
+     "name": "낮은 자세 팔 규칙",
+     "value": "숙임 40° 이상(골반 약 0.49 m 아래)에서는 상체 무작위 목표의 팔 범위를 앞쪽으로 제한 — 손·팔꿈치가 허벅지·무릎에 닿지 않게",
+     "note": "lowest_posture.py: 팔을 내리면 40° 부터 닿는다. 제한 범위는 구현 때 충돌 검사로 정함"
+    },
+    {
+     "id": "cm13",
+     "on": true,
+     "name": "상체 목표 저역 필터",
+     "value": "상체 11 목표는 스텝당 0.2 저역 필터(시정수 약 0.1 s, 50 Hz)를 거친 값을 PD 목표와 actor 관측에 쓴다. 학습의 무작위 목표, 실기 상위 층 출력 모두 같다",
+     "note": "dev10 v2 ReferenceComposer(lpf 0.2) 와 같다 — dev10 식 상체 정책 출력이 그대로 들어온다"
+    },
+    {
+     "id": "cm7",
+     "on": true,
+     "name": "명령 지연·갱신",
+     "value": "0–100 ms 지연, 30 Hz 갱신",
+     "note": "상위 층 흉내, 체크리스트 ② 대신"
+    }
+   ]
+  },
+  "curricula": {
+   "title": "커리큘럼",
+   "desc": "무엇을 처음엔 쉽게 시작해 넓히나.",
+   "cols": [
+    {
+     "key": "on",
+     "label": "넣기",
+     "type": "check"
+    },
+    {
+     "key": "name",
+     "label": "이름",
+     "type": "text"
+    },
+    {
+     "key": "start",
+     "label": "시작",
+     "type": "long"
+    },
+    {
+     "key": "end",
+     "label": "끝",
+     "type": "long"
+    },
+    {
+     "key": "gate",
+     "label": "넓히는 조건",
+     "type": "long"
+    },
+    {
+     "key": "src",
+     "label": "출처",
+     "type": "text"
+    }
+   ],
+   "rows": [
+    {
+     "id": "cu1",
+     "on": true,
+     "name": "벌점 배율",
+     "start": "0.2",
+     "end": "1.0",
+     "gate": "100 회마다 배율^0.8 (1,000 회 0.84, 2,000 회 0.98). 보상 표 '배율' 표시 항에 곱함",
+     "src": "HugWBC 코드"
+    },
+    {
+     "id": "cu2a",
+     "on": true,
+     "name": "서기 높이 하한 (K1)",
+     "start": "0.77 m (선 자세)",
+     "end": "0.33 m 까지 열어 둠 — 실제 한계는 학습이 정한다",
+     "gate": "지금 열린 범위의 맨 아래 5 cm(경계 구간) 서기 명령만 따로 판정. ① 정지 기준(순간 높이 오차 p90 ≤ 1.5 cm)을 지키고 넘어짐 ≤ 5 % 면 하한 −1 cm, 넘어짐 > 20 % 면 +1 cm 되돌림. 서기 명령의 30 % 는 경계 구간에서 뽑는다. 판정은 학습 반복 50 회마다. 하한을 학습 로그에 남긴다",
+     "src": "dev12 (ULC 의 단계적 하한을 K1 에 맞게 고침, 숫자는 초안)"
+    },
+    {
+     "id": "cu2b",
+     "on": true,
+     "name": "걷기 높이 하한 (K1)",
+     "start": "0.77 m",
+     "end": "0.42 m 까지 열어 둠 — 실제 한계는 학습이 정한다",
+     "gate": "경계 구간 걷기 명령만 따로 판정. ① 높이 평균 어긋남 p90 ≤ 3 cm, 정상 구간 속도 오차 p90 ≤ 0.12 m/s (속도 점수 exp(−e²/0.25²) = 0.8 에 해당, 두 걸음 평균 속도), 넘어짐 ≤ 5 % 면 −1 cm, 넘어짐 > 20 % 면 +1 cm. ② 흔들림은 판정에 안 쓴다. 걷기 명령의 30 % 는 경계 구간에서. 서기 하한과 따로",
+     "src": "dev12 (숫자는 초안)"
+    },
+    {
+     "id": "cu2c",
+     "on": true,
+     "name": "숙임 여유·roll (K1)",
+     "start": "숙임 = θ_min(높이) 그대로, roll 0",
+     "end": "숙임 θ_min(z) + 여유 — 45° (세울 수 있는 높이에선 −5° 까지), roll 은 명령 생성 표의 roll 함수까지 (최대 10°)",
+     "gate": "숙임 하한은 늘 높이–숙임 지도(+0.63 m 아래 2°)를 따른다. pitch 는 이동이면 ① 이동(두 걸음 평균 p90 ≤ 3°), 정지면 ① 정지(순간 p90 ≤ 1.5°), roll(정지만)은 ① 정지 기준을 지키면 더 숙이는 여유 +2°·roll 상한 +1°. roll 은 그때 숙임 여유가 허락하는 만큼만 뽑는다. 높이 단계와 함께 진행",
+     "src": "dev12 (숫자는 초안)"
+    },
+    {
+     "id": "cu3",
+     "on": true,
+     "name": "상체 무작위",
+     "start": "0 (기본 자세) — 아래 시작 조건 전까지는 상체를 움직이지 않음",
+     "end": "1 (관절 범위 전체)",
+     "gate": "시작 조건: 벌점 배율 ≥ 0.9 이고 걷기 높이 하한이 0.77 m 아래로 내려간 뒤, 걷기 하한이 0.42 m 에 닿거나 더 내려가지 않는 상태가 판정 10 회 연속 이어질 때 (= 낮은 자세로 걸을 수 있게 된 뒤). 그 뒤 HugWBC 방식: 속도·자세 추종이 문턱을 넘으면 +0.01, 2/3 밑이면 −0.01. 목표는 1.8 s 마다 새로, 앞 2/3 선형 보간. 낮은 자세에서는 팔 범위를 앞쪽으로 제한 (명령 생성 표). 목표는 상체 목표 저역 필터를 거친다",
+     "src": "HugWBC 논문 + 사용자 10-16 (시작 조건, \"10 회 연속\" 은 초안)"
+    },
+    {
+     "id": "cu4",
+     "on": false,
+     "name": "손 하중",
+     "start": "0 kg",
+     "end": "2 kg/손",
+     "gate": "2단계에서 켠다",
+     "src": "dev2 armfixed"
+    }
+   ]
+  },
+  "rewards": {
+   "title": "보상",
+   "desc": "가중치는 초안. 서기 항은 정지 손익 계산 뒤 정한다. 걸음 시계 보상은 뺐다.",
+   "cols": [
+    {
+     "key": "on",
+     "label": "넣기",
+     "type": "check"
+    },
+    {
+     "key": "group",
+     "label": "묶음",
+     "type": "select",
+     "options": [
+      "과제",
+      "자세",
+      "걸음",
+      "서기",
+      "규제",
+      "종료"
+     ]
+    },
+    {
+     "key": "name",
+     "label": "이름",
+     "type": "text"
+    },
+    {
+     "key": "weight",
+     "label": "가중치",
+     "type": "text"
+    },
+    {
+     "key": "formula",
+     "label": "식",
+     "type": "long"
+    },
+    {
+     "key": "curr",
+     "label": "배율",
+     "type": "check"
+    },
+    {
+     "key": "src",
+     "label": "출처",
+     "type": "text"
+    },
+    {
+     "key": "note",
+     "label": "메모",
+     "type": "long"
+    }
+   ],
+   "rows": [
+    {
+     "id": "r1",
+     "on": true,
+     "group": "과제",
+     "name": "track_lin_vel_xy",
+     "weight": "+1.0",
+     "formula": "exp(−‖v*xy − vxy‖² / 0.25²), heading 틀",
+     "curr": false,
+     "src": "dev2",
+     "note": "std 0.25 = 서 있기 국소최적 방지"
+    },
+    {
+     "id": "r2",
+     "on": true,
+     "group": "과제",
+     "name": "track_ang_vel_z",
+     "weight": "+1.0",
+     "formula": "exp(−(ω* − ωz)² / 0.5²)",
+     "curr": false,
+     "src": "dev2",
+     "note": ""
+    },
+    {
+     "id": "r3",
+     "on": true,
+     "group": "자세",
+     "name": "pelvis_height",
+     "weight": "−40",
+     "formula": "이동: (z̄ − z̄*)² (두 걸음 평균끼리) · 정지: (z − z*)² 순간 값 ×3",
+     "curr": true,
+     "src": "HugWBC",
+     "note": "정지에는 걸음 흔들림이 없으니 순간 값으로 엄하게. 이동 흔들림은 lin_vel_z 가 맡는다"
+    },
+    {
+     "id": "r4",
+     "on": true,
+     "group": "자세",
+     "name": "pelvis_orientation",
+     "weight": "−10",
+     "formula": "이동: ‖ḡxy − ḡ*xy‖² (두 걸음 평균끼리) · 정지: ‖gxy − g*xy‖² 순간 값, g* = Ry(θ*)·Rx(φ*) 의 중력 방향",
+     "curr": true,
+     "src": "HugWBC + roll",
+     "note": "한 항이 pitch·roll 을 같이 추종"
+    },
+    {
+     "id": "r5",
+     "on": true,
+     "group": "걸음",
+     "name": "feet_air_time",
+     "weight": "+1.0",
+     "formula": "발 공중 0.4 s 목표, 명령 0 이면 끔",
+     "curr": false,
+     "src": "dev2",
+     "note": ""
+    },
+    {
+     "id": "r6",
+     "on": true,
+     "group": "걸음",
+     "name": "feet_single_contact",
+     "weight": "+0.1",
+     "formula": "한 발만 닿아 있으면",
+     "curr": false,
+     "src": "dev2",
+     "note": ""
+    },
+    {
+     "id": "r7",
+     "on": true,
+     "group": "걸음",
+     "name": "feet_clearance",
+     "weight": "+0.3",
+     "formula": "흔드는 발 높이 목표: 골반 0.65 m 위 0.1 m → 0.42 m 에서 0.05 m 로 선형 (지형 상대)",
+     "curr": false,
+     "src": "dev2",
+     "note": "낮은 자세 목표는 초안"
+    },
+    {
+     "id": "r8",
+     "on": true,
+     "group": "걸음",
+     "name": "feet_slide",
+     "weight": "−0.2",
+     "formula": "닿은 발의 수평 속도",
+     "curr": false,
+     "src": "dev2",
+     "note": ""
+    },
+    {
+     "id": "r9",
+     "on": true,
+     "group": "걸음",
+     "name": "feet_orientation",
+     "weight": "−0.2",
+     "formula": "발바닥 기울기²",
+     "curr": false,
+     "src": "dev2",
+     "note": ""
+    },
+    {
+     "id": "r10",
+     "on": true,
+     "group": "걸음",
+     "name": "feet_touchdown",
+     "weight": "−0.002 · −0.05",
+     "formula": "착지 가속도 · 착지 수평 속도",
+     "curr": false,
+     "src": "dev2",
+     "note": ""
+    },
+    {
+     "id": "r11",
+     "on": true,
+     "group": "서기",
+     "name": "stand_both_feet",
+     "weight": "+0.5 (초안)",
+     "formula": "서기 명령에서 두 발 접지",
+     "curr": false,
+     "src": "HugWBC",
+     "note": "정지 손익 계산 뒤 정함"
+    },
+    {
+     "id": "r12",
+     "on": true,
+     "group": "서기",
+     "name": "stand_feet_still",
+     "weight": "−1.0 (초안)",
+     "formula": "서기 명령에서 발 수평 속도 합",
+     "curr": true,
+     "src": "dev12",
+     "note": "목표: 서서 자세 바꿀 때 발 안 떼기"
+    },
+    {
+     "id": "r13",
+     "on": true,
+     "group": "규제",
+     "name": "lin_vel_z",
+     "weight": "−2.0",
+     "formula": "(vz − ż*)² — 명령 높이 변화율을 뺀다",
+     "curr": true,
+     "src": "dev2 + 수정",
+     "note": "② 높이 흔들림을 맡는다. 처음엔 dev2 가중치 그대로(사람 수준 흔들림 허용), 학습 뒤 조임"
+    },
+    {
+     "id": "r14",
+     "on": true,
+     "group": "규제",
+     "name": "ang_vel_xy",
+     "weight": "−0.1",
+     "formula": "(ωxy − 명령 pitch·roll 변화율)²",
+     "curr": true,
+     "src": "dev2 + 수정",
+     "note": "② pitch·roll 흔들림을 맡는다. 처음엔 dev2 가중치 그대로, 학습 뒤 조임"
+    },
+    {
+     "id": "r15",
+     "on": true,
+     "group": "규제",
+     "name": "action_rate",
+     "weight": "−0.1",
+     "formula": "다리 행동 차분²",
+     "curr": true,
+     "src": "dev2",
+     "note": ""
+    },
+    {
+     "id": "r16",
+     "on": true,
+     "group": "규제",
+     "name": "dof_acc · torques",
+     "weight": "−5e-7 · −3e-6",
+     "formula": "다리 관절 가속도² · 토크²",
+     "curr": true,
+     "src": "dev2",
+     "note": ""
+    },
+    {
+     "id": "r17",
+     "on": true,
+     "group": "규제",
+     "name": "dof_pos_limits",
+     "weight": "−5.0",
+     "formula": "관절이 소프트 한계를 넘은 양",
+     "curr": false,
+     "src": "dev2",
+     "note": "다리 pitch 관절은 소프트 한계 0.98 (무작위화·실기 조건 표)"
+    },
+    {
+     "id": "r27",
+     "on": true,
+     "group": "규제",
+     "name": "torque_over_70",
+     "weight": "−0.01",
+     "formula": "Σ max(0, |τ_요구| − 70 N·m)² — 다리 QC080 관절(고관절 pitch·roll·yaw·무릎·발목 pitch). τ_요구 = 모터 한계로 자르기 전 PD 토크",
+     "curr": false,
+     "src": "사용자 10-16 + dev9 식(가중치 −0.01)",
+     "note": "발열(연속 정격 24.2 N·m)은 보지 않는다. dev9 는 이미 잘린 토크에 걸어 한계 근처에서 거의 작동하지 않았다. 실기: 보통 걷기 무릎 p99 44·최대 96 N·m(착지), 깊은 쪼그림 서 있기 p50 27 N·m (scripts/real_torque_by_height_20261016.txt)"
+    },
+    {
+     "id": "r18",
+     "on": true,
+     "group": "규제",
+     "name": "joint_deviation_hip",
+     "weight": "−0.5",
+     "formula": "고관절 roll·yaw 기본 자세 편차",
+     "curr": false,
+     "src": "dev2",
+     "note": "roll 명령과 부딪히는지 확인"
+    },
+    {
+     "id": "r19",
+     "on": true,
+     "group": "규제",
+     "name": "undesired_contacts",
+     "weight": "−1.0",
+     "formula": "발 말고 닿은 링크",
+     "curr": false,
+     "src": "dev2",
+     "note": "팔–다리 접촉은 셈에서 뺀다 (정책이 팔을 못 움직인다)"
+    },
+    {
+     "id": "r20",
+     "on": true,
+     "group": "종료",
+     "name": "alive · termination",
+     "weight": "+0.15 · −200",
+     "formula": "살아 있음 · 시간 초과 아닌 종료",
+     "curr": false,
+     "src": "dev2",
+     "note": ""
+    },
+    {
+     "id": "r21",
+     "on": false,
+     "group": "자세",
+     "name": "flat_orientation_l2",
+     "weight": "−5.0",
+     "formula": "몸 수평",
+     "curr": false,
+     "src": "dev2",
+     "note": "pelvis_orientation 으로 바뀜"
+    },
+    {
+     "id": "r22",
+     "on": false,
+     "group": "자세",
+     "name": "base_height (0.80 고정)",
+     "weight": "−10",
+     "formula": "(z − 0.80)²",
+     "curr": false,
+     "src": "dev2",
+     "note": "pelvis_height 로 바뀜"
+    },
+    {
+     "id": "r23",
+     "on": false,
+     "group": "규제",
+     "name": "joint_deviation 팔·허리",
+     "weight": "−0.1–−1.0",
+     "formula": "팔·허리 기본 자세 편차",
+     "curr": false,
+     "src": "dev2",
+     "note": "상체는 바깥 목표"
+    },
+    {
+     "id": "r24",
+     "on": false,
+     "group": "걸음",
+     "name": "접촉·흔들기 (걸음 시계)",
+     "weight": "−2",
+     "formula": "흔드는 발 힘 · 딛는 발 속도",
+     "curr": false,
+     "src": "HugWBC",
+     "note": "걸음 시계 뺌"
+    },
+    {
+     "id": "r25",
+     "on": false,
+     "group": "걸음",
+     "name": "발 높이 궤적 (걸음 시계)",
+     "weight": "−30",
+     "formula": "명령 발 높이 궤적 추종",
+     "curr": false,
+     "src": "HugWBC",
+     "note": "걸음 시계 뺌"
+    },
+    {
+     "id": "r26",
+     "on": false,
+     "group": "걸음",
+     "name": "no_fly · 두 발 대칭",
+     "weight": "+0.25 · −5",
+     "formula": "걸음 종류별 접지 규칙",
+     "curr": false,
+     "src": "HugWBC",
+     "note": "걸음 시계 뺌"
+    }
+   ]
+  },
+  "dr": {
+   "title": "무작위화·실기 조건",
+   "desc": "sim2real 체크리스트 §4 결정 + dev2 무작위화.",
+   "cols": [
+    {
+     "key": "on",
+     "label": "넣기",
+     "type": "check"
+    },
+    {
+     "key": "name",
+     "label": "항목",
+     "type": "text"
+    },
+    {
+     "key": "value",
+     "label": "값",
+     "type": "long"
+    },
+    {
+     "key": "src",
+     "label": "출처",
+     "type": "text"
+    },
+    {
+     "key": "note",
+     "label": "메모",
+     "type": "long"
+    }
+   ],
+   "rows": [
+    {
+     "id": "d0",
+     "on": true,
+     "name": "지형",
+     "value": "평지 (평면). 바닥 마찰은 0 으로 두고, 로봇 재질 마찰(0.4–1.2)이 발–바닥 실효 마찰이 되게 한다",
+     "src": "cyclo_lab K1 평지 설정",
+     "note": "Newton(MJWarp)은 두 물체 마찰 중 큰 값을 쓴다"
+    },
+    {
+     "id": "d14",
+     "on": true,
+     "name": "상체 PD 게인",
+     "value": "허리 yaw 76.45/4.87, 팔 22.30/1.42 (kp N·m/rad / kd N·m·s/rad) — hangang·SONIC·dev10 박스 집기 번들과 같은 값. 실기 번들(sim2real.yaml)에 같은 값을 넣는다. 학습 때 ±20 % 무작위화. 다리는 dev2 값(고관절 120/3·무릎 200/5·발목 20/2)",
+     "src": "dev6/assets/base/walk_amp_hangang/sim2real.yaml (76.45161, 4.86706 / 22.30104, 1.41973), 사용자 10-16",
+     "note": "상체를 맡을 정책(dev10·SONIC 계열)이 이 게인으로 학습됐다. 허리 120/3 은 감쇠비 0.28 이라 흔들리기 쉽고 76.45/4.87 은 0.57. 팔 처짐: 앞으로 수평으로 뻗으면 9° (상위 정책이 보정). scripts/arm_gain_check_20261016.txt"
+    },
+    {
+     "id": "d1",
+     "on": true,
+     "name": "모터 최대 토크",
+     "value": "QC080 72.6 · QC060 30.0 N·m",
+     "src": "체크리스트 ③ · dev9",
+     "note": "시뮬 모델 한계는 1.3–1.6 배"
+    },
+    {
+     "id": "d2",
+     "on": true,
+     "name": "속도에 따른 토크 감소",
+     "value": "DC 직선: 7.5 rad/s 정격 끝, 8.8 rad/s 에서 0 (corner = V)",
+     "src": "dev9",
+     "note": "Newton DCMotor 함정 주의"
+    },
+    {
+     "id": "d3",
+     "on": true,
+     "name": "모터마다 차이",
+     "value": "최대 토크 ±10 %, 속도 ×0.93–1.10",
+     "src": "체크리스트 ③",
+     "note": ""
+    },
+    {
+     "id": "d4",
+     "on": true,
+     "name": "동작 지연",
+     "value": "0–20 ms, env 마다 (평가 0/10/20)",
+     "src": "체크리스트 ④",
+     "note": "실기 ≈ MuJoCo + 10 ms"
+    },
+    {
+     "id": "d5",
+     "on": true,
+     "name": "충돌체·접촉 여유",
+     "value": "k1_col 범용 모델, 여유 0.002",
+     "src": "체크리스트 ⑤ · dev9",
+     "note": "dev2 는 0.01 (2 cm 공기 쿠션)"
+    },
+    {
+     "id": "d6",
+     "on": true,
+     "name": "마찰",
+     "value": "0.4–1.2",
+     "src": "dev2",
+     "note": ""
+    },
+    {
+     "id": "d7",
+     "on": true,
+     "name": "PD 게인",
+     "value": "±20 %",
+     "src": "dev2",
+     "note": "export 는 무작위화 끈 Play 환경에서"
+    },
+    {
+     "id": "d8",
+     "on": true,
+     "name": "몸통 질량",
+     "value": "−5–+5 kg",
+     "src": "cyclo_lab",
+     "note": ""
+    },
+    {
+     "id": "d9",
+     "on": true,
+     "name": "밀기",
+     "value": "10–15 s 마다 ±0.5 m/s",
+     "src": "cyclo_lab",
+     "note": ""
+    },
+    {
+     "id": "d10",
+     "on": true,
+     "name": "관측 잡음",
+     "value": "입출력 항목의 잡음 열",
+     "src": "dev2",
+     "note": ""
+    },
+    {
+     "id": "d11",
+     "on": true,
+     "name": "명령 지연·갱신",
+     "value": "0–100 ms, 30 Hz",
+     "src": "체크리스트 ② 대신",
+     "note": ""
+    },
+    {
+     "id": "d12",
+     "on": false,
+     "name": "카메라 실측·지연·깊이 잡음",
+     "value": "",
+     "src": "체크리스트 ①②",
+     "note": "이 정책엔 카메라 없음"
+    },
+    {
+     "id": "d13",
+     "on": true,
+     "name": "소프트 관절 한계",
+     "value": "고관절 pitch·무릎·발목 pitch 0.98, 나머지 0.9 (cyclo 기본)",
+     "src": "dev12 (0.98 은 초안)",
+     "note": "0.9 면 골반 0.43 m 아래가 벌점 구역이라 정책이 피한다 (SONIC 이 0.45 m 에서 막힌 것과 같은 원인)"
+    }
+   ]
+  },
+  "terminations": {
+   "title": "종료",
+   "desc": "",
+   "cols": [
+    {
+     "key": "on",
+     "label": "넣기",
+     "type": "check"
+    },
+    {
+     "key": "name",
+     "label": "이름",
+     "type": "text"
+    },
+    {
+     "key": "cond",
+     "label": "조건",
+     "type": "long"
+    },
+    {
+     "key": "note",
+     "label": "메모",
+     "type": "long"
+    }
+   ],
+   "rows": [
+    {
+     "id": "t1",
+     "on": true,
+     "name": "넘어짐",
+     "cond": "골반·몸통이 바닥에 닿음",
+     "note": ""
+    },
+    {
+     "id": "t2",
+     "on": true,
+     "name": "자세 이탈",
+     "cond": "|roll − φ*| > 0.6 rad 또는 |pitch − θ*| > 0.8 rad",
+     "note": "명령 대비. 초안"
+    },
+    {
+     "id": "t3",
+     "on": true,
+     "name": "시간",
+     "cond": "20 s",
+     "note": ""
+    }
+   ]
+  },
+  "metrics": {
+   "title": "평가 지표",
+   "desc": "MuJoCo, 실기 조건, 체크포인트 여러 개를 분포로. 목표 숫자는 초안 (계획.md §1, 근거 없음).",
+   "cols": [
+    {
+     "key": "on",
+     "label": "넣기",
+     "type": "check"
+    },
+    {
+     "key": "name",
+     "label": "지표",
+     "type": "text"
+    },
+    {
+     "key": "target",
+     "label": "목표",
+     "type": "text"
+    },
+    {
+     "key": "how",
+     "label": "재는 법",
+     "type": "long"
+    }
+   ],
+   "rows": [
+    {
+     "id": "m1",
+     "on": true,
+     "name": "넘어짐",
+     "target": "0 %",
+     "how": ""
+    },
+    {
+     "id": "m2",
+     "on": true,
+     "name": "앞뒤·옆 속도 오차 p90",
+     "target": "≤ 0.1 m/s",
+     "how": "명령 바뀐 뒤 2 s 를 뺀 정상 구간의 두 걸음 평균 속도, 0.2–0.8 m/s 명령"
+    },
+    {
+     "id": "m3",
+     "on": true,
+     "name": "회전 속도 오차 p90",
+     "target": "≤ 0.15 rad/s",
+     "how": "정상 구간 두 걸음 평균"
+    },
+    {
+     "id": "m4",
+     "on": true,
+     "name": "골반 높이 오차 — 이동",
+     "target": "두 걸음 평균 p90 ≤ 2 cm",
+     "how": "① 이동 기준 (흔들림 제외)"
+    },
+    {
+     "id": "m5",
+     "on": true,
+     "name": "골반 pitch·roll 오차 — 이동",
+     "target": "두 걸음 평균 p90 ≤ 3°",
+     "how": "① 이동 기준"
+    },
+    {
+     "id": "m12",
+     "on": true,
+     "name": "골반 높이 오차 — 정지",
+     "target": "순간 p90 ≤ 1 cm",
+     "how": "① 정지 기준, 정지 구간만"
+    },
+    {
+     "id": "m13",
+     "on": true,
+     "name": "골반 pitch·roll 오차 — 정지",
+     "target": "순간 p90 ≤ 1°",
+     "how": "① 정지 기준, 정지 구간만"
+    },
+    {
+     "id": "m14",
+     "on": true,
+     "name": "정지 흔들림 (② 정지)",
+     "target": "높이 0.5 cm · pitch 1° · roll 1.3° 이내",
+     "how": "순간 − 1 s 평균의 p90"
+    },
+    {
+     "id": "m6",
+     "on": true,
+     "name": "서서 자세 바꿀 때 발 이동",
+     "target": "20 s 동안 ≤ 0.05 m",
+     "how": "HugWBC 표 V 와 같은 방식 (HugWBC 0.03–0.09 m)"
+    },
+    {
+     "id": "m7",
+     "on": true,
+     "name": "걷기 발 접촉 비율",
+     "target": "60–80 %",
+     "how": "dev2 diagnose_policy — 98 % 면 서 있는 것"
+    },
+    {
+     "id": "m8",
+     "on": true,
+     "name": "상체 무작위 + 손 2 kg",
+     "target": "위 숫자 유지",
+     "how": "2단계"
+    },
+    {
+     "id": "m9",
+     "on": true,
+     "name": "높이 × 속도 지도",
+     "target": "칸마다 성공률·높이 오차",
+     "how": "높이 0.33–0.77 m × 속도 0–0.8 m/s, MuJoCo 실기 조건"
+    },
+    {
+     "id": "m10",
+     "on": true,
+     "name": "도달한 최저 높이",
+     "target": "서기 0.33 m · 걷기 0.42 m 에 얼마나 가까운지",
+     "how": "커리큘럼 하한 로그 + MuJoCo 에서 확인"
+    },
+    {
+     "id": "m11",
+     "on": true,
+     "name": "걸음 흔들림 (② 이동)",
+     "target": "처음엔 기록만 — 오차 기준 표의 사람 p90 과 비교",
+     "how": "순간 − 두 걸음 평균의 p90, 골반 높이 구간별"
+    },
+    {
+     "id": "m15",
+     "on": true,
+     "name": "정책의 두 걸음 시간",
+     "target": "기록 (사람 1.2 s 와 비교)",
+     "how": "같은 발이 닿는 간격, 골반 높이·속도 구간별"
+    }
+   ]
+  },
+  "phases": {
+   "title": "단계·관문",
+   "desc": "학습 시작·로봇 실행은 사용자 지시 뒤에만.",
+   "cols": [
+    {
+     "key": "name",
+     "label": "단계",
+     "type": "text"
+    },
+    {
+     "key": "task",
+     "label": "할 일",
+     "type": "long"
+    },
+    {
+     "key": "gate",
+     "label": "관문",
+     "type": "long"
+    },
+    {
+     "key": "status",
+     "label": "상태",
+     "type": "select",
+     "options": [
+      "계획",
+      "진행",
+      "끝"
+     ]
+    }
+   ],
+   "rows": [
+    {
+     "id": "ph0",
+     "name": "P0 설계",
+     "task": "이 페이지에서 입출력·학습 과정 확정",
+     "gate": "사용자 승인",
+     "status": "진행"
+    },
+    {
+     "id": "ph1",
+     "name": "P1 환경",
+     "task": "명령 생성기·상체 무작위·보상·인코더 높이 추정 (CPU 테스트), 정지 손익 계산",
+     "gate": "테스트 통과, 명령을 두고 서 있기가 손해",
+     "status": "계획"
+    },
+    {
+     "id": "ph2",
+     "name": "P2 스모크",
+     "task": "GPU 10 분 (비었을 때만), 보상 항별 크기 대조",
+     "gate": "항별 크기가 dev2 와 같은 자릿수",
+     "status": "계획"
+    },
+    {
+     "id": "ph3",
+     "name": "P3 학습",
+     "task": "사용자 지시 뒤에만",
+     "gate": "커리큘럼 끝까지",
+     "status": "계획"
+    },
+    {
+     "id": "ph4",
+     "name": "P4 평가",
+     "task": "MuJoCo 실기 조건, 체크포인트 분포",
+     "gate": "평가 지표 표",
+     "status": "계획"
+    },
+    {
+     "id": "ph5",
+     "name": "P5 사람 입력 시연",
+     "task": "조종기·키보드 → 속도·높이·pitch·roll",
+     "gate": "실시간으로 의도대로",
+     "status": "계획"
+    },
+    {
+     "id": "ph6",
+     "name": "P6 실기",
+     "task": "ROS 노드 (복사 패키지), 골든 재생, ROS MuJoCo 뒤 로봇 (사용자 실행)",
+     "gate": "골든 일치, ROS MuJoCo 통과",
+     "status": "계획"
+    }
+   ]
+  },
+  "tolerance": {
+   "title": "오차 기준",
+   "desc": "정지와 이동을 나눈다. 정지(속도 명령 0)는 걸음 흔들림이 없으니 순간 오차로 엄하게, 이동은 ① 평균 어긋남(두 걸음 평균)만 지키고 ② 걸음 흔들림은 처음엔 사람 수준까지 허용·기록만 한 뒤 조인다 (10-16 결정). 판정·평가 통계는 모두 p90 (10 번 중 9 번은 이 오차 이하) — 사용자 10-16.",
+   "cols": [
+    {
+     "key": "on",
+     "label": "넣기",
+     "type": "check"
+    },
+    {
+     "key": "name",
+     "label": "항목",
+     "type": "text"
+    },
+    {
+     "key": "value",
+     "label": "기준",
+     "type": "long"
+    },
+    {
+     "key": "use",
+     "label": "쓰는 곳",
+     "type": "long"
+    },
+    {
+     "key": "src",
+     "label": "출처",
+     "type": "text"
+    },
+    {
+     "key": "note",
+     "label": "메모",
+     "type": "long"
+    }
+   ],
+   "rows": [
+    {
+     "id": "tl7",
+     "on": true,
+     "name": "속도 판정 정상 구간",
+     "value": "속도 명령이 새 값에 도달(램프 0.5 s)하고 2 s 가 지난 뒤, 남은 구간의 두 걸음 평균 속도로 판정",
+     "use": "커리큘럼 판정·평가",
+     "src": "출발·멈춤 클립 760 개 (출발 p90 1.4·1.8 s, 멈춤 p90 1.7·1.0 s)",
+     "note": "scripts/walk_settle_time_from_clips.py. RL 정책으로 다시 잰다"
+    },
+    {
+     "id": "ts0",
+     "on": true,
+     "name": "판정 구간 (정지·이동 공통)",
+     "value": "명령(속도·자세)이 새 값에 도달한 뒤 2 s 가 지나면 판정 구간. 그때 속도 명령이 0 이면 정지, 아니면 이동. 명령이 옮겨 가는 동안과 도달 뒤 2 s 는 판정에서 뺀다",
+     "use": "모든 판정·평가",
+     "src": "사용자 10-16 + 출발·멈춤 클립 (멈춤 p90 1.7 s, 출발 p90 1.8 s)",
+     "note": "자세 목표 3–5 s·속도 10 s 로 바뀌므로 판정에 쓰이는 시간은 전체의 약 24 % (모의 계산). 큰 자세 변화는 옮기는 데 최대 2.2 s 라 그 구간은 판정 시간이 없을 수 있다"
+    },
+    {
+     "id": "tw",
+     "on": true,
+     "name": "두 걸음 평균 창",
+     "value": "창 길이 = 같은 발이 직전에 두 번 닿은 사이 시간(가장 최근 걸음 주기), 0.5–2.0 s 로 자름. 아직 두 걸음이 안 됐으면 1.2 s",
+     "use": "이동의 ①·② 판정, 이동 중 추종 보상, 이동 속도 판정",
+     "src": "dev12 (사람 두 걸음 1.2 s [p10–p90 0.6–1.6], 2,941 걸음)",
+     "note": "scripts/stride_period_from_clips.py. 작은 로봇은 더 빨리 걸을 수 있어 고정값 대신 실제 걸음으로 맞춘다. 학습 정책의 두 걸음 시간도 기록"
+    },
+    {
+     "id": "tl1",
+     "on": true,
+     "name": "① 이동 — 높이 평균 어긋남",
+     "value": "|z̄ − z̄*| p90 ≤ 3 cm (모든 높이). z̄·z̄* = 골반 높이와 명령의 두 걸음 평균",
+     "use": "걷기 판정·평가. 이동 중 추종 보상도 두 걸음 평균에",
+     "src": "dev12 (사용자 10-16 유지)",
+     "note": "명령도 같은 창으로 평균해, 자세 명령이 바뀔 때 생기는 늦음을 오차로 세지 않는다"
+    },
+    {
+     "id": "tl2",
+     "on": true,
+     "name": "① 이동 — pitch·roll 평균 어긋남",
+     "value": "p90 ≤ 3° (모든 높이, 두 걸음 평균끼리)",
+     "use": "걷기 판정·평가",
+     "src": "dev12 (사용자 10-16 유지)",
+     "note": ""
+    },
+    {
+     "id": "ts1",
+     "on": true,
+     "name": "① 정지 — 높이 오차",
+     "value": "순간 |z − z*| p90 ≤ 1.5 cm (판정), 평가 목표 p90 ≤ 1 cm",
+     "use": "서기 판정·평가. 정지 명령에서는 추종 보상을 순간 값에 건다 (×3)",
+     "src": "dev12 초안",
+     "note": "판정 구간에서는 명령이 멈춰 있어 따라가는 늦음이 없다. 사람 정지 흔들림은 0.5 cm 이하. HugWBC 서기 오차는 시뮬 높이 3.5 cm·pitch 2.7°, 실기 pitch 4.1° 라 이보다 훨씬 엄한 기준이다"
+    },
+    {
+     "id": "ts2",
+     "on": true,
+     "name": "① 정지 — pitch·roll 오차",
+     "value": "순간 p90 ≤ 1.5° (판정), 평가 목표 p90 ≤ 1°",
+     "use": "서기 판정·평가",
+     "src": "dev12 초안",
+     "note": "판정 구간에서는 명령이 멈춰 있다"
+    },
+    {
+     "id": "ts3",
+     "on": true,
+     "name": "② 정지 흔들림",
+     "value": "높이 0.5 cm · pitch 1° · roll 1.3° 이내 (사람 정지 p90)",
+     "use": "기록 + 평가",
+     "src": "K1 리타게팅 사람 서기·쪼그려 있기 156 클립",
+     "note": "scripts/pelvis_sway_idle_from_clips.py — 서 있을 때 0.1 cm·0.5°·0.2°, 쪼그려 있을 때 0.5 cm·1°·1.3°. 정지는 걸음이 없어 1 s 창으로 잰다"
+    },
+    {
+     "id": "tl3",
+     "on": true,
+     "name": "② 이동 흔들림 — 골반 0.70 m 위",
+     "value": "높이 2.6 cm · pitch 6.8° · roll 6.0° 까지 허용",
+     "use": "처음엔 기록만 (판정에 안 씀)",
+     "src": "사람 보통 걷기 381 클립 p90 (두 걸음 창)",
+     "note": "scripts/pelvis_sway_from_clips.py --stride"
+    },
+    {
+     "id": "tl4",
+     "on": true,
+     "name": "② 이동 흔들림 — 골반 0.58 m 근처",
+     "value": "높이 4.5 cm · pitch 6.7° · roll 19.3° 까지 허용",
+     "use": "처음엔 기록만",
+     "src": "쪼그려 걷기 75 클립 p90 (두 걸음 창)",
+     "note": "사람은 낮게 걸을 때 좌우로 뒤뚱거린다"
+    },
+    {
+     "id": "tl5",
+     "on": true,
+     "name": "② 이동 흔들림 — 골반 0.44 m 이하",
+     "value": "높이 5.4 cm · pitch 10.1° · roll 23.1° 까지 허용",
+     "use": "처음엔 기록만",
+     "src": "쪼그려 걷기 14 클립 p90 (두 걸음 창)",
+     "note": "클립 수 적음"
+    },
+    {
+     "id": "tl6",
+     "on": true,
+     "name": "② 이동 흔들림 조이기",
+     "value": "학습한 정책의 흔들림을 같은 방법으로 재서 표를 고치고, 필요하면 lin_vel_z·ang_vel_xy 를 키운다",
+     "use": "학습 뒤",
+     "src": "dev12 (10-16 결정 '다')",
+     "note": "매끈함(BD 같은 움직임)은 이 단계에서"
+    }
+   ]
+  },
+  "symmetry": {
+   "title": "좌우 대칭 손실",
+   "desc": "정책이 좌우 대칭으로 행동하게 하는 손실 (HugWBC ppo.py 방식). dev2 DWAQ PPO 에는 없어 새로 넣는다 (10-16 결정).",
+   "cols": [
+    {
+     "key": "on",
+     "label": "넣기",
+     "type": "check"
+    },
+    {
+     "key": "name",
+     "label": "항목",
+     "type": "text"
+    },
+    {
+     "key": "value",
+     "label": "규칙",
+     "type": "long"
+    },
+    {
+     "key": "src",
+     "label": "출처",
+     "type": "text"
+    },
+    {
+     "key": "note",
+     "label": "메모",
+     "type": "long"
+    }
+   ],
+   "rows": [
+    {
+     "id": "sy1",
+     "on": true,
+     "name": "손실",
+     "value": "0.5 × ‖π(o) − M_a(π(M_o(o)))‖² — 원래 행동(멈춤 기울기)과 '좌우 뒤집은 관측으로 낸 행동을 다시 뒤집은 것'의 차이",
+     "src": "HugWBC 논문 식 (12)·(13), rsl_rl/algorithms/ppo.py",
+     "note": "PPO 손실에 더한다. actor 에만 건다 (critic 은 안 건다, HugWBC 와 같음)"
+    },
+    {
+     "id": "sy2",
+     "on": true,
+     "name": "관절 (관측·행동)",
+     "value": "왼쪽 ↔ 오른쪽을 바꾼다. 부호 그대로: 고관절 pitch·무릎·발목 pitch·어깨 pitch·팔꿈치. 부호 뒤집기: 고관절 roll·yaw·발목 roll·어깨 roll·yaw·손목 roll, 허리 yaw (자기 자리에서 뒤집기)",
+     "src": "K1 모델 관절 축 확인 (10-16)",
+     "note": "관절 위치·속도·이전 행동·행동 출력·상체 목표에 같은 규칙"
+    },
+    {
+     "id": "sy3",
+     "on": true,
+     "name": "몸 관측",
+     "value": "각속도: x·z 뒤집기, y 그대로. 중력 방향: y 뒤집기, x·z 그대로",
+     "src": "HugWBC 순열 (ang vel −x, +y, −z; gravity +x, −y, +z)",
+     "note": ""
+    },
+    {
+     "id": "sy4",
+     "on": true,
+     "name": "명령",
+     "value": "그대로: vx·높이·pitch. 뒤집기: vy·ωz·roll",
+     "src": "dev12",
+     "note": "HugWBC 는 vy·ωz·허리 yaw 뒤집기"
+    },
+    {
+     "id": "sy5",
+     "on": true,
+     "name": "인코더",
+     "value": "뒤집은 관측 이력으로 인코더를 다시 돌리고, 잠재는 표본 대신 평균값으로 행동을 낸다",
+     "src": "dev12 (dev2 β-VAE 에 맞춤)",
+     "note": "추정 속도·높이도 거울 상태에서 다시 추정된다"
+    }
+   ]
+  }
+ },
+ "notes": "열린 질문\n- 서기 보상 가중치는 정지 손익 계산 뒤 정한다\n- 높이 추정 정답을 critic 관측 어디에 둘지 (dev2 는 속도 정답을 critic 관측 위치로 자른다)\n- lin_vel_z·ang_vel_xy 벌점에서 명령 변화율을 빼는 방식 확인\n- 명령을 이력(인코더 입력)에 넣을지 — dev2 는 넣는다\n- 낮은 자세 걷기는 정적 토크만 계산했다 — 동적 하중·옆 방향(고관절 roll)·연속 토크(발열)는 미확인\n- 발꿈치를 드는 쪼그림(더 낮게 가능)은 고려하지 않았다 (실기 모터 규칙: 발끝 서기 > 50 % 동작 제외)\n- ② 흔들림 허용 폭을 얼마로 조일지 (BD 같은 매끈함 목표) — 학습한 정책 측정 뒤\n- 밀기(±0.5 m/s, 10–15 s)와 서기 발 안 떼기 벌점 충돌: 보류. 서서 자세 바꿀 때 발 이동 평가는 밀기를 끄고 잰다\n- 상위 정책 연결: dev10 teacher 가 '상체 11 + 숙임 + 쪼그림' 을 냈듯이 dev12 상위 정책은 '상체 11 + 골반 높이·pitch·roll + 속도' 를 낸다"
+}

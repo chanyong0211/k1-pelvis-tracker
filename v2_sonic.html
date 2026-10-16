@@ -1,0 +1,1102 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style></head><body><title>골반 추종 정책 계획</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap"><style id="page-css">
+/* Layout: sticky save bar, left section rail on wide screens, one reading column of working sections; teal = target/plan, amber = today's planner baseline */
+:root{
+  --bg:#f2f4f3; --surface:#ffffff; --sunken:#e8ecea; --ink:#17201e; --muted:#58645f; --line:#d3dad7;
+  --accent:#0d6b77; --accent-soft:#d7ecee; --base:#a4630a; --base-soft:#f5e7d2;
+  --good:#2c7a47; --warn:#a4630a; --bad:#b23a3a;
+  --f-body:"IBM Plex Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111715; --surface:#192120; --sunken:#212b29; --ink:#e3eae7; --muted:#9aa9a4; --line:#2e3a37;
+  --accent:#4fb4c0; --accent-soft:#16363a; --base:#e2a24e; --base-soft:#3a2c17;
+  --good:#5cbb7c; --warn:#e2a24e; --bad:#e46f6f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111715; --surface:#192120; --sunken:#212b29; --ink:#e3eae7; --muted:#9aa9a4; --line:#2e3a37;
+  --accent:#4fb4c0; --accent-soft:#16363a; --base:#e2a24e; --base-soft:#3a2c17;
+  --good:#5cbb7c; --warn:#e2a24e; --bad:#e46f6f; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.bar-in{max-width:1180px;margin:0 auto;padding-block:10px;padding-inline:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.bar-title{font-weight:700;font-size:15px;margin-right:auto;min-width:0}
+.bar-title small{font-weight:400;color:var(--muted);margin-left:8px;font-family:var(--f-mono);font-size:12px}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:3px 10px;border-radius:99px;background:var(--sunken);color:var(--muted);white-space:nowrap}
+.pill.dirty{background:var(--base-soft);color:var(--base)}
+.pill.ok{background:var(--accent-soft);color:var(--accent)}
+.btn{border:1px solid var(--line);background:var(--surface);padding:6px 14px;border-radius:6px;cursor:pointer;font-size:14px}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface);font-weight:500}
+.btn.primary:disabled{opacity:.45;cursor:default}
+.btn.small{padding:2px 10px;font-size:13px}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--muted)}
+.btn.ghost:hover{color:var(--bad)}
+.notice{max-width:1180px;margin:10px auto 0;padding-inline:16px}
+.notice > div{background:var(--base-soft);color:var(--ink);border-radius:6px;padding:10px 14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:24px 80px;display:grid;grid-template-columns:200px minmax(0,1fr);gap:40px}
+nav.rail{position:sticky;top:64px;align-self:start;display:flex;flex-direction:column;gap:2px;font-size:14px}
+nav.rail a{color:var(--muted);text-decoration:none;padding:4px 10px;border-left:2px solid var(--line)}
+nav.rail a:hover{color:var(--ink);border-left-color:var(--accent)}
+nav.rail .k{font-family:var(--f-mono);font-size:12px;margin-right:6px;color:var(--accent)}
+main{min-width:0;display:flex;flex-direction:column;gap:56px}
+@media (max-width:860px){.wrap{grid-template-columns:minmax(0,1fr)} nav.rail{display:none}}
+section{min-width:0;scroll-margin-top:70px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;color:var(--accent);text-transform:uppercase}
+h1{font-size:30px;line-height:1.25;margin:4px 0 10px;text-wrap:balance;font-weight:700}
+h2{font-size:21px;margin:2px 0 6px;text-wrap:balance;font-weight:700}
+h3{font-size:16px;margin:0;font-weight:700}
+.lede{color:var(--muted);max-width:68ch;margin:0 0 18px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+textarea.f,input.f{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:7px 10px;line-height:1.55;resize:none;overflow:hidden}
+textarea.f:hover,input.f:hover{border-color:var(--muted)}
+textarea.big{font-size:16px}
+input.num{width:84px;text-align:right;font-family:var(--f-mono);border:1px solid var(--line);border-radius:6px;padding:3px 8px;background:var(--surface)}
+.hero-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:6px}
+label.lab{display:block;font-size:12px;color:var(--muted);margin-bottom:4px;letter-spacing:.02em}
+.rule{border:1px dashed var(--line);border-radius:8px;padding:10px 14px;font-size:14px;color:var(--muted);margin-top:16px}
+.rule b{color:var(--ink)}
+
+/* metrics */
+.metrics{display:flex;flex-direction:column;border-top:1px solid var(--line)}
+.m-row{display:grid;grid-template-columns:minmax(180px,1.1fr) minmax(0,1.6fr) 120px;gap:16px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.m-name{font-weight:500}
+.m-src{font-size:12px;color:var(--muted);line-height:1.4;margin-top:2px}
+.m-bars{display:flex;flex-direction:column;gap:5px;min-width:0}
+.m-bar{display:grid;grid-template-columns:44px minmax(0,1fr) 90px;gap:8px;align-items:center;font-size:12px}
+.m-bar .track{height:10px;background:var(--sunken);border-radius:3px;overflow:hidden}
+.m-bar .fill{height:100%;border-radius:3px}
+.m-bar.b .fill{background:var(--base)} .m-bar.t .fill{background:var(--accent)}
+.m-bar .v{font-family:var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
+.m-bar.b .who{color:var(--base)} .m-bar.t .who{color:var(--accent)}
+.m-side{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.chip{font-size:12px;padding:2px 9px;border-radius:99px;white-space:nowrap}
+.chip.up{background:var(--accent-soft);color:var(--accent)}
+.chip.keep{background:var(--sunken);color:var(--muted)}
+.chip.oos{background:var(--base-soft);color:var(--base)}
+@media (max-width:640px){.m-row{grid-template-columns:minmax(0,1fr)} .m-side{flex-direction:row;align-items:center;justify-content:space-between}}
+
+/* placement */
+.place{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:760px){.place{grid-template-columns:minmax(0,1fr)}}
+.svgbox{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px;overflow-x:auto}
+.svgbox svg{display:block;width:100%;min-width:420px;height:auto}
+.legend{display:flex;flex-direction:column;gap:10px;font-size:14px}
+.legend .sw{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:8px;border-radius:2px}
+.slider{display:flex;flex-direction:column;gap:4px}
+.slider input[type=range]{width:100%;accent-color:var(--accent)}
+
+/* architecture */
+.cands{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:18px}
+.cand{text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:12px 14px;cursor:pointer;display:flex;flex-direction:column;gap:6px}
+.cand:hover{border-color:var(--muted)}
+.cand.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.cand .head{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.cand .lt{font-family:var(--f-mono);color:var(--accent);font-weight:500}
+.cand p{margin:0;font-size:13.5px;color:var(--muted);line-height:1.5}
+.tag{font-size:11px;padding:1px 8px;border-radius:99px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+.tag.base{background:var(--base-soft);color:var(--base)}
+.flow{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px;overflow-x:auto}
+.flow-row{display:flex;align-items:stretch;gap:0;min-width:760px}
+.node{flex:1 1 0;border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:13px;line-height:1.45;background:var(--bg);min-width:0}
+.node b{display:block;font-size:13.5px;margin-bottom:2px}
+.node .r{font-family:var(--f-mono);font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.node.learn{border-color:var(--accent);background:var(--accent-soft)}
+.node.learn .r{color:var(--accent)}
+.node.frozen{border-style:dashed}
+.node.robot{background:var(--sunken)}
+.arrow{flex:0 0 22px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:15px}
+.fb{margin-top:10px;font-size:13px;color:var(--muted);min-width:760px;display:flex;gap:8px;align-items:center}
+.fb .loop{flex:1;border-top:1px dashed var(--muted);height:0}
+.side-in{margin-top:10px;min-width:760px;display:flex;gap:8px;font-size:13px}
+.side-in .node{flex:0 1 330px}
+.pc{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+@media (max-width:640px){.pc{grid-template-columns:1fr}}
+.pc h4{margin:0 0 4px;font-size:13px;color:var(--muted);font-weight:500}
+
+/* io table */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table.io{width:100%;border-collapse:collapse;font-size:14px;min-width:640px}
+table.io th{text-align:left;font-weight:500;font-size:12px;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--line);background:var(--sunken)}
+table.io td{padding:4px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+table.io tr:last-child td{border-bottom:0}
+table.io input{width:100%;border:1px solid transparent;background:transparent;padding:4px 6px;border-radius:4px}
+table.io input:hover{border-color:var(--line)}
+table.io input:focus{border-color:var(--accent);background:var(--bg)}
+table.io td.dim input{font-family:var(--f-mono);text-align:right;width:60px}
+.io-head{display:flex;justify-content:space-between;align-items:baseline;margin:22px 0 8px;gap:12px;flex-wrap:wrap}
+.io-head:first-child{margin-top:0}
+.sum{font-family:var(--f-mono);font-size:13px;color:var(--muted)}
+
+/* decisions / checklist */
+.cards{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px;display:grid;grid-template-columns:30px minmax(0,1fr);gap:4px 12px}
+.card .no{font-family:var(--f-mono);color:var(--muted);font-size:13px;padding-top:2px}
+.card .q{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
+.state{font-size:12px;padding:2px 9px;border-radius:99px;white-space:nowrap}
+.state.open{background:var(--base-soft);color:var(--base)}
+.state.set{background:var(--accent-soft);color:var(--accent)}
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 8px}
+.opt{border:1px solid var(--line);background:var(--bg);border-radius:6px;padding:6px 12px;cursor:pointer;font-size:14px;text-align:left;line-height:1.4}
+.opt:hover{border-color:var(--muted)}
+.opt.on{border-color:var(--accent);background:var(--accent-soft);color:var(--ink);box-shadow:inset 0 0 0 1px var(--accent)}
+.opt .rec{font-size:11px;color:var(--accent);margin-left:6px;font-weight:500}
+.why{font-size:13.5px;color:var(--muted);margin:0 0 8px;max-width:80ch}
+.card .body{grid-column:2}
+
+/* phases */
+.phases{display:flex;flex-direction:column;gap:0;border-left:2px solid var(--line);margin-left:10px}
+.ph{position:relative;padding:0 0 22px 24px}
+.ph::before{content:"";position:absolute;left:-7px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--surface);border:2px solid var(--line)}
+.ph.s-doing::before{border-color:var(--accent);background:var(--accent)}
+.ph.s-done::before{border-color:var(--good);background:var(--good)}
+.ph.s-hold::before{border-color:var(--base)}
+.ph-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+.ph-top input.f{flex:1 1 260px;font-weight:700}
+.status{border:0;border-radius:99px;padding:3px 12px;font-size:12px;cursor:pointer}
+.status.s-plan{background:var(--sunken);color:var(--muted)}
+.status.s-doing{background:var(--accent-soft);color:var(--accent)}
+.status.s-done{background:color-mix(in srgb,var(--good) 16%,transparent);color:var(--good)}
+.status.s-hold{background:var(--base-soft);color:var(--base)}
+.ph-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:640px){.ph-grid{grid-template-columns:1fr}}
+.ord{display:flex;gap:2px}
+.src li{margin-bottom:4px;font-size:14px}
+.src code{font-family:var(--f-mono);font-size:12.5px;background:var(--sunken);padding:1px 6px;border-radius:4px;word-break:break-all}
+.modal{position:fixed;inset:0;background:color-mix(in srgb,var(--ink) 40%,transparent);display:flex;align-items:center;justify-content:center;padding:16px;z-index:20}
+.modal > div{background:var(--surface);border-radius:10px;padding:16px;width:min(760px,100%);max-height:85vh;display:flex;flex-direction:column;gap:10px}
+.modal textarea{flex:1;min-height:50vh;font-family:var(--f-mono);font-size:12.5px;border:1px solid var(--line);border-radius:6px;padding:10px;background:var(--bg);resize:vertical}
+@media (prefers-reduced-motion:no-preference){.btn,.opt,.cand{transition:border-color .12s,background-color .12s}}
+</style><div id="app"></div><script type="application/json" id="plan-data">{
+ "meta": {
+  "rev": 2,
+  "savedAt": "2026-10-13T04:37:01.893Z",
+  "title": "골반 위치·방향 추종 정책",
+  "goal": "목표 골반 위치 (x, y)와 방향 yaw 를 주면 K1 이 그 자리까지 걸어가 그 방향으로 선다. dev10 ② 예상 위치로 걸어가 집기와 dev12 ③ 들고 걷기에서 지금 플래너 v3 가 맡은 '걷기'를 대신한다.",
+  "scope": "선 자세 높이(골반 0.70–0.77 m) 평지 보행. 상체 11 은 dev10·dev12 teacher 가 계속 내고, 이 정책은 하체 레퍼런스만 정한다. 추종기는 동결 SONIC K1_LoRA/20261007_062957/model_1500.",
+  "why": "플래너 v3 걷기는 넘어짐은 없지만 멈춰 서는 자리가 학습 배치 범위를 벗어나고(정지 p90 11.6 cm), 먼 목표는 달리기 레퍼런스가 되어 hop 으로만 쓸 수 있으며(0.32–0.38 m/s), 실기엔 데스크톱 GPU 서버와 링크 지연이 남는다."
+ },
+ "metrics": [
+  {
+   "id": "stop_pos",
+   "label": "정지 위치 오차 p90",
+   "unit": "cm",
+   "baseline": 11.6,
+   "target": 5,
+   "better": "lower",
+   "src": "dev10 기록_v2 §49 (c) 선 자세에서 stand_at 한 구간, 기준 8 cm 미달. student est 학습 잡음 ±3 cm, G0 허용 ±5 cm"
+  },
+  {
+   "id": "stop_yaw",
+   "label": "정지 방향 오차 p90",
+   "unit": "°",
+   "baseline": 8.4,
+   "target": 5,
+   "better": "lower",
+   "src": "§49 (c), 기준 5°. 0.9 m·30–45° 회전은 13°"
+  },
+  {
+   "id": "feet",
+   "label": "선 뒤 두 발 앞뒤 차",
+   "unit": "cm",
+   "baseline": 5.3,
+   "target": 2,
+   "better": "lower",
+   "src": "§49 (c), 기준 2 cm"
+  },
+  {
+   "id": "speed",
+   "label": "먼 거리 평균 전진 속도",
+   "unit": "m/s",
+   "baseline": 0.35,
+   "target": 0.5,
+   "better": "higher",
+   "src": "§49 Fix round 1, hop v 0.6 기본 규칙 0.32–0.38 m/s"
+  },
+  {
+   "id": "hesitate",
+   "label": "멈칫 비율 (1 s 창 \u003c 평균 60 %)",
+   "unit": "%",
+   "baseline": 8.3,
+   "target": 0,
+   "better": "lower",
+   "src": "§49 (b) 8/96; 지연 0.4 s 에선 4 m 10/16"
+  },
+  {
+   "id": "turn_sym",
+   "label": "좌우 회전 대칭 (작은 쪽 ÷ 큰 쪽)",
+   "unit": "비",
+   "baseline": 0.21,
+   "target": 0.9,
+   "better": "higher",
+   "src": "dev12 기록 Task 2 수정: hop 5 회 ω +0.3 → +26°, −0.3 → −124°"
+  },
+  {
+   "id": "replan",
+   "label": "하체 명령 갱신 주기",
+   "unit": "s",
+   "baseline": 1,
+   "target": 0.02,
+   "better": "lower",
+   "src": "플래너 hop 재계획 1 s + 데스크톱 서버 왕복(USB 0.14 ms, Wi-Fi 평균 245 ms). 정책은 노드 안 50 Hz"
+  },
+  {
+   "id": "falls",
+   "label": "넘어짐",
+   "unit": "%",
+   "baseline": 0,
+   "target": 0,
+   "better": "lower",
+   "src": "§49 0/96, dev4 8c ① 0/80 — 지켜야 할 값"
+  },
+  {
+   "id": "odom",
+   "label": "주행거리 앞 오차 |p90| (2.5 m)",
+   "unit": "cm",
+   "baseline": 15.1,
+   "target": 15.1,
+   "better": "lower",
+   "oos": true,
+   "src": "§49 발바닥 점 적분, 지연 0. 지연 0.2 s 면 40.2. 정책이 직접 줄이는 값이 아님 — 고른 걸음이 미끄럼을 줄이는지만 본다"
+  }
+ ],
+ "arch": {
+  "choice": "A",
+  "rec": "A",
+  "note": ""
+ },
+ "candidates": [
+  {
+   "id": "A",
+   "name": "조향 정책 + 클립 재생 걸음 생성기",
+   "summary": "정책이 (v*, ω*, 서기)를 내고, 걸음 생성기가 속도 띠로 SEED 클립을 골라 재생 속도와 골반 방향 회전을 맞춰 다리 창을 만든다. dev14 sonic_reverse 걸음 생성기와 같은 부품.",
+   "pros": "학습 루프 안에서 배치로 돈다(플래너 서버 없음). 로봇 노드 안 MLP. dev12 §24 MuJoCo 1,225 회 넘어짐 0, 더한 회전 97–98 % 추종, 걷기 0.21–0.64 m/s.",
+   "cons": "정지·한 걸음 조정 품질이 클립 전환에 달림. 0.6 배 재생에서 이동 비율 0.79 로 떨어짐(느린 마지막 접근). 앞으로 걷기·출발·정지·옆걸음 클립 라이브러리를 새로 만들어야 함."
+  },
+  {
+   "id": "B",
+   "name": "정책이 플래너 v3 목표를 고쳐 줌",
+   "summary": "정책이 0.5–1 s 앞 중간 목표(키프레임)를 내고 플래너 v3 가 다리를 생성한다. 지금 ② ③ 경로를 거의 그대로 쓴다.",
+   "pros": "플래너가 걸음 모양을 보장. dev4 8c ① 0.2–0.6 m/s 추종, 넘어짐 0/80.",
+   "cons": "Isaac 과 플래너의 torch 가 달라 루프 안 호출엔 소켓 서버, 배치 4096 재계획 681 ms. 실기엔 GPU 서버·링크 지연이 남음. hop 왼쪽 회전 약함은 그대로."
+  },
+  {
+   "id": "C",
+   "name": "정책이 다리 레퍼런스를 직접",
+   "summary": "정책이 다리 12 관절 창(미래 10 프레임)을 직접 내고 SONIC 이 따른다.",
+   "pros": "제약이 가장 적음. 클립·플래너 의존 없음.",
+   "cons": "SONIC 학습 분포 밖 레퍼런스는 안 따름(허리 π raw 시험 제자리걸음, dev4 §2 기울임만으로 걸음 0/12). 걸음 자체를 RL 로 처음부터 만들어야 함."
+  }
+ ],
+ "io": {
+  "inputs": [
+   {
+    "name": "목표 골반 상대 위치 (x, y)",
+    "dim": "2",
+    "src": "골반 heading 틀, 다리 주행거리 기준",
+    "note": "학습: 참값 + 주행거리 오차 모형"
+   },
+   {
+    "name": "목표 방향 차 (cos, sin)",
+    "dim": "2",
+    "src": "같은 틀, IMU yaw",
+    "note": ""
+   },
+   {
+    "name": "속도 상한 v_max",
+    "dim": "1",
+    "src": "호출 쪽(dev10 0.6, dev12 들고 0.4)",
+    "note": "정책이 넘지 않게 보상"
+   },
+   {
+    "name": "관절 위치·속도",
+    "dim": "46",
+    "src": "/joint_states 23 + 23",
+    "note": "잡음 = dev10 student"
+   },
+   {
+    "name": "IMU 중력 방향·각속도",
+    "dim": "6",
+    "src": "골반 IMU",
+    "note": ""
+   },
+   {
+    "name": "상체 offset",
+    "dim": "11",
+    "src": "dev10·dev12 teacher 현재 출력",
+    "note": "박스 든 자세를 알게"
+   },
+   {
+    "name": "걸음 생성기 상태 (위상 cos·sin, 재생 속도)",
+    "dim": "3",
+    "src": "걸음 생성기",
+    "note": "후보 A 일 때"
+   },
+   {
+    "name": "이전 행동",
+    "dim": "4",
+    "src": "정책",
+    "note": ""
+   }
+  ],
+  "outputs": [
+   {
+    "name": "v* 앞뒤 속도",
+    "dim": "1",
+    "src": "→ 클립 고르기·재생 속도",
+    "note": "−0.3 – 0.8 m/s (실기 다리 속도 한계 때문에 0.8 상한, dev12 §24)"
+   },
+   {
+    "name": "v_y* 옆 속도",
+    "dim": "1",
+    "src": "→ 옆걸음 클립",
+    "note": "옆걸음 클립 수 미확인"
+   },
+   {
+    "name": "ω* 회전",
+    "dim": "1",
+    "src": "→ 골반 방향 적분",
+    "note": "±0.6 rad/s"
+   },
+   {
+    "name": "서기",
+    "dim": "1",
+    "src": "→ 선 자세 클립으로 전환",
+    "note": "0.5 넘으면 정지"
+   }
+  ],
+  "critic": [
+   {
+    "name": "참 골반 속도·위치 오차",
+    "dim": "6",
+    "src": "시뮬 참값",
+    "note": ""
+   },
+   {
+    "name": "주행거리 오차",
+    "dim": "3",
+    "src": "시뮬 참값 − 주행거리",
+    "note": ""
+   },
+   {
+    "name": "박스 질량·마찰, 지연",
+    "dim": "4",
+    "src": "무작위화 값",
+    "note": ""
+   },
+   {
+    "name": "SONIC 추종 오차",
+    "dim": "2",
+    "src": "다리 RMS, 골반 기울기",
+    "note": ""
+   }
+  ]
+ },
+ "decisions": [
+  {
+   "id": "owner",
+   "q": "코드는 어디에 두나",
+   "options": [
+    "dev12 아래 새 폴더 (dev12/sonic_walk), dev10 은 import",
+    "새 프로젝트 dev15",
+    "dev14 걸음 생성기 확장"
+   ],
+   "rec": 0,
+   "choice": null,
+   "why": "들고 이동 기술은 SONIC 구조에서도 dev12 소관으로 정해져 있고, f3 세션도 걸음 생성기를 dev12 소유로 합치자고 답했다. dev10 은 ② 에서 읽기만 한다.",
+   "note": ""
+  },
+  {
+   "id": "cmd",
+   "q": "명령 형태",
+   "options": [
+    "목표 자세 하나 (x, y, yaw) — 도착하면 선다",
+    "경로점 여러 개",
+    "속도 명령 (v, ω) + 바깥 P 제어"
+   ],
+   "rec": 0,
+   "choice": null,
+   "why": "② 와 ③ 이 원하는 것은 둘 다 '거기 가서 서기'. 속도 명령으로 두면 정지 정확도를 다시 바깥 고리가 떠맡는다.",
+   "note": ""
+  },
+  {
+   "id": "range",
+   "q": "목표 범위",
+   "options": [
+    "0–4 m, 모든 방향 (뒤로 0.5 m·제자리 회전 포함)",
+    "0–2.5 m, 앞쪽 ±90°만"
+   ],
+   "rec": 0,
+   "choice": null,
+   "why": "② 입력 범위가 x 1.5–4 m·y ±2 m·yaw 임의이고, 재시도 STEP 은 뒤로 물러나기가 필요하다(§49 (f) 지금은 16 cm 만 물러남).",
+   "note": ""
+  },
+  {
+   "id": "upper",
+   "q": "상체·박스는 언제부터",
+   "options": [
+    "처음부터 상체 offset 무작위 (dev10·dev12 장면 분포) + 박스 질량 게이트 0 → 2 kg",
+    "빈손으로 먼저, 박스는 이어학습"
+   ],
+   "rec": 0,
+   "choice": null,
+   "why": "한 정책을 두 프로젝트가 쓰려면 든 자세 분포를 처음부터 봐야 한다. 질량은 dev10 처럼 게이트로 늘린다.",
+   "note": ""
+  },
+  {
+   "id": "height",
+   "q": "쪼그려 걷기 (골반 높이 출력)",
+   "options": [
+    "이번엔 범위 밖 — 선 자세 높이만",
+    "높이 출력 포함 (0.45–0.77 m)"
+   ],
+   "rec": 0,
+   "choice": null,
+   "why": "dev4 B3 쪼그림 목표 0/12, SONIC 소프트 한계가 바닥 도달을 막는다. 선 자세 걷기부터 끝낸다.",
+   "note": ""
+  },
+  {
+   "id": "pose",
+   "q": "자기 위치 추정 (정책 관측)",
+   "options": [
+    "다리 주행거리 + IMU (dev10 leg_odom, 발바닥 점)",
+    "state_estimator odom"
+   ],
+   "rec": 0,
+   "choice": null,
+   "why": "② C++ 노드에 이미 있고 MuJoCo 로 측정됐다. 학습에서는 실측 덜 셈 2.8–8.4 %, 옆 3.7–12.5 cm 를 관측 잡음으로 넣는다.",
+   "note": ""
+  },
+  {
+   "id": "sim",
+   "q": "학습 시뮬",
+   "options": [
+    "Isaac Lab (isaaclab_sonic 컨테이너, 동결 SONIC)",
+    "mjlab"
+   ],
+   "rec": 0,
+   "choice": null,
+   "why": "dev10·dev12 teacher 와 같은 env·SONIC 래퍼·게이트 코드를 쓴다.",
+   "note": ""
+  },
+  {
+   "id": "ac",
+   "q": "actor·critic 구성",
+   "options": [
+    "비대칭 actor-critic (actor = 로봇 관측만)",
+    "특권 teacher → student 증류"
+   ],
+   "rec": 0,
+   "choice": null,
+   "why": "카메라가 없어 증류할 이유가 없다. dev12 ③ 과 같은 결정, 증류 격차(dev10 §38)를 처음부터 없앤다.",
+   "note": ""
+  },
+  {
+   "id": "run",
+   "q": "실기 실행 위치",
+   "options": [
+    "로봇 노드 안 ONNX (50 Hz)",
+    "데스크톱 서버"
+   ],
+   "rec": 0,
+   "choice": null,
+   "why": "MLP 라 Jetson 에서 충분하다. 플래너 서버·Wi-Fi 지연(평균 245 ms, 손실 5 %)을 걷기 고리에서 뺀다.",
+   "note": ""
+  }
+ ],
+ "checklist": [
+  {
+   "id": "c1",
+   "q": "카메라 장착 실측·무작위화",
+   "options": [
+    "넣음",
+    "평가만",
+    "안 넣음"
+   ],
+   "rec": 2,
+   "choice": null,
+   "why": "actor 에 카메라가 없다.",
+   "note": ""
+  },
+  {
+   "id": "c2",
+   "q": "카메라 지연·깊이 잡음",
+   "options": [
+    "넣음",
+    "평가만",
+    "안 넣음"
+   ],
+   "rec": 2,
+   "choice": null,
+   "why": "같은 이유.",
+   "note": ""
+  },
+  {
+   "id": "c3",
+   "q": "모터 토크 피크 (QC080 72.6 · QC060 30 N·m), 속도 곡선, 모터별 ±10 %",
+   "options": [
+    "넣음",
+    "평가만",
+    "안 넣음"
+   ],
+   "rec": 0,
+   "choice": null,
+   "why": "정책이 걸음 속도를 고르는 기술이다. MJWarp·PhysX 시뮬 무릎은 실기 11.5 rad/s 를 넘어 돈다. 동결 SONIC 이 이 조건에서 걷는지 스모크에서 먼저 본다.",
+   "note": ""
+  },
+  {
+   "id": "c4",
+   "q": "동작 지연 (0–20 ms 무작위, 평가 0/10/20)",
+   "options": [
+    "넣음",
+    "평가만",
+    "안 넣음"
+   ],
+   "rec": 0,
+   "choice": null,
+   "why": "실기 ≈ MuJoCo + 10 ms. 정지 순간 반응이 지연에 민감하다.",
+   "note": ""
+  },
+  {
+   "id": "c5",
+   "q": "다리 충돌체·접촉 여유",
+   "options": [
+    "넣음",
+    "평가만",
+    "안 넣음"
+   ],
+   "rec": 0,
+   "choice": null,
+   "why": "평지라 턱 항목은 뺀다. 발 충돌 모델은 두 시뮬에서 같게(k1_col 범용 모델) 둔다. 발 미끄럼이 주행거리 오차의 큰 몫이다.",
+   "note": ""
+  },
+  {
+   "id": "c6",
+   "q": "평가 하네스에 실기 조건 (모터 한계·지연·주행거리 오차·링크 지연)",
+   "options": [
+    "넣음",
+    "평가만",
+    "안 넣음"
+   ],
+   "rec": 0,
+   "choice": null,
+   "why": "플래너 기준선과 같은 자리 격자·같은 조건으로 비교해야 '대체'를 말할 수 있다.",
+   "note": ""
+  }
+ ],
+ "phases": [
+  {
+   "id": "p1",
+   "title": "걸음 생성기 공용화 + 규칙 조향 기준선",
+   "detail": "dev14 클립 재생 걸음 생성기를 앞·옆·뒤 걷기와 출발·정지 클립으로 넓힌다. 학습 없이 규칙(P 제어)으로 조향해 MuJoCo 에서 플래너와 같은 자리 격자를 돈다.",
+   "gate": "넘어짐 0, 정지 p90·방향·속도 기준선 숫자 (CPU)",
+   "status": "plan"
+  },
+  {
+   "id": "p2",
+   "title": "Isaac 환경·관측·보상·리셋",
+   "detail": "리셋 = dev10·dev12 장면 상체 분포 + 선 자세. 보상: 목표 거리·방향, 도착 뒤 정지, 속도 상한, 발 미끄럼 벌점, 상체 추종 유지. 게이트: 거리 → 방향 → 질량.",
+   "gate": "스모크 통과, 보상 항별 값이 기준 태스크와 같은 크기 (GPU 10 분, 비었을 때만)",
+   "status": "plan"
+  },
+  {
+   "id": "p3",
+   "title": "학습",
+   "detail": "사용자 '돌려' 뒤에만 시작. 체크포인트 여러 개를 분포로 평가.",
+   "gate": "학습 곡선, 게이트 끝까지",
+   "status": "plan"
+  },
+  {
+   "id": "p4",
+   "title": "MuJoCo 평가: 플래너 기준선과 비교",
+   "detail": "D 0.3–4 m × 방위 −90–90° × 목표 yaw, 빈손·들고, 지연 0/10/20 ms, 모터 한계 켬.",
+   "gate": "목표 표의 값 (정지 p90 · 방향 · 넘어짐 0)",
+   "status": "plan"
+  },
+  {
+   "id": "p5",
+   "title": "dev10 ② · dev12 ③ 에 연결",
+   "detail": "② ApproachFSM 걷기 출처를 플래너에서 정책으로 바꾼다. ③ 은 미리 뽑은 플래너 걷기 라이브러리 대신 정책 닫힌 고리로 학습·평가.",
+   "gate": "② G4 · ③ G3 다시",
+   "status": "plan"
+  },
+  {
+   "id": "p6",
+   "title": "노드·실기",
+   "detail": "ONNX + C++ 노드, 골든 재생, ROS MuJoCo 검증 뒤 로봇(사용자가 실행).",
+   "gate": "골든 일치, ROS MuJoCo 통과",
+   "status": "plan"
+  }
+ ],
+ "notes": "열린 질문\n- SEED 에 옆걸음·제자리 회전 클립이 걸음 생성기에 쓸 만큼 있는가 (미확인)\n- 느린 재생(0.6 배 이하)의 이동 비율 저하가 마지막 0.3 m 접근을 망치는가\n- 박스 든 상체 + 클립 걸음에서 SONIC 추종 (dev12 §20 빈손 0/48 넘어짐만 확인)\n- 정지 정확도를 주행거리가 아니라 참값으로 잴지, 둘 다 잴지"
+}</script><script id="page-js">
+(function(){
+"use strict";
+var S = JSON.parse(document.getElementById("plan-data").textContent);
+var TITLE = "골반 추종 정책 계획";
+var RESET = ':root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,sans-serif}img{max-width:100%}[hidden]{display:none!important}';
+var FONTS = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">';
+var DRAFT_KEY = "pelvis-plan-draft";
+var STATUS = [["plan","계획"],["doing","진행"],["done","끝"],["hold","보류"]];
+var art = null, saveState = "init", dirty = false, staleDraft = null;
+
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});}
+function getP(path){return path.split(".").reduce(function(o,k){return o==null?o:o[k];},S);}
+function setP(path,v){var ks=path.split("."),o=S;for(var i=0;i<ks.length-1;i++)o=o[ks[i]];o[ks[ks.length-1]]=v;}
+function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
+function core(o){var c=JSON.parse(JSON.stringify(o));delete c.meta.rev;delete c.meta.savedAt;return JSON.stringify(c);}
+
+/* ---------- draft recovery ---------- */
+function checkDraft(){
+  var raw=lsGet(DRAFT_KEY); if(!raw) return;
+  var d; try{d=JSON.parse(raw);}catch(e){lsDel(DRAFT_KEY);return;}
+  if(!d||!d.data){lsDel(DRAFT_KEY);return;}
+  if(core(d.data)===core(S)){lsDel(DRAFT_KEY);return;}
+  if(d.baseRev===S.meta.rev){S=d.data;S.meta.rev=d.baseRev;dirty=true;staleDraft=null;}
+  else staleDraft=d;
+}
+checkDraft();
+
+/* ---------- GitHub Pages: save = commit index.html through the GitHub API ---------- */
+var GH={owner:"chanyong0211",repo:"k1-pelvis-tracker",path:"v2_sonic.html",branch:"main"};
+var GH_TOKEN_KEY="pelvis-plan-gh-token";
+function ghToken(){return lsGet(GH_TOKEN_KEY)||"";}
+function b64enc(s){return btoa(unescape(encodeURIComponent(s)));}
+function b64dec(s){return decodeURIComponent(escape(atob(s.replace(/\s/g,""))));}
+function stateOf(html){var m=/<script type="application\/json" id="plan-data">([\s\S]*?)<\/script>/.exec(html);return m?JSON.parse(m[1]):null;}
+function ghFetch(method,body){
+  var h={"Accept":"application/vnd.github+json"},t=ghToken();
+  if(t) h.Authorization="Bearer "+t;
+  if(body) h["Content-Type"]="application/json";
+  var url="https://api.github.com/repos/"+GH.owner+"/"+GH.repo+"/contents/"+GH.path+(method==="GET"?"?ref="+GH.branch:"");
+  return fetch(url,{method:method,headers:h,body:body?JSON.stringify(body):undefined,cache:"no-store"});
+}
+function ghApi(){
+  if(location.hostname!==GH.owner.toLowerCase()+".github.io") return null;
+  function pull(){return ghFetch("GET").then(function(r){if(!r.ok) throw {code:"upstream_error"}; return r.json();}).then(function(j){return {sha:j.sha,html:b64dec(j.content)};});}
+  return {gh:true,pull:pull,publish:function(html){
+    if(!ghToken()) return Promise.reject({code:"needtoken"});
+    return pull().then(function(cur){
+      var st=stateOf(cur.html);
+      if(st&&st.meta.rev!==pendingBase) throw {code:"conflict"};
+      return ghFetch("PUT",{message:"계획 판 "+(pendingBase+1),content:b64enc(html),sha:cur.sha,branch:GH.branch});
+    }).then(function(r){
+      if(r.status===409||r.status===422) throw {code:"conflict"};
+      if(r.status===401||r.status===403||r.status===404) throw {code:"badtoken"};
+      if(!r.ok) throw {code:"upstream_error"};
+      return {noReload:true};
+    });
+  }};
+}
+function showConnect(){
+  $("modal").innerHTML='<div class="modal" data-act="backdrop"><div><h3>GitHub 연결</h3>'+
+  '<p class="muted" style="margin:0;font-size:14px">저장하면 <b>'+GH.owner+'/'+GH.repo+'</b> 저장소의 index.html 이 바뀝니다. 이 저장소에만 쓸 수 있는 토큰을 넣으세요. 토큰은 이 브라우저에만 보관되고 저장소에 올라가지 않습니다.</p>'+
+  '<ol style="margin:0;padding-left:20px;font-size:14px"><li><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Fine-grained token 만들기</a> ('+GH.owner+' 계정으로)</li><li>Repository access: Only select repositories → '+GH.repo+'</li><li>Permissions → Contents: Read and write</li></ol>'+
+  '<label class="lab" for="ghtok">토큰</label><input id="ghtok" class="f" type="password" autocomplete="off" placeholder="github_pat_…">'+
+  '<div id="ghmsg" class="muted" style="font-size:13px"></div>'+
+  '<div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap"><button class="btn ghost" data-act="gh-forget">이 브라우저에서 지우기</button><button class="btn" data-act="close-md">닫기</button><button class="btn primary" data-act="gh-save">확인하고 연결</button></div></div></div>';
+  $("ghtok").focus();
+}
+
+function markDirty(){
+  dirty=true;
+  lsSet(DRAFT_KEY,JSON.stringify({baseRev:S.meta.rev,data:S}));
+  renderBar();
+}
+
+/* ---------- shell ---------- */
+var app=document.getElementById("app");
+var SECTIONS=[["s-goal","목표"],["s-now","지금과 목표"],["s-place","정지 허용 범위"],["s-arch","구조"],["s-io","입력·출력"],["s-dec","결정"],["s-sim","sim2real"],["s-ph","단계·관문"],["s-notes","메모·근거"]];
+app.innerHTML =
+ '<div class="bar"><div class="bar-in"><div class="bar-title">'+esc(TITLE)+'<small id="rev"></small></div>'+
+ '<span id="savepill" class="pill"></span>'+
+ '<button class="btn" id="ghbtn" data-act="gh-connect" hidden>GitHub 연결</button>'+
+ '<button class="btn" data-act="md">Markdown 복사</button>'+
+ '<button class="btn primary" id="savebtn" data-act="save">저장</button></div></div>'+
+ '<div id="notice"></div>'+
+ '<div class="wrap"><nav class="rail">'+SECTIONS.map(function(s,i){return '<a href="#'+s[0]+'"><span class="k">'+(i+1)+'</span>'+s[1]+'</a>';}).join("")+'</nav><main>'+
+ SECTIONS.map(function(s){return '<section id="'+s[0]+'"></section>';}).join("")+'</main></div><div id="modal"></div>';
+
+function $(id){return document.getElementById(id);}
+
+function renderBar(){
+  $("rev").textContent="판 "+S.meta.rev+" · "+fmtSaved(S.meta.savedAt);
+  var p=$("savepill"),b=$("savebtn"),gb=$("ghbtn");
+  gb.hidden=!(art&&art.gh); gb.textContent=ghToken()?"GitHub 연결됨":"GitHub 연결";
+  if(saveState==="needtoken"){p.className="pill dirty";p.textContent=dirty?"저장하려면 GitHub 연결":"보기만 — 저장하려면 GitHub 연결";b.disabled=!dirty;return;}
+  if(saveState==="conflict"){p.className="pill dirty";p.textContent="GitHub 에 더 새 판 — 새로고침하세요";b.disabled=true;return;}
+  if(saveState==="badtoken"){p.className="pill dirty";p.textContent="토큰이 거부됨 — GitHub 연결 다시";b.disabled=false;return;}
+  if(saveState==="readonly"){p.className="pill";p.textContent="읽기 전용 — 저장 권한 없음";b.disabled=true;return;}
+  if(saveState==="nocap"){p.className="pill dirty";p.textContent=dirty?"이 브라우저에만 임시 보관":"저장 기능 없음";b.disabled=true;return;}
+  if(saveState==="saving"){p.className="pill";p.textContent="저장 중…";b.disabled=true;return;}
+  if(saveState==="error"){p.className="pill dirty";p.textContent="저장 실패 — 다시 누르세요";b.disabled=false;return;}
+  b.disabled=!dirty;
+  if(dirty){p.className="pill dirty";p.textContent="저장 안 한 변경 있음";}
+  else{p.className="pill ok";p.textContent="저장됨";}
+}
+function fmtSaved(s){
+  if(!s) return "";
+  var d=new Date(s); if(isNaN(d)) return s;
+  function z(n){return (n<10?"0":"")+n;}
+  return d.getFullYear()+"-"+z(d.getMonth()+1)+"-"+z(d.getDate())+" "+z(d.getHours())+":"+z(d.getMinutes())+" 저장";
+}
+function renderNotice(){
+  var n=$("notice");
+  if(!staleDraft){n.innerHTML="";return;}
+  n.innerHTML='<div class="notice"><div><span>이 브라우저에 저장되지 않은 이전 변경(판 '+esc(staleDraft.baseRev)+' 기준)이 남아 있습니다. 그 사이 다른 저장이 들어왔습니다.</span>'+
+   '<button class="btn small" data-act="draft-load">이전 변경 불러오기</button><button class="btn small ghost" data-act="draft-drop">버리기</button></div></div>';
+}
+
+/* ---------- field helpers ---------- */
+function ta(path,cls,ph){return '<textarea class="f '+(cls||"")+'" rows="1" data-bind="'+path+'" placeholder="'+esc(ph||"")+'">'+esc(getP(path))+'</textarea>';}
+function inp(path,ph){return '<input class="f" data-bind="'+path+'" value="'+esc(getP(path))+'" placeholder="'+esc(ph||"")+'">';}
+function grow(root){(root||document).querySelectorAll("textarea.f").forEach(function(t){t.style.height="auto";t.style.height=(t.scrollHeight+2)+"px";});}
+
+/* ---------- 1 goal ---------- */
+function rGoal(){
+  $("s-goal").innerHTML='<div class="eyebrow">dev10 ② · dev12 ③ 공용 하체 정책</div>'+
+  '<h1>'+esc(S.meta.title)+'</h1>'+
+  '<div class="hero-grid">'+
+   '<div><label class="lab" for="f-goal">무엇을 하나</label>'+ta("meta.goal","big").replace('<textarea','<textarea id="f-goal"')+'</div>'+
+   '<div><label class="lab" for="f-why">왜 지금 플래너를 바꾸나</label>'+ta("meta.why").replace('<textarea','<textarea id="f-why"')+'</div>'+
+   '<div><label class="lab" for="f-scope">범위</label>'+ta("meta.scope").replace('<textarea','<textarea id="f-scope"')+'</div>'+
+  '</div>'+
+  '<div class="rule"><b>지키는 규칙</b> · 학습은 사용자의 "돌려"·"시작해" 뒤에만 · 다른 세션 학습이 GPU 우선 · 로봇 연결·실행은 사용자 · dev4·dev13·ai_sapiens 는 읽기만</div>';
+}
+
+/* ---------- 2 metrics ---------- */
+function verdict(m){
+  if(m.oos) return '<span class="chip oos">참고 — 정책 밖</span>';
+  var b=+m.baseline,t=+m.target;
+  if(b===t) return '<span class="chip keep">유지</span>';
+  var better = m.better==="lower" ? t<b : t>b;
+  if(!better) return '<span class="chip oos">지금보다 느슨함</span>';
+  var r;
+  if(m.better==="lower") r = t===0 ? "0 으로" : (b/t).toFixed(1)+"배 줄임";
+  else r = b===0 ? "새로" : (t/b).toFixed(1)+"배 늘림";
+  return '<span class="chip up">'+r+'</span>';
+}
+function mRow(m,i){
+  var b=+m.baseline||0,t=+m.target||0,mx=Math.max(b,t)*1.12||1;
+  function w(v){return Math.max(v>0?1.5:0,v/mx*100).toFixed(1);}
+  return '<div class="m-row" data-mrow="'+i+'"><div><div class="m-name">'+esc(m.label)+'</div><div class="m-src">'+esc(m.src)+'</div></div>'+
+   '<div class="m-bars">'+
+    '<div class="m-bar b"><span class="who">지금</span><div class="track"><div class="fill" style="width:'+w(b)+'%"></div></div><span class="v">'+esc(m.baseline)+' '+esc(m.unit)+'</span></div>'+
+    '<div class="m-bar t"><span class="who">목표</span><div class="track"><div class="fill" style="width:'+w(t)+'%"></div></div><span class="v">'+esc(m.target)+' '+esc(m.unit)+'</span></div>'+
+   '</div>'+
+   '<div class="m-side"><label class="lab" for="mt'+i+'" style="margin:0">목표 '+esc(m.unit)+'</label><input id="mt'+i+'" class="num" type="number" step="any" data-bind="metrics.'+i+'.target" data-num="1" data-redraw="metric" value="'+esc(m.target)+'">'+verdict(m)+'</div></div>';
+}
+function rNow(){
+  $("s-now").innerHTML='<div class="eyebrow">기준선 = 플래너 v3 + 동결 SONIC (MuJoCo)</div><h2>지금과 목표</h2>'+
+  '<p class="lede">주황은 dev10 ② G2·G3 와 dev4·dev12 에서 잰 지금 값, 청록은 이 정책의 관문 값입니다. 오른쪽 칸에 목표를 바꾸면 막대와 아래 그림이 바로 바뀝니다.</p>'+
+  '<div class="metrics" id="mlist">'+S.metrics.map(mRow).join("")+'</div>';
+}
+function redrawMetric(i){
+  var row=document.querySelector('[data-mrow="'+i+'"]'); if(!row) return;
+  var tmp=document.createElement("div"); tmp.innerHTML=mRow(S.metrics[i],i);
+  var nw=tmp.firstChild;
+  row.querySelector(".m-bars").replaceWith(nw.querySelector(".m-bars"));
+  var side=row.querySelector(".m-side"); var chip=side.querySelector(".chip"); chip.replaceWith(nw.querySelector(".m-side .chip"));
+}
+function metric(id){for(var i=0;i<S.metrics.length;i++) if(S.metrics[i].id===id) return S.metrics[i]; return null;}
+
+/* ---------- 3 placement ---------- */
+function rPlace(){
+  $("s-place").innerHTML='<div class="eyebrow">위에서 본 그림 · 단위 cm · 박스 37.1 × 40.5</div><h2>정지 허용 범위</h2>'+
+  '<p class="lede">걸어온 로봇이 서야 하는 자리는 발끝→박스 모서리 0.22 m 정면입니다. student 가 학습한 배치는 발끝→모서리 0.04–0.30 m·옆 ±0.15 m(골반 기준 점선 상자). 정지 오차 원이 상자를 벗어나는 만큼 집기 전에 STEP 보정이 필요합니다.</p>'+
+  '<div class="place"><div class="svgbox" id="placesvg"></div><div class="legend">'+
+   '<div><span class="sw" style="background:var(--muted)"></span>student 학습 배치 범위 (골반 위치로 환산)</div>'+
+   '<div><span class="sw" style="background:var(--base)"></span>지금 플래너 stand_at 정지 p90 (위치 원 · 방향 부채꼴)</div>'+
+   '<div><span class="sw" style="background:var(--accent)"></span>목표 정지 p90</div>'+
+   '<div class="slider"><label class="lab" for="sl-pos">목표 위치 p90 <span class="mono" id="sl-pos-v"></span></label><input id="sl-pos" type="range" min="1" max="15" step="0.5" data-bind="'+mPath("stop_pos")+'" data-num="1" data-redraw="place"></div>'+
+   '<div class="slider"><label class="lab" for="sl-yaw">목표 방향 p90 <span class="mono" id="sl-yaw-v"></span></label><input id="sl-yaw" type="range" min="1" max="15" step="0.5" data-bind="'+mPath("stop_yaw")+'" data-num="1" data-redraw="place"></div>'+
+   '<div class="muted" id="place-read" style="font-size:13.5px"></div>'+
+  '</div></div>';
+  drawPlace();
+}
+function mPath(id){for(var i=0;i<S.metrics.length;i++) if(S.metrics[i].id===id) return "metrics."+i+".target"; return "";}
+function drawPlace(){
+  var mp=metric("stop_pos"),my=metric("stop_yaw");
+  var rb=+mp.baseline,rt=+mp.target,yb=+my.baseline,yt=+my.target;
+  var px=-36,py=0, L=34;
+  function wedge(deg,cls,op){
+    var a=deg*Math.PI/180, x1=px+L*Math.cos(a), y1=py-L*Math.sin(a), x2=px+L*Math.cos(-a), y2=py-L*Math.sin(-a);
+    return '<path d="M'+px+' '+py+' L'+x1.toFixed(2)+' '+y1.toFixed(2)+' A'+L+' '+L+' 0 0 1 '+x2.toFixed(2)+' '+y2.toFixed(2)+' Z" style="fill:'+cls+';fill-opacity:'+op+';stroke:'+cls+';stroke-width:.3"/>';
+  }
+  var g='';
+  // grid
+  for(var x=-60;x<=40;x+=10) g+='<line x1="'+x+'" y1="-30" x2="'+x+'" y2="30" style="stroke:var(--line);stroke-width:.15"/>';
+  for(var y=-30;y<=30;y+=10) g+='<line x1="-60" y1="'+y+'" x2="40" y2="'+y+'" style="stroke:var(--line);stroke-width:.15"/>';
+  // box
+  g+='<rect x="0" y="-20.25" width="37.1" height="40.5" rx=".6" style="fill:var(--sunken);stroke:var(--muted);stroke-width:.4"/>';
+  g+='<text x="18.5" y="1" text-anchor="middle" style="fill:var(--muted);font-size:2.8px;font-family:var(--f-body)">박스</text>';
+  // accept window
+  g+='<rect x="-44" y="-15" width="26" height="30" style="fill:none;stroke:var(--muted);stroke-width:.35;stroke-dasharray:1.2 .9"/>';
+  g+='<text x="-31" y="-16.4" text-anchor="middle" style="fill:var(--muted);font-size:2.4px;font-family:var(--f-body)">학습 배치 범위</text>';
+  // wedges
+  g+=wedge(yb,"var(--base)",.13)+wedge(yt,"var(--accent)",.22);
+  // feet
+  g+='<rect x="-40" y="-11" width="18" height="6" rx="1.5" style="fill:var(--surface);stroke:var(--ink);stroke-width:.35"/>';
+  g+='<rect x="-40" y="5" width="18" height="6" rx="1.5" style="fill:var(--surface);stroke:var(--ink);stroke-width:.35"/>';
+  // circles
+  g+='<circle cx="'+px+'" cy="'+py+'" r="'+rb+'" style="fill:var(--base);fill-opacity:.08;stroke:var(--base);stroke-width:.45;stroke-dasharray:1.4 .8"/>';
+  g+='<circle cx="'+px+'" cy="'+py+'" r="'+rt+'" style="fill:var(--accent);fill-opacity:.14;stroke:var(--accent);stroke-width:.5"/>';
+  g+='<circle cx="'+px+'" cy="'+py+'" r=".9" style="fill:var(--ink)"/>';
+  // toe line + dimension
+  g+='<line x1="-22" y1="-24" x2="-22" y2="24" style="stroke:var(--ink);stroke-width:.2;stroke-dasharray:.6 .6"/>';
+  g+='<line x1="-22" y1="25.5" x2="0" y2="25.5" style="stroke:var(--ink);stroke-width:.25"/>';
+  g+='<text x="-11" y="28.6" text-anchor="middle" style="fill:var(--ink);font-size:2.4px;font-family:var(--f-mono)">22 발끝→모서리</text>';
+  g+='<text x="'+(px)+'" y="'+(py+rb+3.2)+'" text-anchor="middle" style="fill:var(--base);font-size:2.3px;font-family:var(--f-mono)">'+rb+' cm</text>';
+  g+='<text x="'+(px-rt-1)+'" y="'+(py+0.8)+'" text-anchor="end" style="fill:var(--accent);font-size:2.3px;font-family:var(--f-mono)">'+rt+'</text>';
+  g+='<text x="-59" y="-27" style="fill:var(--muted);font-size:2.3px;font-family:var(--f-body)">→ 앞 (로봇 진행 방향)</text>';
+  $("placesvg").innerHTML='<svg viewBox="-62 -32 106 64" role="img" aria-label="정지 오차와 학습 배치 범위">'+g+'</svg>';
+  $("sl-pos").value=rt; $("sl-yaw").value=yt;
+  $("sl-pos-v").textContent=rt+" cm"; $("sl-yaw-v").textContent=yt+"°";
+  // how far outside: window spans pelvis x -44..-18 → room behind = 8, ahead = 18, sides = 15
+  function fits(r){return r<=8?"원 전체가 범위 안":"앞뒤로 "+(r-8).toFixed(1)+" cm 넘침(뒤쪽 여유 8 cm)";}
+  $("place-read").innerHTML="지금: "+fits(rb)+"<br>목표: "+fits(rt);
+}
+
+/* ---------- 4 arch ---------- */
+var FLOWS={
+ A:[["입력","목표 골반 (x, y, yaw)","dev10 접근 FSM · dev12 걷기 목표",""],["학습","골반 추종 정책","MLP 50 Hz, 로봇 노드 안","learn"],["출력","v* · ω* · 서기","",""],["고정","걸음 생성기","SEED 클립 재생 · 재생 속도 · 방향 적분",""],["창","다리·골반 10 프레임","",""],["동결","SONIC model_1500","",""+"frozen"],["로봇","K1 23 관절","","robot"]],
+ B:[["입력","목표 골반 (x, y, yaw)","dev10 접근 FSM · dev12 걷기 목표",""],["학습","골반 추종 정책","중간 목표를 고침","learn"],["출력","0.5–1 s 앞 키프레임","",""],["고정","플래너 v3","데스크톱 GPU 서버",""],["창","다리·골반 창","",""],["동결","SONIC model_1500","","frozen"],["로봇","K1 23 관절","","robot"]],
+ C:[["입력","목표 골반 (x, y, yaw)","dev10 접근 FSM · dev12 걷기 목표",""],["학습","골반 추종 정책","다리 레퍼런스 직접","learn"],["출력","다리 12 관절 × 10 프레임","",""],["동결","SONIC model_1500","","frozen"],["로봇","K1 23 관절","","robot"]]
+};
+function rArch(){
+  var cur=S.arch.choice||S.arch.rec;
+  var cands=S.candidates.map(function(c){
+    var tags=(c.id===S.arch.rec?'<span class="tag">권고</span>':'')+(c.id===S.arch.choice?' <span class="tag base">선택함</span>':'');
+    return '<button class="cand'+(c.id===cur?' on':'')+'" data-act="arch" data-v="'+c.id+'"><div class="head"><span><span class="lt">'+c.id+'</span> <b>'+esc(c.name)+'</b></span><span>'+tags+'</span></div><p>'+esc(c.summary)+'</p></button>';
+  }).join("");
+  var nodes=FLOWS[cur]||FLOWS.A;
+  var row=nodes.map(function(n,i){
+    return (i?'<div class="arrow" aria-hidden="true">→</div>':'')+'<div class="node '+n[3]+'"><span class="r">'+n[0]+'</span><b>'+esc(n[1])+'</b>'+(n[2]?esc(n[2]):'')+'</div>';
+  }).join("");
+  var ci=0; S.candidates.forEach(function(c,i){if(c.id===cur)ci=i;});
+  var c=S.candidates[ci];
+  $("s-arch").innerHTML='<div class="eyebrow">하체 레퍼런스를 누가 만드나</div><h2>구조</h2>'+
+  '<p class="lede">후보를 누르면 아래 흐름도가 바뀌고 그 후보가 선택으로 기록됩니다. 청록 칸이 학습하는 부분, 점선 칸이 동결 SONIC 입니다.</p>'+
+  '<div class="cands">'+cands+'</div>'+
+  '<div class="flow"><div class="flow-row">'+row+'</div>'+
+   '<div class="side-in"><div class="node"><span class="r">옆 입력</span><b>상체 11 offset</b>dev10 집기 · dev12 다시 쥐기 teacher → composer 가 창의 상체를 덮음</div></div>'+
+   '<div class="fb"><span>되먹임</span><span class="loop"></span><span>다리 주행거리 + IMU → 정책 관측 (목표를 현재 골반 틀로)</span></div></div>'+
+  '<div class="pc"><div><h4>좋은 점 ('+c.id+')</h4>'+ta("candidates."+ci+".pros")+'</div><div><h4>걱정 ('+c.id+')</h4>'+ta("candidates."+ci+".cons")+'</div></div>'+
+  '<div style="margin-top:12px"><label class="lab" for="f-archnote">구조 메모</label>'+ta("arch.note","", "예: A 로 가되 옆걸음은 2 단계에서").replace('<textarea','<textarea id="f-archnote"')+'</div>';
+}
+
+/* ---------- 5 io ---------- */
+function ioTable(key,title,hint){
+  var rows=S.io[key], sum=0;
+  rows.forEach(function(r){var n=parseFloat(r.dim);if(!isNaN(n))sum+=n;});
+  return '<div class="io-head"><h3>'+title+' <span class="sum">합 '+sum+'</span></h3><span class="muted" style="font-size:13px">'+hint+'</span></div>'+
+  '<div class="tbl-wrap"><table class="io"><thead><tr><th style="width:30%">항목</th><th style="width:70px">차원</th><th>출처·쓰임</th><th>비고</th><th style="width:40px"></th></tr></thead><tbody>'+
+  rows.map(function(r,i){var p="io."+key+"."+i+".";
+   return '<tr><td><input aria-label="항목" data-bind="'+p+'name" value="'+esc(r.name)+'"></td><td class="dim"><input aria-label="차원" data-bind="'+p+'dim" data-redraw="io" value="'+esc(r.dim)+'"></td><td><input aria-label="출처" data-bind="'+p+'src" value="'+esc(r.src)+'"></td><td><input aria-label="비고" data-bind="'+p+'note" value="'+esc(r.note)+'"></td><td><button class="btn ghost small" title="줄 삭제" aria-label="줄 삭제" data-act="row-del" data-k="'+key+'" data-i="'+i+'">×</button></td></tr>';
+  }).join("")+
+  '</tbody></table></div><div style="margin-top:6px"><button class="btn small" data-act="row-add" data-k="'+key+'">+ 줄 추가</button></div>';
+}
+function rIO(){
+  $("s-io").innerHTML='<div class="eyebrow">후보 '+esc(S.arch.choice||S.arch.rec)+' 기준 초안</div><h2>입력·출력</h2>'+
+  '<p class="lede">칸을 눌러 바로 고치세요. 차원 합은 저장 전에 자동으로 다시 셉니다.</p><div id="io-body">'+
+  ioTable("inputs","actor 관측","로봇에서 잴 수 있는 것만")+ioTable("outputs","행동","걸음 생성기로 가는 명령")+ioTable("critic","critic 특권 관측","학습 때만")+'</div>';
+}
+
+/* ---------- 6/7 decisions ---------- */
+function cardList(key){
+  return S[key].map(function(d,i){
+    var set=d.choice!==null&&d.choice!==undefined;
+    var opts=d.options.map(function(o,j){
+      return '<button class="opt'+(d.choice===j?' on':'')+'" data-act="choose" data-k="'+key+'" data-i="'+i+'" data-v="'+j+'">'+esc(o)+(j===d.rec?'<span class="rec">권고</span>':'')+'</button>';
+    }).join("");
+    return '<div class="card"><div class="no">'+(i+1)+'</div><div class="body"><div class="q"><h3>'+esc(d.q)+'</h3><span class="state '+(set?'set':'open')+'">'+(set?'정함':'정할 것')+'</span></div>'+
+     '<div class="opts">'+opts+'</div><p class="why">근거 · '+esc(d.why)+'</p>'+ta(key+"."+i+".note","","메모 (선택 이유, 조건, 바꿀 숫자)")+'</div></div>';
+  }).join("");
+}
+function countOpen(key){return S[key].filter(function(d){return d.choice===null||d.choice===undefined;}).length;}
+function rDec(){
+  $("s-dec").innerHTML='<div class="eyebrow">남은 것 '+countOpen("decisions")+' / '+S.decisions.length+'</div><h2>결정</h2>'+
+  '<p class="lede">선택지를 누르면 결정으로 기록됩니다. 다시 누르면 취소됩니다. "권고"는 기록에서 고른 초안입니다.</p>'+
+  '<div class="cards">'+cardList("decisions")+'</div>';
+}
+function rSim(){
+  $("s-sim").innerHTML='<div class="eyebrow">Projects2/sim2real_체크리스트.md · 남은 것 '+countOpen("checklist")+' / '+S.checklist.length+'</div><h2>sim2real 체크리스트</h2>'+
+  '<p class="lede">새 K1 학습 프로젝트마다 항목별로 넣을지 정합니다. 정한 내용은 프로젝트 기록에도 옮겨 적습니다.</p>'+
+  '<div class="cards">'+cardList("checklist")+'</div>';
+}
+
+/* ---------- 8 phases ---------- */
+function rPh(){
+  var html=S.phases.map(function(p,i){
+    var st=STATUS.filter(function(s){return s[0]===p.status;})[0]||STATUS[0];
+    var base="phases."+i+".";
+    return '<div class="ph s-'+st[0]+'"><div class="ph-top"><span class="mono muted">P'+(i+1)+'</span>'+
+     inp(base+"title").replace('class="f"','class="f" aria-label="단계 이름"')+
+     '<button class="status s-'+st[0]+'" data-act="status" data-i="'+i+'" title="눌러서 상태 바꾸기">'+st[1]+'</button>'+
+     '<span class="ord"><button class="btn ghost small" data-act="ph-up" data-i="'+i+'" aria-label="위로">↑</button><button class="btn ghost small" data-act="ph-down" data-i="'+i+'" aria-label="아래로">↓</button><button class="btn ghost small" data-act="ph-del" data-i="'+i+'" aria-label="단계 삭제">×</button></span></div>'+
+     '<div class="ph-grid"><div><label class="lab">할 일</label>'+ta(base+"detail")+'</div><div><label class="lab">관문 (통과 기준)</label>'+ta(base+"gate")+'</div></div></div>';
+  }).join("");
+  $("s-ph").innerHTML='<div class="eyebrow">순서대로</div><h2>단계·관문</h2>'+
+  '<p class="lede">상태 칩을 누르면 계획 → 진행 → 끝 → 보류 순으로 바뀝니다. 화살표로 순서를 바꿉니다.</p>'+
+  '<div class="phases">'+html+'</div><button class="btn small" data-act="ph-add">+ 단계 추가</button>';
+}
+
+/* ---------- 9 notes ---------- */
+function rNotes(){
+  $("s-notes").innerHTML='<div class="eyebrow">자유 메모</div><h2>메모·열린 질문</h2>'+ta("notes","","")+
+  '<h3 style="margin-top:28px">근거 문서</h3><ul class="src">'+
+  ['dev10/docs/superpowers/specs/2026-10-11-dev10-approach-pick-design.md — ② 접근 설계, 오차 예산',
+   'dev10/기록_v2.md §49 — G2·G3 플래너 걷기·정지·주행거리 측정',
+   'dev12/docs/superpowers/specs/2026-10-11-dev12-carry-regrip-walk-design.md — ③ 들고 걷기 설계',
+   'dev12/기록.md §24 — 클립 재생 속도·회전 조절 시험 (1,225 회)',
+   'dev4/docs/CROUCH_APPROACH_기록_20261008.md — SONIC 은 골반 위치를 안 본다, B3 쪼그림 실패',
+   'dev14/docs/superpowers/plans/2026-10-08-reverse-walk-teacher.md — 걸음 생성기 구조',
+   'sim2real_체크리스트.md'].map(function(s){var k=s.indexOf(" — ");return '<li><code>'+esc(s.slice(0,k))+'</code> '+esc(s.slice(k+3))+'</li>';}).join("")+'</ul>';
+}
+
+function renderAll(){rGoal();rNow();rPlace();rArch();rIO();rDec();rSim();rPh();rNotes();renderBar();renderNotice();grow();}
+
+/* ---------- events ---------- */
+document.addEventListener("input",function(e){
+  var el=e.target, path=el.getAttribute&&el.getAttribute("data-bind"); if(!path) return;
+  var v=el.value;
+  if(el.getAttribute("data-num")){var n=parseFloat(v); if(isNaN(n)) return; v=n;}
+  setP(path,v);
+  if(el.tagName==="TEXTAREA") grow(el.parentNode);
+  var r=el.getAttribute("data-redraw");
+  if(r==="metric"||r==="place"){
+    var i=+path.split(".")[1]; redrawMetric(i);
+    var id=S.metrics[i].id; if(id==="stop_pos"||id==="stop_yaw") drawPlace();
+    if(r==="place"){var mi=document.getElementById("mt"+i); if(mi) mi.value=v;}
+  }
+  if(r==="io"){var sums=document.querySelectorAll("#io-body .sum"),keys=["inputs","outputs","critic"];
+    keys.forEach(function(k,j){var s=0;S.io[k].forEach(function(x){var n=parseFloat(x.dim);if(!isNaN(n))s+=n;});sums[j].textContent="합 "+s;});}
+  markDirty();
+});
+document.addEventListener("click",function(e){
+  var b=e.target.closest&&e.target.closest("[data-act]"); if(!b) return;
+  var a=b.getAttribute("data-act"), i=+b.getAttribute("data-i"), k=b.getAttribute("data-k");
+  if(a==="save"){save();return;}
+  if(a==="gh-connect"){showConnect();return;}
+  if(a==="gh-forget"){lsDel(GH_TOKEN_KEY);$("modal").innerHTML="";saveState="needtoken";renderBar();return;}
+  if(a==="gh-save"){var tk=$("ghtok").value.trim(); if(!tk) return; $("ghmsg").textContent="확인 중…";
+    fetch("https://api.github.com/repos/"+GH.owner+"/"+GH.repo,{headers:{Authorization:"Bearer "+tk,Accept:"application/vnd.github+json"},cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(j){
+      if(j&&j.permissions&&j.permissions.push){lsSet(GH_TOKEN_KEY,tk);$("modal").innerHTML="";saveState="ok";renderBar();}
+      else $("ghmsg").textContent="이 토큰으로는 저장소에 쓸 수 없습니다. 저장소 선택과 Contents 쓰기 권한을 확인하세요.";
+    },function(){$("ghmsg").textContent="GitHub 에 닿지 못했습니다. 연결을 확인하고 다시 누르세요.";});
+    return;}
+  if(a==="md"){showMd();return;}
+  if(a==="backdrop"){if(e.target===b)$("modal").innerHTML="";return;}
+  if(a==="close-md"){$("modal").innerHTML="";return;}
+  if(a==="copy-md"){var t=$("mdtext");t.select();
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t.value).then(function(){b.textContent="복사됨";},function(){b.textContent="선택됨 — Ctrl+C";});}
+    else b.textContent="선택됨 — Ctrl+C";return;}
+  if(a==="draft-load"){var base=S.meta.rev, sv=S.meta.savedAt; S=staleDraft.data; S.meta.rev=base; S.meta.savedAt=sv; staleDraft=null; renderAll(); markDirty(); return;}
+  if(a==="draft-drop"){staleDraft=null; if(!dirty) lsDel(DRAFT_KEY); renderNotice(); return;}
+  if(a==="arch"){var v=b.getAttribute("data-v"); S.arch.choice = S.arch.choice===v?null:v; rArch(); rIO(); grow(); markDirty(); return;}
+  if(a==="choose"){var j=+b.getAttribute("data-v"); var d=S[k][i]; d.choice = d.choice===j?null:j; if(k==="decisions")rDec(); else rSim(); grow(); markDirty(); return;}
+  if(a==="row-add"){S.io[k].push({name:"",dim:"",src:"",note:""}); rIO(); markDirty(); var ins=document.querySelectorAll("#io-body table")[["inputs","outputs","critic"].indexOf(k)].querySelectorAll("tr:last-child input"); if(ins[0]) ins[0].focus(); return;}
+  if(a==="row-del"){S.io[k].splice(i,1); rIO(); markDirty(); return;}
+  if(a==="status"){var p=S.phases[i]; var ix=STATUS.map(function(s){return s[0];}).indexOf(p.status); p.status=STATUS[(ix+1)%STATUS.length][0]; rPh(); grow(); markDirty(); return;}
+  if(a==="ph-up"&&i>0){var t1=S.phases[i];S.phases[i]=S.phases[i-1];S.phases[i-1]=t1;rPh();grow();markDirty();return;}
+  if(a==="ph-down"&&i<S.phases.length-1){var t2=S.phases[i];S.phases[i]=S.phases[i+1];S.phases[i+1]=t2;rPh();grow();markDirty();return;}
+  if(a==="ph-del"){S.phases.splice(i,1);rPh();grow();markDirty();return;}
+  if(a==="ph-add"){S.phases.push({id:"p"+Date.now(),title:"새 단계",detail:"",gate:"",status:"plan"});rPh();grow();markDirty();return;}
+});
+document.addEventListener("keydown",function(e){if((e.ctrlKey||e.metaKey)&&e.key==="s"){e.preventDefault(); if(dirty) save();}});
+window.addEventListener("resize",function(){grow();});
+
+/* ---------- markdown ---------- */
+function toMd(){
+  var L=[], chosen=function(d){return d.choice===null||d.choice===undefined?"(정할 것, 권고: "+d.options[d.rec]+")":d.options[d.choice];};
+  L.push("# "+S.meta.title,"", "판 "+S.meta.rev+" · "+fmtSaved(S.meta.savedAt),"");
+  L.push("**무엇을** "+S.meta.goal,"","**왜** "+S.meta.why,"","**범위** "+S.meta.scope,"");
+  L.push("## 지금과 목표","","| 지표 | 지금 | 목표 | 근거 |","|---|---|---|---|");
+  S.metrics.forEach(function(m){L.push("| "+m.label+(m.oos?" (참고)":"")+" | "+m.baseline+" "+m.unit+" | "+m.target+" "+m.unit+" | "+m.src+" |");});
+  var cur=S.arch.choice||S.arch.rec, c=S.candidates.filter(function(x){return x.id===cur;})[0];
+  L.push("","## 구조","", "선택: "+(S.arch.choice?S.arch.choice+" "+c.name:"(정할 것, 권고: "+S.arch.rec+")"),"", "- "+c.summary,"- 좋은 점: "+c.pros,"- 걱정: "+c.cons);
+  if(S.arch.note) L.push("- 메모: "+S.arch.note);
+  [["inputs","actor 관측"],["outputs","행동"],["critic","critic 특권 관측"]].forEach(function(t){
+    L.push("","### "+t[1],"","| 항목 | 차원 | 출처 | 비고 |","|---|---|---|---|");
+    S.io[t[0]].forEach(function(r){L.push("| "+r.name+" | "+r.dim+" | "+r.src+" | "+r.note+" |");});
+  });
+  L.push("","## 결정","");
+  S.decisions.forEach(function(d,i){L.push((i+1)+". "+d.q+" → "+chosen(d)+(d.note?"  \n   메모: "+d.note:""));});
+  L.push("","## sim2real 체크리스트","");
+  S.checklist.forEach(function(d,i){L.push((i+1)+". "+d.q+" → "+chosen(d)+(d.note?"  \n   메모: "+d.note:""));});
+  L.push("","## 단계·관문","");
+  S.phases.forEach(function(p,i){var st=STATUS.filter(function(s){return s[0]===p.status;})[0]||STATUS[0];L.push("- **P"+(i+1)+" "+p.title+"** ["+st[1]+"]  \n  "+p.detail+"  \n  관문: "+p.gate);});
+  L.push("","## 메모","",S.notes);
+  return L.join("\n");
+}
+function showMd(){
+  $("modal").innerHTML='<div class="modal" data-act="backdrop"><div><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h3>Markdown</h3><span><button class="btn small" data-act="copy-md">복사</button> <button class="btn small ghost" data-act="close-md">닫기</button></span></div><textarea id="mdtext" readonly aria-label="Markdown">'+esc(toMd())+'</textarea></div></div>';
+  $("mdtext").select();
+}
+
+/* ---------- save (republish this page from state) ---------- */
+function buildDoc(){
+  var css=document.getElementById("page-css").textContent;
+  var js=document.getElementById("page-js").textContent;
+  var json=JSON.stringify(S,null,1).replace(/</g,"\\u003c");
+  return '<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>'+RESET+'</style></head><body>'+
+    '<title>'+esc(TITLE)+'</title>'+FONTS+'<style id="page-css">'+css+'</style><div id="app"></div>'+
+    '<script type="application/json" id="plan-data">'+json+'<\/script><script id="page-js">'+js+'<\/script></body></html>';
+}
+async function save(){
+  if(!art||!dirty) return;
+  if(art.gh&&!ghToken()){showConnect();return;}
+  saveState="saving"; renderBar();
+  var prevRev=S.meta.rev, prevAt=S.meta.savedAt;
+  S.meta.rev=prevRev+1; S.meta.savedAt=new Date().toISOString();
+  lsSet(DRAFT_KEY,JSON.stringify({baseRev:prevRev,data:S}));
+  pendingBase=prevRev;
+  var res;
+  try{ res=await art.publish(buildDoc()); }
+  catch(err){
+    var code=err&&err.code;
+    S.meta.rev=prevRev; S.meta.savedAt=prevAt;
+    if(code==="conflict"){ if(art.gh){saveState="conflict";renderBar();return;} saveState="ok"; renderBar(); if(art.server) location.reload(); return; }
+    if(code==="badtoken"){ saveState="badtoken"; renderBar(); return; }
+    if(code==="not_writer"||code==="not_granted"||code==="consent_required"||code==="not_declared"||code==="capability_disabled"||code==="capability_removed"){ saveState="readonly"; renderBar(); return; }
+    saveState="error"; renderBar(); return;
+  }
+  if(res&&res.noReload){ dirty=false; lsDel(DRAFT_KEY); saveState="ok"; renderBar(); }
+}
+
+renderAll();
+/* outside claude.ai: save through plan_server.py (POST writes the html file) */
+var pendingBase=null;
+function serverApi(){
+  if(!/^https?:$/.test(location.protocol)) return Promise.resolve(null);
+  return fetch("__plan_api/ping",{cache:"no-store"}).then(function(r){
+    if(!r.ok) return null;
+    return {server:true, publish:function(html){
+      return fetch("__plan_api/save",{method:"POST",headers:{"Content-Type":"text/html; charset=utf-8","X-Base-Rev":String(pendingBase)},body:html}).then(function(r){
+        if(r.status===409) throw {code:"conflict"};
+        if(!r.ok) throw {code:"upstream_error"};
+        location.reload(); return {version:""};
+      },function(){throw {code:"upstream_error"};});
+    }};
+  },function(){return null;});
+}
+Promise.resolve(window.claude&&window.claude.use?window.claude.use("artifact"):null).then(function(ns){
+  return ns || ghApi() || serverApi();
+},function(){return ghApi() || serverApi();}).then(function(ns){
+  art=ns;
+  if(ns&&ns.gh){
+    saveState=ghToken()?"ok":"needtoken"; renderBar();
+    ns.pull().then(function(cur){
+      var st=stateOf(cur.html);
+      if(st&&st.meta.rev>S.meta.rev){S=st; dirty=false; staleDraft=null; checkDraft(); renderAll();}
+    },function(){});
+    return;
+  }
+  saveState= ns ? "ok" : "nocap"; renderBar();
+});
+})();
+</script></body></html>
