@@ -2,5 +2,19 @@
 
 K1 하체 정책 설계 페이지 (dev12).
 
-- [index.html](https://chanyong0211.github.io/k1-pelvis-tracker/) — dev12 골반 명령 추종 보행 정책 설계. 데이터는 `dev12_design.json`. GitHub Pages 에서는 읽기 전용(고친 내용은 "JSON 내보내기")이고, 저장은 로컬 설계 서버에서 한다.
+- [index.html](https://chanyong0211.github.io/k1-pelvis-tracker/) — dev12 골반 명령 추종 보행 정책 설계. 데이터는 `dev12_design.json`. GitHub Pages 에서는 읽기 전용이다(고친 내용은 "JSON 내보내기").
 - [v2_sonic.html](https://chanyong0211.github.io/k1-pelvis-tracker/v2_sonic.html) — 2026-10-13 계획(판 2, 동결 SONIC + 걸음 생성기 안). 이 페이지의 저장 버튼은 v2_sonic.html 자신에 쓴다.
+
+## 설계 고치기
+
+```
+git clone https://github.com/chanyong0211/k1-pelvis-tracker
+cd k1-pelvis-tracker
+git pull
+python3 docs_server.py        # http://localhost:8099/ 에서 고치고 저장
+git commit -am "설계 판 N"
+git push
+```
+
+- 고치기 전에 꼭 `git pull`. 두 곳에서 동시에 고치면 나중 push 가 거절되고 JSON 충돌을 손으로 풀어야 한다.
+- 저장할 때마다 이전 판이 `design_backups/` 에 남는다(git 에는 안 올라감).
