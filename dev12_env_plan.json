@@ -1,12 +1,12 @@
 {
  "meta": {
-  "rev": 24,
-  "updatedAt": "2026-10-23T00:10:00+09:00",
+  "rev": 25,
+  "updatedAt": "2026-10-22T08:13:21Z",
   "title": "dev12 학습 환경 계획",
   "subtitle": "설계 판 28 을 학습할 Isaac Lab 환경과 학습기(DreamWaQ 인코더 + 좌우 대칭 손실 + 다리 AMP)를 만들고 GPU 10 분 스모크(P2)까지 통과시킨다. MuJoCo 평가 하네스(T15)는 나란히 만든다. 본 학습(P3)은 사용자 지시 뒤.",
   "planFile": "dev12/docs/superpowers/plans/2026-10-21-dev12-env-amp.md",
   "written": "2026-10-21",
-  "designRev": 30,
+  "designRev": 31,
   "state": "결정 검토 끝 (10-22, D1–D14)",
   "currentPhase": "ph0",
   "next": [
@@ -67,14 +67,13 @@
   "histSteps": 5,
   "histPer": 81,
   "obsHist": 405,
-  "critic": 125,
-  "code": 23,
-  "actorIn": 115,
+  "critic": 126,
+  "code": 8,
+  "actorIn": 100,
   "actions": 12,
   "ampFrame": 33,
   "ampHist": 10,
-  "amp": 330,
-  "recon": 30
+  "amp": 330
  },
  "phaseTasks": {
   "ph1": [
@@ -139,7 +138,7 @@
     "lines": [
      "policy 92 (잡음, 허리 칸 × 0.2)",
      "obs_hist 405 = 5 스텝 × 81",
-     "critic 125 = 92 + 특권 33 (두 걸음 창 7 포함)",
+     "critic 126 = 92 + 특권 34 (두 걸음 창 7·총 무게 1 포함)",
      "amp 330 = 10 프레임 × 다리 33"
     ]
    },
@@ -153,12 +152,12 @@
      "e_vel",
      "e_h",
      "e_com",
-     "e_lat"
+     "e_wt"
     ],
     "lines": [
-     "인코더 405 → 23 (속도 3·높이 1·무게중심 3·잠재 16)",
-     "actor 115 = 23 + 92 → 다리 12",
-     "critic 125 → 가치 1"
+     "인코더 405 → 8 (속도 3·높이 1·무게중심 3·총 무게 1, 결정적)",
+     "actor 100 = 8(기울기 끊음) + 92 → 다리 12",
+     "critic 126 → 가치 1"
     ]
    },
    {
@@ -258,12 +257,13 @@
     ],
     "refs": [
      "e_vel",
-     "e_com"
+     "e_com",
+     "e_wt"
     ],
     "lines": [
-     "속도·높이·무게중심 회귀",
-     "다음 스텝 30 복원 (끝난 샘플 제외)",
-     "β · KL (샘플 평균)"
+     "속도·높이·무게중심·총 무게 회귀",
+     "인코더 별도 옵티마이저 (Adam 1e-3, 정책 KL 적응 lr 과 무관)",
+     "code 는 rollout 때 저장 → 첫 미니배치 확률비 1"
     ]
    },
    {
@@ -279,7 +279,7 @@
     ],
     "lines": [
      "0.5 × ‖π(o) − M(π(M o))‖²",
-     "인코더 추정·복원·판별기 전이도 거울"
+     "인코더 추정·판별기 전이도 거울"
     ]
    },
    {
@@ -880,7 +880,7 @@
    "id": "S5",
    "what": "거울 범위 (10-22 조사)",
    "design": "거울 손실은 actor 만",
-   "default": "인코더 추정(속도·높이·무게중심)·복원과 판별기 정책 전이에도 거울 (OpenHomie him_ppo, amp-rsl-rl)",
+   "default": "인코더 추정(속도·높이·무게중심·총 무게)과 판별기 정책 전이에도 거울 (OpenHomie him_ppo, amp-rsl-rl)",
    "tasks": [
     "T5",
     "T6"
@@ -922,6 +922,31 @@
    "owner": "here",
    "status": "결정",
    "choice": "10-22 사용자 승인 (조사 보고서 dev12/reports/dev12 구현 참고 연구와 오픈소스.md)"
+  },
+  {
+   "id": "E1",
+   "what": "인코더 (10-22 추정기 조사)",
+   "design": "CENet: 속도·높이·무게중심 + β-VAE 잠재 16, 다음 스텝 30 복원, KL 샘플 평균",
+   "default": "명시 추정 8(속도 3·높이 1·무게중심 3·총 무게 1)만, 결정적. 잠재·디코더·KL 없음. code 는 rollout 때 저장, actor 에는 detach, 인코더는 별도 옵티마이저. critic 에 총 무게 정답 1 칸(125 → 126), actor 115 → 100",
+   "tasks": [
+    "T4",
+    "T5",
+    "T10",
+    "T13",
+    "T14",
+    "T15"
+   ],
+   "refs": [
+    "e_vel",
+    "e_h",
+    "e_com",
+    "e_wt",
+    "e_lat",
+    "v_wt"
+   ],
+   "owner": "here",
+   "status": "결정",
+   "choice": "10-22 사용자 결정: 잠재 있는 판(A)은 필요 없음, 총 무게 1 칸 넣고 명시 추정만(B). 근거 dev12/reports/dev12 고유감각 추정기 대안.md (dev2 잠재 σ 1.0000·actor 잠재 열 노름 0.04 직접 확인, Wukong-IV, WMR, P3)"
   }
  ],
  "owners": {
@@ -1019,7 +1044,7 @@
    "id": "T4",
    "part": 1,
    "title": "거울 함수",
-   "what": "관측 92·이력 405·행동 12·인코더 23·AMP 33 의 좌우 거울(지수·부호)",
+   "what": "관측 92·이력 405·행동 12·인코더 8·AMP 33 의 좌우 거울(지수·부호)",
    "outputs": [
     "source/k1_pelvis/symmetry.py"
    ],
@@ -1043,7 +1068,7 @@
    "id": "T5",
    "part": 1,
    "title": "dev12 학습기",
-   "what": "인코더 23(속도·높이·무게중심·잠재 16), 다음 스텝 30 복원, KL 샘플 평균, 좌우 대칭 손실, 거울은 인코더 추정·복원까지(S5)",
+   "what": "인코더 8(속도·높이·무게중심·총 무게, 결정적, E1), code 는 rollout 때 저장·actor 에는 detach·인코더 별도 옵티마이저, 좌우 대칭 손실, 거울은 인코더 추정까지(S5)",
    "outputs": [
     "ActorCriticDev12",
     "RolloutStorageDev12",
@@ -1058,18 +1083,20 @@
     "e_vel",
     "e_h",
     "e_com",
-    "e_lat",
+    "e_wt",
     "sy1"
    ],
    "decisions": [
+    "E1",
     "S5"
    ],
    "status": "계획",
    "tests": [
     "test_shapes",
-    "test_act_inference_uses_mean",
-    "test_kl_is_per_sample_mean",
-    "test_recon_mask_drops_done",
+    "test_act_code_equals_inference_code",
+    "test_first_minibatch_ratio_is_one",
+    "test_surrogate_does_not_touch_encoder",
+    "test_encoder_lr_independent_of_policy_kl",
     "test_targets_from_critic_slice",
     "test_symmetry_zero_for_equivariant_policy",
     "test_encoder_mirror_targets",
@@ -1243,8 +1270,8 @@
   {
    "id": "T10",
    "part": 2,
-   "title": "관측 — 92·405·125·330",
-   "what": "관측 그룹 넷과 두 걸음 평균 창, 특권 항목(속도·높이·무게중심·접촉·마찰·질량·손 힘·상체 수준·지연), AMP 이력",
+   "title": "관측 — 92·405·126·330",
+   "what": "관측 그룹 넷과 두 걸음 평균 창, 특권 항목(속도·높이·무게중심·총 무게·접촉·마찰·질량·손 힘·상체 수준·지연), AMP 이력",
    "outputs": [
     "mdp/observations.py",
     "mdp/stride_window.py (TwoStrideWindow)"
@@ -1263,6 +1290,7 @@
     "v_lin",
     "v_h",
     "v_com",
+    "v_wt",
     "v_slow",
     "v_contact",
     "v_fric",
@@ -1284,6 +1312,7 @@
     "test_term_order",
     "test_hist_latest_slice_equals_policy",
     "test_com_target_moves_with_hand_force",
+    "test_weight_target_with_hand_force",
     "test_amp_frame_matches_features_convention",
     "test_waist_obs_scaled",
     "test_critic_window_state"
@@ -1450,7 +1479,7 @@
    "refs": [],
    "decisions": [],
    "status": "계획",
-   "gate": "아래 스모크 판정 다섯 가지. β·AMP 세기·보상 가중치 조정과 본 학습 시작은 사용자 결정",
+   "gate": "아래 스모크 판정 다섯 가지. AMP 세기·보상 가중치 조정과 본 학습 시작은 사용자 결정",
    "tests": []
   },
   {
@@ -1581,10 +1610,10 @@
     "title": "DreamWaQ 잠재 죽음",
     "date": "10-20",
     "status": "반영됨",
-    "statusNote": "T5 · T14",
+    "statusNote": "T5 · E1",
     "lines": [
      "dev2 는 KL 을 묶음 합계로 매겨 복원보다 24,576 배 셌고 잠재 16칸이 죽어 있었다",
-     "dev12: KL 샘플 평균, β 는 스모크에서 잠재가 0 에 붙지 않는 값으로"
+     "dev12: 10-22 E1 로 잠재·KL 을 뺌 — pyramid_02·omni_01 도 잠재 σ 1.0000, actor 잠재 열 노름 0.04 (실기 정책도 잠재를 안 씀)"
     ],
     "link": "dreamwaq.html"
    },
@@ -1701,8 +1730,8 @@
     "result": null
    },
    {
-    "name": "latent_alive",
-    "target": "0 도 16 도 아님",
+    "name": "인코더 오차",
+    "target": "vel·h·com·wt 오차가 300 회 안에 내려감 (보상보다 먼저)",
     "result": null
    },
    {
@@ -1717,7 +1746,7 @@
    }
   ],
   "training": {
-   "desc": "P3 은 사용자 지시 뒤. 시작하면 run 이름·반복 수·체크포인트와 주요 곡선(보상 항목별 초당 크기, 커리큘럼 값, latent_alive, 판별기 예측)을 여기 남긴다",
+   "desc": "P3 은 사용자 지시 뒤. 시작하면 run 이름·반복 수·체크포인트와 주요 곡선(보상 항목별 초당 크기, 커리큘럼 값, 인코더 오차, 판별기 예측)을 여기 남긴다",
    "runs": []
   },
   "metrics": {}
