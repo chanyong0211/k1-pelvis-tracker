@@ -1,12 +1,12 @@
 {
  "meta": {
-  "rev": 20,
-  "updatedAt": "2026-10-22T22:10:00+09:00",
+  "rev": 22,
+  "updatedAt": "2026-10-22T23:40:00+09:00",
   "title": "dev12 학습 환경 계획",
   "subtitle": "설계 판 28 을 학습할 Isaac Lab 환경과 학습기(DreamWaQ 인코더 + 좌우 대칭 손실 + 다리 AMP)를 만들고 GPU 10 분 스모크(P2)까지 통과시킨다. MuJoCo 평가 하네스(T15)는 나란히 만든다. 본 학습(P3)은 사용자 지시 뒤.",
   "planFile": "dev12/docs/superpowers/plans/2026-10-21-dev12-env-amp.md",
   "written": "2026-10-21",
-  "designRev": 29,
+  "designRev": 30,
   "state": "결정 검토 끝 (10-22, D1–D14)",
   "currentPhase": "ph0",
   "next": [
@@ -67,7 +67,7 @@
   "histSteps": 5,
   "histPer": 81,
   "obsHist": 405,
-  "critic": 118,
+  "critic": 125,
   "code": 23,
   "actorIn": 115,
   "actions": 12,
@@ -137,9 +137,9 @@
      "tw"
     ],
     "lines": [
-     "policy 92 (잡음)",
+     "policy 92 (잡음, 허리 칸 × 0.2)",
      "obs_hist 405 = 5 스텝 × 81",
-     "critic 118 = 92 + 특권 26",
+     "critic 125 = 92 + 특권 33 (두 걸음 창 7 포함)",
      "amp 330 = 10 프레임 × 다리 33"
     ]
    },
@@ -158,7 +158,7 @@
     "lines": [
      "인코더 405 → 23 (속도 3·높이 1·무게중심 3·잠재 16)",
      "actor 115 = 23 + 92 → 다리 12",
-     "critic 118 → 가치 1"
+     "critic 125 → 가치 1"
     ]
    },
    {
@@ -278,7 +278,8 @@
      "sy5"
     ],
     "lines": [
-     "0.5 × ‖π(o) − M(π(M o))‖²"
+     "0.5 × ‖π(o) − M(π(M o))‖²",
+     "인코더 추정·복원·판별기 전이도 거울"
     ]
    },
    {
@@ -289,8 +290,8 @@
     ],
     "refs": [],
     "lines": [
-     "PPO 뒤 20 회 · LSGAN + 기울기 벌점 5",
-     "정답 = 걸음 모음 v2 정상 주기의 보간·덧셈 (T6 다시 씀)"
+     "PPO 뒤 20 회 · LSGAN + 기울기 벌점 5 · 입력 = 다리 전이 + 명령 6",
+     "정답 = 걸음 모음 v2 주기(네 접촉 사건 정렬)의 보간·덧셈"
     ]
    }
   ],
@@ -317,7 +318,7 @@
    },
    {
     "ref": "r_hand20261020",
-    "text": "손 외력 크기 = 상체 수준 × 0–19.6 N (D1)"
+    "text": "손 외력 = 상체 수준 × 0–49 N(5 kg), 숙임 30° 이상 걷기 2 kg 까지, env 20 % 무부하 (D15·S7)"
    }
   ]
  },
@@ -336,7 +337,7 @@
    ],
    "owner": "here",
    "status": "결정",
-   "choice": "10-22 확정: 기본값 그대로(손 외력, cu4 는 쓰지 않음). 양손 1 kg 씩이면 숙임 40–45° 걷기에서 토크 70 % 여유가 깨짐(85 % 로는 가능) → 처음엔 모든 자세 허용, 걷기 하한이 다시 오르거나 넘어짐이 늘면 숙임 40° 이상 1 kg 까지로 줄임."
+   "choice": "10-22 확정: 기본값 그대로(손 외력, cu4 는 쓰지 않음). 양손 1 kg 씩이면 숙임 40–45° 걷기에서 토크 70 % 여유가 깨짐(85 % 로는 가능) → 처음엔 모든 자세 허용, 걷기 하한이 다시 오르거나 넘어짐이 늘면 숙임 40° 이상 1 kg 까지로 줄임. → 10-22 D15 로 5 kg 까지 키움"
   },
   {
    "id": "D2",
@@ -552,6 +553,22 @@
    "owner": "here",
    "status": "결정",
    "choice": "10-22 사용자 확정. 0.36 m 위에선 예전 규칙과 1.6° 안으로 같음. 팔 0·허리 0° 기준이라 허리 180° 면 하한이 오름(45° 0.395 m) — 1판은 상체 자세별 하한을 따로 계산하지 않음"
+  },
+  {
+   "id": "D15",
+   "what": "손 하중 5 kg (10-22)",
+   "design": "D1: 아래 합 0–19.6 N(2 kg)",
+   "default": "아래 합 0–49 N(5 kg, 양손 반씩), 숙임 30° 이상 걷기는 2 kg 까지, env 20 % 무부하",
+   "tasks": [
+    "T12"
+   ],
+   "refs": [
+    "r_hand20261020",
+    "m8"
+   ],
+   "owner": "here",
+   "status": "결정",
+   "choice": "10-22 사용자 \"5 kg 정도까지\". 양손 2.5 kg 씩: 서기 문제없음, 숙임 25° 까지 걷기 하한 +1–1.5 cm, 숙임 30° 이상 걷기는 토크 70 % 여유가 깨지고 40–45° 는 85 % 로도 안 됨 → 그 구간 2 kg 상한(제 판단, 빼도 됨)"
   },
   {
    "id": "B1",
@@ -805,6 +822,106 @@
    "owner": "review",
    "status": "결정",
    "choice": "10-22 사용자 승인 (계획 검토 권고안 dev12/reports/2026-10-22_plan_review/권고안.md)"
+  },
+  {
+   "id": "S1",
+   "what": "T6 주기 정렬 (10-22 조사)",
+   "design": "왼발 이륙 하나에 맞춤",
+   "default": "네 접촉 사건(LLO·LTD·RLO·RTD 위상 0·0.1·0.5·0.6, 단조 3차 스플라인)에 맞춘 뒤 보간·덧셈, 디딘 발 미끄럼 > 1 cm/걸음 덧셈 정답 제외 (Hopkins 2024)",
+   "tasks": [
+    "T6"
+   ],
+   "refs": [],
+   "owner": "here",
+   "status": "결정",
+   "choice": "10-22 사용자 승인 (조사 보고서 dev12/reports/dev12 구현 참고 연구와 오픈소스.md)"
+  },
+  {
+   "id": "S2",
+   "what": "판별기 명령 입력 (10-22 조사)",
+   "design": "명령 맞춤 정답만",
+   "default": "판별기 입력에 정규화 명령 6 추가, v2 칸이 감싸지 않는 명령은 스타일 0 (Push the Limit: 공유 판별기에서 제자리 회전이 서기로 무너짐)",
+   "tasks": [
+    "T6"
+   ],
+   "refs": [],
+   "owner": "here",
+   "status": "결정",
+   "choice": "10-22 사용자 승인 (조사 보고서 dev12/reports/dev12 구현 참고 연구와 오픈소스.md)"
+  },
+  {
+   "id": "S3",
+   "what": "Isaac Lab 사본 고정 (10-22 조사)",
+   "design": "—",
+   "default": "cyclo_lab/third_party/IsaacLab 28a37ce 고정, GA 로 안 올림(관측 이력 순서가 바뀜). 빠진 Newton 수정(#8269 외력·#8182 마찰·#6839 게인)은 시험과 dev12 쪽 감싸기로",
+   "tasks": [
+    "T7",
+    "T12"
+   ],
+   "refs": [],
+   "owner": "here",
+   "status": "결정",
+   "choice": "10-22 사용자 승인 (조사 보고서 dev12/reports/dev12 구현 참고 연구와 오픈소스.md)"
+  },
+  {
+   "id": "S4",
+   "what": "T15 골든 둘로 (10-22 조사)",
+   "design": "\"100 스텝 관측 차 < 1e-4\"",
+   "default": "녹화 상태로 관측 조립은 끝까지 1e-4, 같은 행동 개방 루프는 처음 1–3 스텝만 엄하게, ProtoMotions MuJoCo 규약을 단언으로",
+   "tasks": [
+    "T15"
+   ],
+   "refs": [],
+   "owner": "here",
+   "status": "결정",
+   "choice": "10-22 사용자 승인 (조사 보고서 dev12/reports/dev12 구현 참고 연구와 오픈소스.md)"
+  },
+  {
+   "id": "S5",
+   "what": "거울 범위 (10-22 조사)",
+   "design": "거울 손실은 actor 만",
+   "default": "인코더 추정(속도·높이·무게중심)·복원과 판별기 정책 전이에도 거울 (OpenHomie him_ppo, amp-rsl-rl)",
+   "tasks": [
+    "T5",
+    "T6"
+   ],
+   "refs": [
+    "sy1",
+    "sy5"
+   ],
+   "owner": "here",
+   "status": "결정",
+   "choice": "10-22 사용자 승인 (조사 보고서 dev12/reports/dev12 구현 참고 연구와 오픈소스.md)"
+  },
+  {
+   "id": "S6",
+   "what": "critic 두 걸음 창 상태 (10-22 조사)",
+   "design": "없음",
+   "default": "critic 에 창 평균 실제 속도 3·창 평균 명령 3·창 길이 1 (118 → 125), D5 의 조건",
+   "tasks": [
+    "T10"
+   ],
+   "refs": [
+    "v_win"
+   ],
+   "owner": "here",
+   "status": "결정",
+   "choice": "10-22 사용자 승인 (조사 보고서 dev12/reports/dev12 구현 참고 연구와 오픈소스.md)"
+  },
+  {
+   "id": "S7",
+   "what": "무부하 몫 (10-22 조사)",
+   "design": "없음",
+   "default": "상체 무작위·손 힘이 켜진 뒤에도 env 20 % 는 상체 기본 자세·손 힘 0 (HULK)",
+   "tasks": [
+    "T12"
+   ],
+   "refs": [
+    "r_hand20261020"
+   ],
+   "owner": "here",
+   "status": "결정",
+   "choice": "10-22 사용자 승인 (조사 보고서 dev12/reports/dev12 구현 참고 연구와 오픈소스.md)"
   }
  ],
  "owners": {
@@ -926,7 +1043,7 @@
    "id": "T5",
    "part": 1,
    "title": "dev12 학습기",
-   "what": "인코더 23(속도·높이·무게중심·잠재 16), 다음 스텝 30 복원, KL 샘플 평균, 좌우 대칭 손실",
+   "what": "인코더 23(속도·높이·무게중심·잠재 16), 다음 스텝 30 복원, KL 샘플 평균, 좌우 대칭 손실, 거울은 인코더 추정·복원까지(S5)",
    "outputs": [
     "ActorCriticDev12",
     "RolloutStorageDev12",
@@ -944,7 +1061,9 @@
     "e_lat",
     "sy1"
    ],
-   "decisions": [],
+   "decisions": [
+    "S5"
+   ],
    "status": "계획",
    "tests": [
     "test_shapes",
@@ -953,6 +1072,7 @@
     "test_recon_mask_drops_done",
     "test_targets_from_critic_slice",
     "test_symmetry_zero_for_equivariant_policy",
+    "test_encoder_mirror_targets",
     "test_unknown_cfg_key_rejected",
     "test_two_iterations_run"
    ]
@@ -976,17 +1096,22 @@
    "refs": [],
    "decisions": [
     "D6",
-    "D10"
+    "D10",
+    "S1",
+    "S2",
+    "S5"
    ],
    "status": "계획",
-   "note": "10-22 사용자 승인으로 정답 만들기가 \"가장 가까운 칸\"에서 보간·덧셈으로 바뀜 — 설계 다시 쓸 예정(근거 reports/2026-10-22_amp_coverage: 보통 조합 관절 1.5° vs 짝짓기 5.6°). 참조 데이터는 걸음 모음 v2 를 기다림. v2 메모(10-22): 뒤로 기운 자세(pm*)에는 조합 칸이 없어 덧셈의 조합 차분은 바로 선(0°) 칸에서 빌린다. 옆+회전 칸은 몸 기준 옆 쪽 발부터 내밀고 같은 옆 위치에 쌍으로 서는 규칙. 결과 out/lib_amp_v2 위치·형식은 걸음 모음 세션이 다 풀고 알려 줌. d9 메모(10-22): ① 덮음 다시 재기 = amp_cover.py 를 새 이름으로 복사해 v2 이름(lib2_, fl·bl·lt(wp/wm)·bt·stp·val)과 D12·D13 분포를 넣고, 기준을 \"가장 가까운 칸 거리\"에서 \"바탕 칸이 감싸는 범위 안(보간 가능) + 덧셈 오차\"로 바꿈. ② 덧셈 정답의 먼저 뜨는 발: 모든 주기를 왼발 뜨는 시점에 맞추면 같은 부호(vy>0, wz>0)는 둘 다 왼발부터, 반대 부호(vy>0, wz<0)는 옆 쪽 발 먼저(미확인) → v2 lt·wm 칸·검증 칸으로 두 발 좌우 거리 최솟값·발목–무릎 간격을 TO 해와 비교, 엇갈리면 반대 부호 회전 주기를 한 걸음(24 프레임) 밀기. 10-22 검토 B7: 속도 램프 시작부터 1.5 s 는 스타일 0·버퍼 제외. 걸음 모음 세션(10-22 B7 답): v2 npz 구간 = 출발 0–57 · 정상 58–177 · 정지 178–212 프레임(50 Hz, 모든 칸 공통). 정상 구간에도 빠른 앞 걸음(0.55–0.76 m/s) 일부는 뒤꿈치 착지 때 발목 속도가 한 칸에 −6 → +11 rad/s 로 뒤집힘(속도 > 10 rad/s 9칸·가속 > 500 rad/s² 96칸, 한강 최대 7.9 rad/s·223 rad/s²) → 정답 칸에 발목 가속 상한 필터. 평평한 발 칸 정상·정지 구간 디딤 −3.7 mm 잔여",
+   "note": "10-22 사용자 승인으로 정답 만들기가 \"가장 가까운 칸\"에서 보간·덧셈으로 바뀜 — 설계 다시 쓸 예정(근거 reports/2026-10-22_amp_coverage: 보통 조합 관절 1.5° vs 짝짓기 5.6°). 참조 데이터는 걸음 모음 v2 를 기다림. v2 메모(10-22): 뒤로 기운 자세(pm*)에는 조합 칸이 없어 덧셈의 조합 차분은 바로 선(0°) 칸에서 빌린다. 옆+회전 칸은 몸 기준 옆 쪽 발부터 내밀고 같은 옆 위치에 쌍으로 서는 규칙. 결과 out/lib_amp_v2 위치·형식은 걸음 모음 세션이 다 풀고 알려 줌. d9 메모(10-22): ① 덮음 다시 재기 = amp_cover.py 를 새 이름으로 복사해 v2 이름(lib2_, fl·bl·lt(wp/wm)·bt·stp·val)과 D12·D13 분포를 넣고, 기준을 \"가장 가까운 칸 거리\"에서 \"바탕 칸이 감싸는 범위 안(보간 가능) + 덧셈 오차\"로 바꿈. ② 덧셈 정답의 먼저 뜨는 발: 모든 주기를 왼발 뜨는 시점에 맞추면 같은 부호(vy>0, wz>0)는 둘 다 왼발부터, 반대 부호(vy>0, wz<0)는 옆 쪽 발 먼저(미확인) → v2 lt·wm 칸·검증 칸으로 두 발 좌우 거리 최솟값·발목–무릎 간격을 TO 해와 비교, 엇갈리면 반대 부호 회전 주기를 한 걸음(24 프레임) 밀기. 10-22 검토 B7: 속도 램프 시작부터 1.5 s 는 스타일 0·버퍼 제외. 걸음 모음 세션(10-22 B7 답): v2 npz 구간 = 출발 0–57 · 정상 58–177 · 정지 178–212 프레임(50 Hz, 모든 칸 공통). 정상 구간에도 빠른 앞 걸음(0.55–0.76 m/s) 일부는 뒤꿈치 착지 때 발목 속도가 한 칸에 −6 → +11 rad/s 로 뒤집힘(속도 > 10 rad/s 9칸·가속 > 500 rad/s² 96칸, 한강 최대 7.9 rad/s·223 rad/s²) → 정답 칸에 발목 가속 상한 필터. 평평한 발 칸 정상·정지 구간 디딤 −3.7 mm 잔여. 10-22 조사 S1·S2·S5: 네 접촉 사건 정렬·미끄럼 > 1 cm/걸음 제외, 판별기 입력에 명령 6, v2 밖 명령은 스타일 0, 판별기 정책 전이도 거울",
    "tests": [
     "test_features_match_dev9_convention",
     "test_mirror_clip_features",
-    "test_cycle_table_phase_aligned",
+    "test_cycle_table_four_contact_events",
+    "test_superpose_drops_sliding_samples",
     "test_interp_matches_heldout_cell",
     "test_superpose_matches_combo_cells",
-    "test_style_zero_when_standing_young_or_ramp",
+    "test_disc_input_has_command",
+    "test_style_zero_when_standing_young_ramp_or_outside_hull",
     "test_discriminator_update_runs"
    ]
   },
@@ -1017,15 +1142,19 @@
    ],
    "decisions": [
     "D8",
-    "D9"
+    "D9",
+    "S3"
    ],
    "status": "계획",
    "tests": [
     "test_env_builds_and_steps",
     "test_colliders_present",
     "test_dc_motor_curve_per_env",
-    "test_soft_limits"
-   ]
+    "test_soft_limits",
+    "test_contact_forces_nonzero",
+    "test_actuator_single_controller"
+   ],
+   "note": "10-22 조사: Newton 이슈 #8648(접촉 센서 힘 0, 열림) 확인용 — 서 있을 때 발 접촉력 합 ≈ 몸무게. #8181(몸체 부분 집합 마찰 무작위화가 다른 shape 에 씀)은 우리 사본에 있음 → 마찰은 모든 몸체에만. S3: Isaac Lab 사본 28a37ce 고정(GA 로 안 올림). #6839(명시 구동기 게인이 두 번) 확인 — 고정 오차에서 토크 = kp × 오차 한 번"
   },
   {
    "id": "T8",
@@ -1113,7 +1242,7 @@
   {
    "id": "T10",
    "part": 2,
-   "title": "관측 — 92·405·118·330",
+   "title": "관측 — 92·405·125·330",
    "what": "관측 그룹 넷과 두 걸음 평균 창, 특권 항목(속도·높이·무게중심·접촉·마찰·질량·손 힘·상체 수준·지연), AMP 이력",
    "outputs": [
     "mdp/observations.py",
@@ -1140,10 +1269,12 @@
     "v_handf",
     "v_upper_lvl",
     "v_delay",
-    "d10"
+    "d10",
+    "v_win"
    ],
    "decisions": [
-    "B9"
+    "B9",
+    "S6"
    ],
    "status": "계획",
    "tests": [
@@ -1153,7 +1284,8 @@
     "test_hist_latest_slice_equals_policy",
     "test_com_target_moves_with_hand_force",
     "test_amp_frame_matches_features_convention",
-    "test_waist_obs_scaled"
+    "test_waist_obs_scaled",
+    "test_critic_window_state"
    ]
   },
   {
@@ -1254,17 +1386,22 @@
     "D3",
     "D7",
     "B8",
-    "B10"
+    "B10",
+    "D15",
+    "S7"
    ],
    "status": "계획",
-   "note": "학습 때 지켜볼 것(D1): 손 힘이 켜진 뒤 걷기 하한이 다시 오르거나 숙임 40° 이상 걷기에서 넘어짐이 늘면 그 구간 손 하중을 1 kg 까지로 줄인다",
+   "note": "손 하중 D15: 0–5 kg(양손 반씩), 숙임 30° 이상 걷기 2 kg 까지, env 20 % 무부하(S7). 10-22 조사(오픈소스): Isaac Lab Newton 이슈 #8268 — 우리 사본(isaaclab_newton 0.13.6, 06-16)은 하위 스텝마다 state_0.clear_forces() 로 외력을 지우고, 행동 관절이 모두 Newton 액추에이터면 decimation 4 를 그래프 하나로 돌려 외력이 첫 스텝에만 걸림 → 손 외력이 약 1/4. 수정은 GA(PR #8269, 10-08)의 \"하위 스텝마다 다시 걸기\" — cyclo_lab 은 안 고치고 dev12 쪽에서 NewtonManager 하위 스텝 함수를 감싸 다시 걸게 함(그래프 캡처 전에). 시험: 1 kg 큐브 충격량·팔 처짐(B10)",
    "tests": [
+    "test_external_wrench_full_impulse",
     "test_gain_randomization_hits_all_23",
     "test_com_shift_matches_baked_urdf",
     "test_hand_force_bounds_and_toggle",
     "test_penalty_scale_schedule",
     "test_height_bound_moves_on_judgement",
-    "test_upper_level_gate"
+    "test_upper_level_gate",
+    "test_no_load_envs_20pct",
+    "test_hand_force_cap_deep_lean_walk"
    ]
   },
   {
@@ -1347,12 +1484,14 @@
     "B6",
     "C1",
     "C2",
-    "C4"
+    "C4",
+    "S4"
    ],
    "status": "계획",
    "note": "10-22 추가: projects2-d9 계획 검토 항목, 사용자 승인(설계 §4 체크리스트 ⑥ '평가 하네스에 실기 조건 기본'). 실기 조건 기본값 = 새 모델 k1_col_main 계열, 최대 토크 72.6/30.0 N·m + 속도 곡선, 동작 지연 10 ms(평가 0/10/20), 모터 개체 차, 접촉 여유 0.002. 같이 올라온 NaN 가드·cmd_rate 정의·손 외력 물리 시험·손익에 v1 궤적은 사용자 보류",
    "tests": [
-    "test_golden_obs_match",
+    "test_golden_obs_assembly",
+    "test_golden_open_loop_first_steps",
     "test_command_delay_and_hold_mj",
     "test_real_conditions_default",
     "test_eval_report_fields"
@@ -1362,6 +1501,18 @@
  "testResults": {},
  "results": {
   "evidence": [
+   {
+    "title": "구현 참고 조사",
+    "date": "10-22",
+    "status": "반영됨",
+    "statusNote": "S1–S7 · Newton 외력(T12)",
+    "lines": [
+     "가장 닮은 구조: FAME(서기)·Mobile-TeleVision",
+     "AMP 코드 = G1DWAQ_Lab/TienKung amp_ppo.py, 대칭 = rsl_rl v2.3.1 블록 이식",
+     "dev12 가 처음: TO 모음 보간·덧셈 AMP, 높이별 숙임 표, 몸통 기준 이동, 두 걸음 평균 추종, 골든 sim2sim"
+    ],
+    "path": "dev12/reports/dev12 구현 참고 연구와 오픈소스.md"
+   },
    {
     "title": "걸음 모음 (궤적최적화)",
     "date": "10-21–22",
@@ -1399,6 +1550,18 @@
      "걷기 토크 70 % 하한: 0.5–1 cm 높음 (45° 0.420 → 0.430 m), 두 발 지지 무릎 24.8 → 25.4 N·m"
     ],
     "path": "dev12/scripts/lowest_posture_main_20261022.txt"
+   },
+   {
+    "title": "손 5 kg 숙임 하한",
+    "date": "10-22",
+    "status": "반영됨",
+    "statusNote": "D15 · 설계 손 외력",
+    "lines": [
+     "새 모델 + 양손 2.5 kg 씩, 소프트 한계: 서 있는 최저는 오히려 낮아짐, 두 발 무릎 25 → 29 N·m",
+     "걷기(토크 70 %) 숙임 25° 까지 +1–1.5 cm, 30° 0.54 → 0.68 m, 35° 0.51 → 0.76 m, 40–45° 불가(85 % 로도 0.54·0.67 m)",
+     "→ 숙임 30° 이상 걷기는 2 kg 상한"
+    ],
+    "path": "dev12/scripts/lowest_posture_main_hand5kg_20261022.txt"
    },
    {
     "title": "손 2 kg 숙임 하한",
