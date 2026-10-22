@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>dev12 하체 정책 설계</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f7f6f3; --surface: #fdfdfc; --surface-2: #efeee9; --border: #dedcd5; --border-2: #c9c7bf;
+  --text: #121211; --text-2: #4d4c48; --text-3: #7a7973;
+  --accent: #2a78d6; --accent-soft: #e5effb;
+  --warn: #9a5600; --warn-soft: #fbf0de;
+  --bad: #b3261e; --bad-soft: #fbe5e3;
+  --good: #1b7a4b; --good-soft: #e3f3ea;
+  --g-cmd: #eb6834; --g-prop: #2a78d6; --g-code: #1baf7a; --g-priv: #eda100; --g-act: #e87ba4; --g-ext: #8a8880;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #121211; --surface: #1a1a19; --surface-2: #242422; --border: #34332f; --border-2: #4a4944;
+    --text: #f0efec; --text-2: #c6c5bb; --text-3: #929087;
+    --accent: #5a9cec; --accent-soft: #1c2a3c;
+    --warn: #e0a24a; --warn-soft: #33281a;
+    --bad: #f08a80; --bad-soft: #3a1d1a;
+    --good: #5cc28f; --good-soft: #17291f;
+    --g-cmd: #d95926; --g-prop: #3987e5; --g-code: #199e70; --g-priv: #c98500; --g-act: #d55181; --g-ext: #8f8d85;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #121211; --surface: #1a1a19; --surface-2: #242422; --border: #34332f; --border-2: #4a4944;
+  --text: #f0efec; --text-2: #c6c5bb; --text-3: #929087;
+  --accent: #5a9cec; --accent-soft: #1c2a3c;
+  --warn: #e0a24a; --warn-soft: #33281a;
+  --bad: #f08a80; --bad-soft: #3a1d1a;
+  --good: #5cc28f; --good-soft: #17291f;
+  --g-cmd: #d95926; --g-prop: #3987e5; --g-code: #199e70; --g-priv: #c98500; --g-act: #d55181; --g-ext: #8f8d85;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 15px/1.6 "IBM Plex Sans KR", system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+.topbar { position: sticky; top: 0; z-index: 20; background: var(--surface); border-bottom: 1px solid var(--border); }
+.topbar .in { max-width: 1240px; margin: 0 auto; padding: 8px 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.topbar b { font-size: 15px; }
+.status { font-size: 13px; color: var(--text-2); flex: 1 1 200px; }
+.status.dirty { color: var(--warn); }
+.status.err { color: var(--bad); }
+.btn { border: 1px solid var(--border-2); background: var(--surface); border-radius: 8px; padding: 5px 12px; font-size: 14px; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.primary:disabled { opacity: .45; cursor: default; }
+.btn.small { padding: 2px 8px; font-size: 12.5px; border-radius: 6px; }
+.btn.danger { color: var(--bad); }
+.crumb { font-size: 14px; color: var(--text-3); }
+.crumb a { color: var(--text-2); text-decoration: none; }
+.crumb a:hover { color: var(--accent); }
+tr[id], .chip[id], .off-chip[id] { scroll-margin-top: 64px; }
+tr.flash td { background: var(--accent-soft); }
+.chip.flash, .off-chip.flash { outline: 2px solid var(--accent); }
+main { max-width: 1240px; margin: 0 auto; padding: 24px 16px 96px; }
+h1 { font-size: 26px; margin: 0 0 4px; }
+h2 { font-size: 20px; margin: 0 0 4px; }
+h3 { font-size: 16px; margin: 0 0 2px; }
+.sub-in { display: block; resize: none; overflow: hidden; line-height: 1.5; width: 100%; border: 1px dashed transparent; background: transparent; color: var(--text-2); font-size: 15.5px; padding: 2px 4px; margin-left: -4px; border-radius: 6px; }
+.sub-in:hover, .sub-in:focus { border-color: var(--border-2); background: var(--surface); outline: none; }
+.meta { font-size: 12.5px; color: var(--text-3); }
+section { margin-top: 28px; }
+.hint { font-size: 13.5px; color: var(--text-2); margin: 2px 0 12px; }
+.banner { border-radius: 10px; padding: 10px 14px; background: var(--warn-soft); margin: 14px 0; font-size: 14px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.banner[hidden] { display: none; }
+
+/* ---------- 입출력 그림 ---------- */
+.dims { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 14px; }
+.dim-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; min-width: 120px; }
+.dim-card .k { font-size: 12px; color: var(--text-3); }
+.dim-card .v { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.dim-card .f { font-size: 12px; color: var(--text-2); }
+.io { display: grid; grid-template-columns: minmax(150px, .75fr) 22px minmax(230px, 1.15fr) 22px minmax(250px, 1.2fr) 22px minmax(190px, .95fr); gap: 0; align-items: start; }
+.io > .arrow { align-self: center; text-align: center; color: var(--text-3); font-size: 20px; }
+.colh { font-size: 12px; letter-spacing: .03em; color: var(--text-3); margin: 0 0 6px 2px; }
+.stack { display: grid; gap: 10px; }
+@media (max-width: 1080px) {
+  .io { grid-template-columns: 1fr; }
+  .io > .arrow { transform: rotate(90deg); margin: 4px 0; }
+}
+.box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; }
+.box.dashed { border-style: dashed; }
+.box.net { border-width: 2px; }
+.box.net.actor { border-color: var(--accent); background: var(--accent-soft); }
+.box .bh { display: flex; align-items: center; gap: 6px; }
+.box .bh .name { font-weight: 700; font-size: 14.5px; }
+.box .bh .tot { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 700; font-size: 14px; }
+.box .desc { font-size: 12.5px; color: var(--text-3); margin: 1px 0 6px; }
+.dot { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+.chips { display: grid; gap: 5px; }
+.chip { display: grid; grid-template-columns: 1fr auto; gap: 0 8px; align-items: center; text-align: left; width: 100%;
+  background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--gc, var(--border-2)); border-radius: 7px; padding: 4px 8px; font-size: 13.5px; }
+.chip:hover { border-color: var(--accent); border-left-color: var(--gc); }
+.chip .n { font-weight: 500; }
+.chip .d { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 13px; }
+.chip .r { grid-column: 1 / -1; font-size: 11.5px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chip .tag { font-size: 10.5px; padding: 0 5px; border-radius: 99px; background: var(--surface-2); color: var(--text-2); margin-left: 4px; font-weight: 400; vertical-align: 1px; }
+.add { margin-top: 6px; width: 100%; border: 1px dashed var(--border-2); background: transparent; border-radius: 7px; padding: 3px; font-size: 12.5px; color: var(--text-2); }
+.add:hover { border-color: var(--accent); color: var(--accent); }
+.flow { font-size: 13px; color: var(--text-2); margin: 6px 0 0; line-height: 1.55; }
+.flow b { color: var(--text); font-variant-numeric: tabular-nums; }
+.mlp { display: inline-block; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; background: var(--surface-2); border-radius: 5px; padding: 0 6px; }
+.robot { background: var(--surface-2); border-radius: 10px; padding: 8px 12px; font-size: 13.5px; margin-top: 6px; }
+.robot b { display: block; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12.5px; color: var(--text-2); margin: 4px 0 10px; }
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+/* 뺀 항목 */
+.tray { margin-top: 16px; border: 1px dashed var(--border-2); border-radius: 12px; padding: 10px 12px; }
+.tray h3 { font-size: 14.5px; }
+.tray .rows { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 6px; margin-top: 8px; }
+.off-chip { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; align-items: center; font-size: 13px; padding: 5px 8px; border-radius: 7px; background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--gc); opacity: .85; }
+.off-chip .n { text-decoration: line-through; color: var(--text-2); }
+.off-chip .why { grid-column: 1 / -1; font-size: 11.5px; color: var(--text-3); }
+.off-chip .acts { display: flex; gap: 4px; }
+
+/* ---------- 설정 칸 ---------- */
+.fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+.field label { display: block; font-size: 12.5px; color: var(--text-3); margin-bottom: 2px; }
+.field input { width: 100%; border: 1px solid var(--border); background: var(--surface); border-radius: 7px; padding: 5px 8px; font-size: 14px; }
+.field input:focus, td input:focus, td textarea:focus, td select:focus, textarea.notes:focus, .dlg input:focus, .dlg textarea:focus, .dlg select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+
+/* ---------- 표 ---------- */
+.tblock { margin: 22px 0 0; }
+.tblock .th { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.tblock .cnt { font-size: 12.5px; color: var(--text-3); }
+.tbl-wrap { overflow-x: auto; margin-top: 8px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+th { text-align: left; font-weight: 500; font-size: 12.5px; color: var(--text-2); padding: 7px 8px; border-bottom: 1px solid var(--border); background: var(--surface-2); white-space: nowrap; }
+td { padding: 3px 4px; border-bottom: 1px solid var(--border); vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+td input[type=text], td textarea, td select { width: 100%; border: 1px solid transparent; background: transparent; border-radius: 6px; padding: 4px 6px; font-size: 13.5px; }
+td input[type=text]:hover, td textarea:hover, td select:hover { border-color: var(--border); }
+td textarea { resize: none; overflow: hidden; line-height: 1.45; min-height: 30px; display: block; }
+td.chk { text-align: center; width: 44px; padding-top: 8px; }
+td.ops { white-space: nowrap; width: 76px; padding-top: 5px; }
+td.ops button { border: none; background: transparent; color: var(--text-3); font-size: 13px; padding: 2px 4px; border-radius: 4px; }
+td.ops button:hover { background: var(--surface-2); color: var(--text); }
+td.ops button.del:hover { color: var(--bad); }
+tr.off td:not(.chk):not(.ops) { opacity: .5; }
+tr.off td input[type=text] { text-decoration: line-through; }
+td.w-name { min-width: 150px; } td.w-short { min-width: 90px; } td.w-long { min-width: 230px; } td.w-sel { min-width: 82px; }
+.addrow { margin-top: 6px; }
+textarea.notes { width: 100%; min-height: 140px; border: 1px solid var(--border); background: var(--surface); border-radius: 10px; padding: 10px 12px; font-size: 14px; line-height: 1.6; }
+
+/* ---------- 편집 창 ---------- */
+dialog.dlg { border: 1px solid var(--border); border-radius: 14px; padding: 0; width: min(520px, calc(100vw - 32px)); background: var(--surface); color: var(--text); }
+dialog.dlg::backdrop { background: rgba(0,0,0,.35); }
+.dlg form { padding: 16px 18px 14px; display: grid; gap: 10px; }
+.dlg .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.dlg label { display: block; font-size: 12.5px; color: var(--text-3); margin-bottom: 2px; }
+.dlg input[type=text], .dlg input[type=number], .dlg textarea, .dlg select { width: 100%; border: 1px solid var(--border); background: var(--bg); border-radius: 7px; padding: 6px 8px; font-size: 14px; }
+.dlg textarea { min-height: 64px; resize: vertical; }
+.dlg .ck { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--text); }
+.dlg .btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.dlg .btns .sp { flex: 1; }
+footer { margin-top: 40px; font-size: 12.5px; color: var(--text-3); }
+</style>
+</head>
+<body>
+<div class="topbar"><div class="in">
+  <span class="crumb"><a href="index.html">학습 환경 계획</a> ›</span> <b>학습 설계</b>
+  <span class="status" id="status">불러오는 중…</span>
+  <button class="btn primary" id="saveBtn" disabled>저장</button>
+  <button class="btn" id="exportBtn">JSON 내보내기</button>
+  <button class="btn" id="importBtn">JSON 불러오기</button>
+  <input type="file" id="importFile" accept="application/json,.json" hidden>
+</div></div>
+
+<main>
+  <header>
+    <div class="meta" id="meta"></div>
+    <h1 id="title">dev12 하체 정책 설계</h1>
+    <textarea class="sub-in" id="subtitle" rows="1" aria-label="부제"></textarea>
+  </header>
+  <div class="banner" id="draftBanner" hidden></div>
+
+  <section id="io">
+    <h2>입출력 구조</h2>
+    <p class="hint">항목을 누르면 고칠 수 있다. 그룹마다 <b>+ 항목 추가</b>, 고치는 창에서 <b>빼기</b>를 누르면 아래 "뺀 항목"으로 간다. 숫자는 켜진 항목의 칸 수를 더한 것이다.</p>
+    <div class="dims" id="dims"></div>
+    <div class="legend" id="legend"></div>
+    <div class="io" id="diagram"></div>
+    <div class="tray" id="tray"></div>
+  </section>
+
+  <section id="netsec">
+    <h2>네트워크·학습 설정</h2>
+    <p class="hint">이력 스텝을 바꾸면 인코더 입력 칸 수가 바로 바뀐다.</p>
+    <div class="fields" id="netFields"></div>
+  </section>
+
+  <section id="train">
+    <h2>학습 과정</h2>
+    <p class="hint">칸을 눌러 바로 고친다. 맨 앞 칸으로 넣고 빼고, ↑ ↓ 로 순서를 바꾸고, × 로 지운다.</p>
+    <div id="tables"></div>
+  </section>
+
+  <section id="notesec">
+    <h2>메모·열린 질문</h2>
+    <textarea class="notes" id="notes" aria-label="메모"></textarea>
+  </section>
+
+  <footer>저장하면 <code>dev12/docs/dev12_design.json</code> 에 쓰고 이전 판은 <code>dev12/docs/design_backups/</code> 에 남는다. 서버 없이 열면 <b>JSON 내보내기</b>로 저장한다.</footer>
+</main>
+
+<dialog class="dlg" id="dlg">
+  <form method="dialog" id="dlgForm">
+    <h3 id="dlgTitle">항목 고치기</h3>
+    <div><label for="f_name">이름</label><input type="text" id="f_name" required></div>
+    <div class="row2">
+      <div><label for="f_group">그룹</label><select id="f_group"></select></div>
+      <div><label for="f_dim">칸 수</label><input type="number" id="f_dim" min="0" step="1"></div>
+    </div>
+    <div><label for="f_range">범위·값</label><input type="text" id="f_range"></div>
+    <div class="row2" id="actorOnly">
+      <div><label for="f_noise">관측 잡음</label><input type="text" id="f_noise"></div>
+      <div><label>&nbsp;</label><label class="ck"><input type="checkbox" id="f_hist"> 이력(인코더 입력)에 넣기</label></div>
+    </div>
+    <div><label for="f_src">출처</label><input type="text" id="f_src"></div>
+    <div><label for="f_note">메모·이유</label><textarea id="f_note"></textarea></div>
+    <div class="btns">
+      <button class="btn primary" value="apply" id="dlgApply">적용</button>
+      <button class="btn" value="toggle" id="dlgToggle">빼기</button>
+      <button class="btn danger" value="delete" id="dlgDelete">완전히 지우기</button>
+      <span class="sp"></span>
+      <button class="btn" value="cancel" formnovalidate>닫기</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+(function () {
+  "use strict";
+  var DATA_URL = "dev12_design.json", SAVE_URL = "__design_api/save", PING_URL = "__design_api/ping";
+  var DRAFT_KEY = "dev12_design_draft_v1";
+  var TABLE_ORDER = ["commands", "tolerance", "curricula", "rewards", "symmetry", "dr", "terminations", "metrics", "phases"];
+  var GROUP_COLOR = { cmd: "--g-cmd", prop: "--g-prop", code: "--g-code", priv: "--g-priv", act: "--g-act", ext: "--g-ext" };
+  var S = null, BASE = null, dirty = false, serverOK = false, editing = null;
+  var $ = function (id) { return document.getElementById(id); };
+
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function lsDel(k) { try { localStorage.removeItem(k); } catch (e) {} }
+  function gcolor(g) { return "var(" + (GROUP_COLOR[g] || "--border-2") + ")"; }
+  function groupById(id) { for (var i = 0; i < S.groups.length; i++) if (S.groups[i].id === id) return S.groups[i]; return null; }
+  function itemsOf(g, on) { return S.items.filter(function (it) { return it.group === g && (on === undefined || !!it.on === on); }); }
+  function sumDim(list) { return list.reduce(function (a, it) { return a + (parseInt(it.dim, 10) || 0); }, 0); }
+  function uid(p) { return p + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36); }
+
+  // ---------- 상태 ----------
+  function setStatus(msg, cls) { var el = $("status"); el.textContent = msg; el.className = "status" + (cls ? " " + cls : ""); }
+  function refreshStatus() {
+    $("saveBtn").disabled = !serverOK || !dirty;
+    if (dirty) setStatus("저장 안 한 변경이 있음 (브라우저에 초안 보관 중)" + (serverOK ? "" : " · 서버 없음: 내보내기로 저장"), "dirty");
+    else setStatus("판 " + BASE + " · " + (S.meta.savedAt ? new Date(S.meta.savedAt).toLocaleString("ko-KR") + " 저장" : "") + (serverOK ? "" : " · 서버 없음(읽기 전용)"));
+    $("meta").textContent = "판 " + BASE + (dirty ? " + 고친 내용" : "") + " · dev12/docs/dev12_design.json";
+  }
+  function markDirty() {
+    dirty = true;
+    lsSet(DRAFT_KEY, JSON.stringify({ base: BASE, at: new Date().toISOString(), state: S }));
+    refreshStatus();
+  }
+
+  // ---------- 입출력 그림 ----------
+  function computeDims() {
+    var steps = parseInt(S.net.histSteps, 10) || 0;
+    var cmd = sumDim(itemsOf("cmd", true)), prop = sumDim(itemsOf("prop", true));
+    var histPer = sumDim(S.items.filter(function (it) { return it.on && (it.group === "cmd" || it.group === "prop") && it.hist; }));
+    var code = sumDim(itemsOf("code", true)), priv = sumDim(itemsOf("priv", true));
+    return { steps: steps, cmd: cmd, prop: prop, obs: cmd + prop, histPer: histPer, hist: steps * histPer, code: code,
+      actorIn: cmd + prop + code, priv: priv, critic: cmd + prop + priv, act: sumDim(itemsOf("act", true)), ext: sumDim(itemsOf("ext", true)) };
+  }
+  function chipHtml(it) {
+    var tags = "";
+    if ((it.group === "cmd" || it.group === "prop") && it.hist) tags += '<span class="tag">이력</span>';
+    if (it.noise) tags += '<span class="tag">잡음</span>';
+    var sub = [it.range, it.noise ? "잡음 " + it.noise : ""].filter(Boolean).join(" · ");
+    return '<button type="button" class="chip" id="item_' + esc(it.id) + '" data-edit="' + esc(it.id) + '" style="--gc:' + gcolor(it.group) + '" title="' + esc(it.note || "") + '">' +
+      '<span class="n">' + esc(it.name) + tags + '</span><span class="d">' + esc(it.dim) + '</span>' +
+      (sub ? '<span class="r">' + esc(sub) + '</span>' : "") + "</button>";
+  }
+  function groupBox(gid, extraClass, extraDesc) {
+    var g = groupById(gid); if (!g) return "";
+    var on = itemsOf(gid, true);
+    return '<div class="box ' + (extraClass || "") + '">' +
+      '<div class="bh"><span class="dot" style="background:' + gcolor(gid) + '"></span><span class="name">' + esc(g.name) + '</span><span class="tot">' + sumDim(on) + "</span></div>" +
+      '<div class="desc">' + esc(g.desc) + (extraDesc ? " · " + extraDesc : "") + "</div>" +
+      '<div class="chips">' + (on.length ? on.map(chipHtml).join("") : '<span class="desc">켜진 항목 없음</span>') + "</div>" +
+      '<button type="button" class="add" data-add="' + gid + '">+ 항목 추가</button></div>';
+  }
+  function renderDiagram() {
+    var d = computeDims(), n = S.net;
+    $("dims").innerHTML = [
+      ["actor 입력", d.actorIn, "명령 " + d.cmd + " + 고유 감각 " + d.prop + " + 인코더 " + d.code],
+      ["인코더 입력", d.hist, d.steps + " 스텝 × " + d.histPer],
+      ["critic 입력", d.critic, "명령·감각 " + d.obs + " + 특권 " + d.priv],
+      ["정책 출력", d.act, "PD 목표"],
+      ["정책 밖", d.ext, "바로 PD"]
+    ].map(function (c) { return '<div class="dim-card"><div class="k">' + c[0] + '</div><div class="v">' + c[1] + '</div><div class="f">' + esc(c[2]) + "</div></div>"; }).join("");
+    $("legend").innerHTML = S.groups.map(function (g) { return '<span><i class="dot" style="background:' + gcolor(g.id) + '"></i>' + esc(g.name) + "</span>"; }).join("") +
+      '<span><i class="dot" style="background:var(--surface-2);border:1px dashed var(--border-2)"></i>점선 = 학습 때만</span>';
+    var html = "";
+    html += '<div><div class="colh">상위 층 (다음 단계)</div><div class="stack">' +
+      '<div class="box"><div class="bh"><span class="name">카메라·깊이·조종기</span></div>' +
+      '<div class="flow">→ 명령 <b>' + d.cmd + "</b> 칸<br>→ 상체 목표 <b>" + d.ext + "</b> 칸</div>" +
+      '<div class="desc" style="margin-top:6px">학습 땐 명령 생성기와 상체 무작위 커리큘럼이 대신한다</div></div></div></div>';
+    html += '<div class="arrow">→</div>';
+    html += '<div><div class="colh">정책 입력 (50 Hz)</div><div class="stack">' + groupBox("cmd") + groupBox("prop") +
+      '<div class="box"><div class="bh"><span class="name">관측 이력</span><span class="tot">' + d.hist + '</span></div>' +
+      '<div class="flow">"이력" 표시 항목 <b>' + d.histPer + "</b> 칸 × <b>" + d.steps + "</b> 스텝 → 인코더</div></div>" +
+      groupBox("priv", "dashed", "critic 전용") + "</div></div>";
+    html += '<div class="arrow">→</div>';
+    html += '<div><div class="colh">네트워크</div><div class="stack">' +
+      '<div class="box net"><div class="bh"><span class="name">인코더</span><span class="tot">' + d.hist + " → " + d.code + "</span></div>" +
+      '<div class="flow">이력 <b>' + d.hist + '</b> → <span class="mlp">MLP [' + esc(n.encHidden) + "]</span> → 아래 <b>" + d.code + "</b> 칸</div></div>" +
+      groupBox("code") +
+      '<div class="box net actor"><div class="bh"><span class="name">actor</span><span class="tot">' + d.actorIn + " → " + d.act + "</span></div>" +
+      '<div class="flow">명령 <b>' + d.cmd + "</b> + 고유 감각 <b>" + d.prop + "</b> + 인코더 <b>" + d.code + "</b> = <b>" + d.actorIn + '</b><br>→ <span class="mlp">MLP [' + esc(n.actorHidden) + "]</span> → 출력 <b>" + d.act + "</b></div></div>" +
+      '<div class="box net dashed"><div class="bh"><span class="name">critic</span><span class="tot">' + d.critic + " → 1</span></div>" +
+      '<div class="flow">명령·감각 <b>' + d.obs + "</b> (잡음 없이) + 특권 <b>" + d.priv + '</b> → <span class="mlp">MLP [' + esc(n.criticHidden) + "]</span> → 가치</div></div>" +
+      "</div></div>";
+    html += '<div class="arrow">→</div>';
+    html += '<div><div class="colh">출력 → 로봇</div><div class="stack">' + groupBox("act") +
+      '<div class="robot"><b>K1 다리 PD</b>목표 = 기본 자세 + ' + esc(n.actionScale) + " × 행동</div>" +
+      groupBox("ext") + '<div class="robot"><b>K1 상체 PD</b>정책을 거치지 않음</div></div></div>';
+    $("diagram").innerHTML = html;
+    renderTray();
+  }
+  function renderTray() {
+    var off = S.items.filter(function (it) { return !it.on; });
+    var html = '<h3>뺀 항목 <span class="meta">' + off.length + " 개 — 다시 넣으면 그림으로 돌아간다</span></h3>";
+    if (!off.length) html += '<div class="meta" style="margin-top:6px">없음</div>';
+    else html += '<div class="rows">' + off.map(function (it) {
+      var g = groupById(it.group);
+      return '<div class="off-chip" id="item_' + esc(it.id) + '" style="--gc:' + gcolor(it.group) + '"><span><span class="n">' + esc(it.name) + "</span> <span class=\"meta\">" + esc(g ? g.name : it.group) + " · " + esc(it.dim) + " 칸 · " + esc(it.src) + "</span></span>" +
+        '<span class="acts"><button type="button" class="btn small" data-reon="' + esc(it.id) + '">다시 넣기</button><button type="button" class="btn small" data-edit="' + esc(it.id) + '">고치기</button></span>' +
+        (it.note ? '<span class="why">' + esc(it.note) + "</span>" : "") + "</div>";
+    }).join("") + "</div>";
+    $("tray").innerHTML = html;
+  }
+
+  // ---------- 편집 창 ----------
+  function openEditor(id, newGroup) {
+    var it = id ? S.items.filter(function (x) { return x.id === id; })[0] : null;
+    editing = it ? it.id : null;
+    $("dlgTitle").textContent = it ? "항목 고치기" : "항목 추가";
+    $("f_group").innerHTML = S.groups.map(function (g) { return '<option value="' + g.id + '">' + esc(g.name) + "</option>"; }).join("");
+    var v = it || { name: "", group: newGroup, dim: 1, range: "", noise: "", hist: newGroup === "cmd" || newGroup === "prop", src: "dev12", note: "", on: true };
+    $("f_name").value = v.name; $("f_group").value = v.group; $("f_dim").value = v.dim; $("f_range").value = v.range || "";
+    $("f_noise").value = v.noise || ""; $("f_hist").checked = !!v.hist; $("f_src").value = v.src || ""; $("f_note").value = v.note || "";
+    $("dlgToggle").hidden = !it; $("dlgDelete").hidden = !it;
+    $("dlgToggle").textContent = it && !it.on ? "다시 넣기" : "빼기";
+    syncActorOnly();
+    $("dlg").returnValue = "";
+    $("dlg").showModal();
+    setTimeout(function () { $("f_name").focus(); }, 0);
+  }
+  function syncActorOnly() { var g = $("f_group").value; $("actorOnly").style.display = (g === "cmd" || g === "prop") ? "" : "none"; }
+  function readEditor(target) {
+    target.name = $("f_name").value.trim() || "이름 없음"; target.group = $("f_group").value;
+    target.dim = Math.max(0, parseInt($("f_dim").value, 10) || 0); target.range = $("f_range").value.trim();
+    target.noise = $("f_noise").value.trim(); target.hist = $("f_hist").checked; target.src = $("f_src").value.trim(); target.note = $("f_note").value.trim();
+  }
+  $("f_group").addEventListener("change", syncActorOnly);
+  $("dlg").addEventListener("close", function () {
+    var act = $("dlg").returnValue;
+    if (act === "cancel" || !act) return;
+    var it = editing ? S.items.filter(function (x) { return x.id === editing; })[0] : null;
+    if (act === "apply") {
+      if (!it) { it = { id: uid("u_"), on: true }; S.items.push(it); }
+      readEditor(it);
+    } else if (act === "toggle" && it) {
+      readEditor(it); it.on = !it.on;
+    } else if (act === "delete" && it) {
+      if (!confirm("'" + it.name + "' 을 완전히 지울까요? 빼기만 하려면 '빼기'를 누르세요.")) return;
+      S.items = S.items.filter(function (x) { return x !== it; });
+    }
+    markDirty(); renderDiagram();
+  });
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest("[data-edit],[data-add],[data-reon]");
+    if (!t) return;
+    if (t.hasAttribute("data-edit")) openEditor(t.getAttribute("data-edit"));
+    else if (t.hasAttribute("data-add")) openEditor(null, t.getAttribute("data-add"));
+    else if (t.hasAttribute("data-reon")) {
+      var it = S.items.filter(function (x) { return x.id === t.getAttribute("data-reon"); })[0];
+      if (it) { it.on = true; markDirty(); renderDiagram(); }
+    }
+  });
+
+  // ---------- 네트워크 설정 ----------
+  var NET_FIELDS = [["histSteps", "이력 스텝", "number"], ["encHidden", "인코더 은닉층"], ["actorHidden", "actor 은닉층"], ["criticHidden", "critic 은닉층"],
+    ["actionScale", "행동 배율"], ["hz", "제어 주기 (Hz)"], ["envs", "env 수"], ["algo", "알고리즘"], ["losses", "손실"], ["start", "시작점"]];
+  function renderNet() {
+    $("netFields").innerHTML = NET_FIELDS.map(function (f) {
+      return '<div class="field"><label for="net_' + f[0] + '">' + f[1] + '</label><input id="net_' + f[0] + '" data-net="' + f[0] + '" type="' + (f[2] || "text") + '" value="' + esc(S.net[f[0]]) + '"></div>';
+    }).join("");
+  }
+  document.addEventListener("input", function (e) {
+    var t = e.target;
+    if (t.hasAttribute("data-net")) { S.net[t.getAttribute("data-net")] = t.type === "number" ? (parseInt(t.value, 10) || 0) : t.value; markDirty(); renderDiagram(); }
+    else if (t.hasAttribute("data-cell")) { onCell(t); }
+    else if (t.id === "notes") { S.notes = t.value; markDirty(); }
+    else if (t.id === "subtitle") { S.meta.subtitle = t.value; autosize(t); markDirty(); }
+  });
+  document.addEventListener("change", function (e) { var t = e.target; if (t.hasAttribute("data-cell") && (t.type === "checkbox" || t.tagName === "SELECT")) onCell(t); });
+
+  // ---------- 표 ----------
+  function cellHtml(tk, ri, c, row) {
+    var a = 'data-cell="1" data-t="' + tk + '" data-r="' + ri + '" data-k="' + c.key + '"', v = row[c.key];
+    if (c.type === "check") return '<td class="chk"><input type="checkbox" ' + a + (v ? " checked" : "") + ' aria-label="' + esc(c.label) + '"></td>';
+    if (c.type === "select") return '<td class="w-sel"><select ' + a + ">" + c.options.map(function (o) { return "<option" + (o === v ? " selected" : "") + ">" + esc(o) + "</option>"; }).join("") + "</select></td>";
+    if (c.type === "long") return '<td class="w-long"><textarea rows="1" ' + a + ">" + esc(v) + "</textarea></td>";
+    var w = c.key === "name" ? "w-name" : "w-short";
+    return '<td class="' + w + '"><input type="text" ' + a + ' value="' + esc(v) + '"></td>';
+  }
+  function renderTable(tk) {
+    var t = S.tables[tk]; if (!t) return "";
+    var onCount = t.rows.filter(function (r) { return r.on !== false; }).length;
+    var hasOn = t.cols.some(function (c) { return c.key === "on"; });
+    var html = '<div class="tblock" id="tb_' + tk + '"><div class="th"><h3>' + esc(t.title) + '</h3><span class="cnt">' + (hasOn ? "켜짐 " + onCount + " / " : "") + t.rows.length + " 행</span></div>" +
+      (t.desc ? '<div class="hint" style="margin:2px 0 0">' + esc(t.desc) + "</div>" : "") +
+      '<div class="tbl-wrap"><table><thead><tr>' + t.cols.map(function (c) { return "<th>" + esc(c.label) + "</th>"; }).join("") + "<th></th></tr></thead><tbody>";
+    t.rows.forEach(function (row, ri) {
+      html += '<tr id="row_' + esc(row.id) + '" class="' + (hasOn && row.on === false ? "off" : "") + '">' + t.cols.map(function (c) { return cellHtml(tk, ri, c, row); }).join("") +
+        '<td class="ops"><button type="button" data-op="up" data-t="' + tk + '" data-r="' + ri + '" title="위로">↑</button><button type="button" data-op="down" data-t="' + tk + '" data-r="' + ri + '" title="아래로">↓</button><button type="button" class="del" data-op="del" data-t="' + tk + '" data-r="' + ri + '" title="지우기">×</button></td></tr>';
+    });
+    html += '</tbody></table></div><button type="button" class="btn small addrow" data-op="add" data-t="' + tk + '">+ 행 추가</button></div>';
+    return html;
+  }
+  function renderTables() {
+    var keys = TABLE_ORDER.concat(Object.keys(S.tables).filter(function (k) { return TABLE_ORDER.indexOf(k) < 0; }));
+    $("tables").innerHTML = keys.map(renderTable).join("");
+    autosizeAll($("tables"));
+  }
+  function rerenderTable(tk) {
+    var el = $("tb_" + tk); if (!el) return;
+    var tmp = document.createElement("div"); tmp.innerHTML = renderTable(tk);
+    var nu = tmp.firstChild; el.parentNode.replaceChild(nu, el); autosizeAll(nu);
+  }
+  function autosize(ta) { ta.style.height = "auto"; ta.style.height = ta.scrollHeight + 2 + "px"; }
+  function autosizeAll(root) { root.querySelectorAll("textarea").forEach(autosize); }
+  function onCell(t) {
+    var tk = t.getAttribute("data-t"), ri = +t.getAttribute("data-r"), k = t.getAttribute("data-k");
+    var row = S.tables[tk].rows[ri];
+    row[k] = t.type === "checkbox" ? t.checked : t.value;
+    if (t.tagName === "TEXTAREA") autosize(t);
+    if (k === "on") { t.closest("tr").classList.toggle("off", !t.checked); var cnt = $("tb_" + tk).querySelector(".cnt"); var tt = S.tables[tk]; cnt.textContent = "켜짐 " + tt.rows.filter(function (r) { return r.on !== false; }).length + " / " + tt.rows.length + " 행"; }
+    markDirty();
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-op]"); if (!b) return;
+    var tk = b.getAttribute("data-t"), t = S.tables[tk], ri = +b.getAttribute("data-r"), op = b.getAttribute("data-op");
+    if (op === "add") {
+      var row = { id: uid("r_") };
+      t.cols.forEach(function (c) { row[c.key] = c.type === "check" ? (c.key === "on") : c.type === "select" ? c.options[0] : ""; });
+      t.rows.push(row);
+    } else if (op === "del") {
+      var nm = t.rows[ri].name || "이 행";
+      if (!confirm("'" + nm + "' 을 지울까요? 잠시 빼려면 맨 앞 체크를 끄세요.")) return;
+      t.rows.splice(ri, 1);
+    } else if (op === "up" && ri > 0) { t.rows.splice(ri - 1, 0, t.rows.splice(ri, 1)[0]); }
+    else if (op === "down" && ri < t.rows.length - 1) { t.rows.splice(ri + 1, 0, t.rows.splice(ri, 1)[0]); }
+    else return;
+    markDirty(); rerenderTable(tk);
+    if (op === "add") { var rows = $("tb_" + tk).querySelectorAll("tbody tr"); var f = rows[rows.length - 1].querySelector("input[type=text],textarea"); if (f) f.focus(); }
+  });
+
+  // ---------- 전체 그리기 ----------
+  function renderAll() {
+    $("title").textContent = S.meta.title || "dev12 설계";
+    $("subtitle").value = S.meta.subtitle || ""; autosize($("subtitle"));
+    $("notes").value = S.notes || "";
+    renderDiagram(); renderNet(); renderTables(); refreshStatus();
+  }
+
+  // ---------- 저장·내보내기·불러오기 ----------
+  $("saveBtn").addEventListener("click", function () {
+    if (!serverOK || !dirty) return;
+    var out = JSON.parse(JSON.stringify(S));
+    out.meta.rev = BASE + 1; out.meta.savedAt = new Date().toISOString();
+    setStatus("저장 중…");
+    fetch(SAVE_URL, { method: "POST", headers: { "Content-Type": "application/json", "X-Base-Rev": String(BASE) }, body: JSON.stringify(out) })
+      .then(function (r) { return r.text().then(function (txt) { return { ok: r.ok, code: r.status, txt: txt }; }); })
+      .then(function (r) {
+        if (r.ok) { S.meta.rev = out.meta.rev; S.meta.savedAt = out.meta.savedAt; BASE = out.meta.rev; dirty = false; lsDel(DRAFT_KEY); refreshStatus(); }
+        else if (r.code === 409) setStatus("저장 거절: 서버에 더 새 판이 있습니다 (" + r.txt + "). 고친 내용은 브라우저 초안에 남아 있으니 내보내기 후 새로고침하세요.", "err");
+        else setStatus("저장 실패 (" + r.code + " " + r.txt + ")", "err");
+      })
+      .catch(function () { setStatus("저장 실패: 서버에 닿지 않음. 내보내기로 저장하세요.", "err"); });
+  });
+  $("exportBtn").addEventListener("click", function () {
+    var blob = new Blob([JSON.stringify(S, null, 1)], { type: "application/json" });
+    var a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+    a.download = "dev12_design.rev" + BASE + (dirty ? "_edited" : "") + ".json"; document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  });
+  $("importBtn").addEventListener("click", function () { $("importFile").click(); });
+  $("importFile").addEventListener("change", function () {
+    var f = this.files[0]; if (!f) return;
+    f.text().then(function (txt) {
+      var obj = JSON.parse(txt);
+      if (!obj.meta || !obj.groups || !obj.items || !obj.tables) throw new Error("설계 파일이 아님");
+      obj.meta.rev = BASE; S = obj; markDirty(); renderAll();
+    }).catch(function (e) { setStatus("불러오기 실패: " + e.message, "err"); });
+    this.value = "";
+  });
+  window.addEventListener("beforeunload", function (e) { if (dirty) { e.preventDefault(); e.returnValue = ""; } });
+
+  // ---------- 시작 ----------
+  // 주소 #row_<행 id> · #item_<항목 id> 로 그 칸을 보여 준다 (학습 환경 계획 페이지의 링크)
+  function focusHash() {
+    var el = document.getElementById(decodeURIComponent(location.hash.slice(1))); if (!el) return;
+    el.scrollIntoView({ block: "center" });
+    el.classList.add("flash"); setTimeout(function () { el.classList.remove("flash"); }, 1800);
+  }
+  window.addEventListener("hashchange", focusHash);
+  function showDraftBanner(draft) {
+    var b = $("draftBanner"), same = draft.base === BASE;
+    b.innerHTML = (same ? "이 브라우저에 저장 안 한 고친 내용이 있습니다" : "이 브라우저의 초안은 옛 판(" + draft.base + ") 위에서 고친 것입니다") +
+      " (" + new Date(draft.at).toLocaleString("ko-KR") + "). " +
+      '<button class="btn small" id="dUse">' + (same ? "이어서 고치기" : "그래도 불러오기") + '</button><button class="btn small" id="dDrop">버리기</button>';
+    b.hidden = false;
+    $("dUse").onclick = function () { S = draft.state; S.meta.rev = BASE; dirty = true; renderAll(); b.hidden = true; };
+    $("dDrop").onclick = function () { lsDel(DRAFT_KEY); b.hidden = true; };
+  }
+  fetch(PING_URL, { cache: "no-store" }).then(function (r) { serverOK = r.ok; }).catch(function () { serverOK = false; })
+    .then(function () { return fetch(DATA_URL, { cache: "no-store" }); })
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function (data) {
+      S = data; BASE = S.meta.rev; renderAll(); if (location.hash) focusHash();
+      var raw = lsGet(DRAFT_KEY);
+      if (raw) { try { var d = JSON.parse(raw); if (JSON.stringify(d.state) !== JSON.stringify(S)) showDraftBanner(d); else lsDel(DRAFT_KEY); } catch (e) { lsDel(DRAFT_KEY); } }
+    })
+    .catch(function (e) { setStatus("dev12_design.json 을 못 읽었습니다 (" + e.message + "). 서버로 열거나 JSON 불러오기를 쓰세요.", "err"); });
+})();
+</script>
+</body>
+</html>

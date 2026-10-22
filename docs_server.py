@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""이 폴더를 LAN 에 띄우고, 설계 페이지(index.html)의 저장 요청을 받아 dev12_design.json 에 쓴다.
+"""이 폴더를 LAN 에 띄우고, 설계 페이지(design.html)의 저장 요청을 받아 dev12_design.json 에 쓴다.
 
 실행: python3 docs_server.py [--port 8099] 후 브라우저로 http://<이 PC 주소>:8099/
 저장할 때마다 이전 판을 design_backups/ 에 남기고, 옛 판 위에서 고친 저장은 거절한다(409).
