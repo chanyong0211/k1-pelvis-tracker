@@ -73,7 +73,7 @@ a{color:var(--acc)}
  <div class="kick">dev12 · K1 rev1 · 2026-10-16 시작</div>
  <h1>K1 골반 명령 추종 하체 정책</h1>
  <div class="auth">설계 판 31 · 과제 14/15 · 마지막 갱신 2026-10-23</div>
- <p class="abs"><b>개요.</b> 상위 층(카메라·깊이)이 골반 명령 6개와 상체 목표 11개를 내면, 하체 정책이 다리 12관절로 그 골반을 따라간다. 자연스러운 걸음은 궤적최적화로 만든 걸음 모음 4,149칸을 정답으로 한 다리 AMP로 배운다. 높이는 0.77 m에서 0.335 m까지 커리큘럼으로 연다.</p>
+ <p class="abs"><b>개요.</b> 상위 층(카메라·깊이)이 골반 명령 6개와 상체 목표 11개를 내면, 하체 정책이 다리 12관절로 그 골반을 따라간다. 자연스러운 걸음은 궤적최적화로 만든 걸음 모음 4,528칸을 정답으로 한 다리 AMP로 배운다. 높이는 0.77 m에서 0.335 m까지 커리큘럼으로 연다.</p>
 
  <div class="fig"><svg viewBox="0 0 1000 330" width="100%" role="img" aria-label="그림 1 dev12 구성">
   <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#93a0b2"/></marker></defs>
@@ -95,7 +95,7 @@ a{color:var(--acc)}
    <a href="#s3"><rect x="410" y="162" width="185" height="64" rx="6" fill="#131a23" stroke="#e2a65a"/><text x="502" y="186" text-anchor="middle" font-weight="700">보상 r1–r27</text><text x="502" y="206" text-anchor="middle" font-size="11" class="m">두 걸음 평균 추종</text></a>
    <a href="#s4"><rect x="610" y="162" width="185" height="64" rx="6" fill="#131a23" stroke="#8fc47c"/><text x="702" y="186" text-anchor="middle" font-weight="700">다리 AMP 판별기</text><text x="702" y="206" text-anchor="middle" font-size="11" class="m">스타일 0.025/스텝</text></a>
    <a href="#s5"><rect x="810" y="162" width="180" height="64" rx="6" fill="#131a23" stroke="#e2a65a"/><text x="900" y="186" text-anchor="middle" font-weight="700">커리큘럼</text><text x="900" y="206" text-anchor="middle" font-size="11" class="m">높이 0.77 → 0.335 m</text></a>
-   <a href="#s4"><rect x="610" y="256" width="185" height="58" rx="6" fill="#1b2b1d" stroke="#8fc47c"/><text x="702" y="279" text-anchor="middle" font-weight="700">걸음 모음 4,149칸</text><text x="702" y="298" text-anchor="middle" font-size="11" class="m">궤적최적화 (Aligator)</text></a>
+   <a href="#s4"><rect x="610" y="256" width="185" height="58" rx="6" fill="#1b2b1d" stroke="#8fc47c"/><text x="702" y="279" text-anchor="middle" font-weight="700">걸음 모음 4,528칸</text><text x="702" y="298" text-anchor="middle" font-size="11" class="m">궤적최적화 (Aligator)</text></a>
    <a href="#s2"><rect x="300" y="256" width="250" height="58" rx="6" fill="#1a2a3b" stroke="#7fb0e0"/><text x="425" y="279" text-anchor="middle" font-weight="700">PPO + 대칭 + 인코더 회귀</text><text x="425" y="298" text-anchor="middle" font-size="11" class="m">critic 126 (특권 정보)</text></a>
   </g>
   <g stroke="#93a0b2" stroke-width="1.2" fill="none" marker-end="url(#ar)"><path d="M702 256V228"/><path d="M425 254V228" stroke-dasharray="3 3"/><path d="M545 254V242H602V114" stroke-dasharray="3 3"/></g>
@@ -106,7 +106,7 @@ a{color:var(--acc)}
   <a href="#s1"><span class="n">1</span><span class="t"><b>명령 공간과 가능 영역</b> <span>낮은 자세 한계, roll·속도 배율</span></span><span class="st"><span class="chip done">정함</span></span></a>
   <a href="#s2"><span class="n">2</span><span class="t"><b>정책 구조</b> <span>명시 추정 인코더 8, 좌우 대칭</span></span><span class="st"><span class="chip done">구현</span></span></a>
   <a href="#s3"><span class="n">3</span><span class="t"><b>보상과 판정 기준</b> <span>두 걸음 창, 서 있기 손익(P1)</span></span><span class="st"><span class="chip wait">결정 대기</span></span></a>
-  <a href="#s4"><span class="n">4</span><span class="t"><b>자연스러운 걸음</b> <span>궤적최적화 걸음 모음, 다리 AMP</span></span><span class="st"><span class="chip risk">AMP 높이 결정</span></span></a>
+  <a href="#s4"><span class="n">4</span><span class="t"><b>자연스러운 걸음</b> <span>궤적최적화 걸음 모음, 다리 AMP</span></span><span class="st"><span class="chip done">0.77 m 추가</span></span></a>
   <a href="#s5"><span class="n">5</span><span class="t"><b>학습 환경</b> <span>무작위화, 커리큘럼</span></span><span class="st"><span class="chip done">구현</span></span></a>
   <a href="#s6"><span class="n">6</span><span class="t"><b>검증과 스모크</b> <span>시험 118, Isaac Lab 버그 3, P2 스모크</span></span><span class="st"><span class="chip done">스모크 끝</span></span></a>
   <a href="#s7"><span class="n">7</span><span class="t"><b>진행과 결정 기록</b> <span>단계 P0–P6, 과제 T1–T15, 결정 D1–D15</span></span><span class="st"><span class="chip todo">14/15</span></span></a>
@@ -222,14 +222,14 @@ a{color:var(--acc)}
   <defs><marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#93a0b2"/></marker></defs>
   <g font-size="12.5">
    <rect x="5" y="25" width="170" height="70" rx="6" fill="#131a23" stroke="#3a4a5e"/><text x="90" y="52" text-anchor="middle" font-weight="700">궤적최적화</text><text x="90" y="72" text-anchor="middle" font-size="11" class="m">Aligator · 뒤꿈치–발끝</text>
-   <rect x="205" y="25" width="170" height="70" rx="6" fill="#1b2b1d" stroke="#8fc47c"/><text x="290" y="52" text-anchor="middle" font-weight="700">걸음 모음 v2</text><text x="290" y="72" text-anchor="middle" font-size="11" class="m">4,149칸 · 4,118 통과</text>
+   <rect x="205" y="25" width="170" height="70" rx="6" fill="#1b2b1d" stroke="#8fc47c"/><text x="290" y="52" text-anchor="middle" font-weight="700">걸음 모음 v2</text><text x="290" y="72" text-anchor="middle" font-size="11" class="m">4,528칸 · 4,497 통과</text>
    <rect x="405" y="25" width="170" height="70" rx="6" fill="#131a23" stroke="#3a4a5e"/><text x="490" y="52" text-anchor="middle" font-weight="700">정렬 주기 표</text><text x="490" y="72" text-anchor="middle" font-size="11" class="m">왼발 뜨는 시점 · 48 프레임</text>
    <rect x="605" y="25" width="170" height="70" rx="6" fill="#131a23" stroke="#3a4a5e"/><text x="690" y="52" text-anchor="middle" font-weight="700">명령별 정답</text><text x="690" y="72" text-anchor="middle" font-size="11" class="m">보간·덧셈 · 미끄럼 거름</text>
    <rect x="805" y="25" width="190" height="70" rx="6" fill="#131a23" stroke="#8fc47c"/><text x="900" y="52" text-anchor="middle" font-weight="700">다리 판별기</text><text x="900" y="72" text-anchor="middle" font-size="11" class="m">33 × 10 프레임 + 명령</text>
   </g>
   <g stroke="#93a0b2" stroke-width="1.4" fill="none" marker-end="url(#ar3)"><path d="M175 60H203"/><path d="M375 60H403"/><path d="M575 60H603"/><path d="M775 60H803"/></g>
  </svg></div>
- <div class="cap"><b>그림 4.</b> 걸음 모음 422 → 3,054 → v2 4,149칸(새 모델 35.71 kg, 딛기 전 발끝 긁기·뒤로 관통 고침). 칸 = 높이 0.02 m · 숙임 5단 × 속도 0.05 m/s · 회전 0.125 rad/s. 한 걸음 0.48 s 고정.</div>
+ <div class="cap"><b>그림 4.</b> 걸음 모음 422 → 3,054 → v2 4,149 → 4,528칸(새 모델 35.71 kg, 딛기 전 발끝 긁기·뒤로 관통 고침, 10-23 0.77 m 줄 379칸). 칸 = 높이 0.02 m · 숙임 5단 × 속도 0.05 m/s · 회전 0.125 rad/s. 한 걸음 0.48 s 고정.</div>
  <div class="vids">
   <div class="vid"><video src="media/z074_p00_fwd050.mp4" controls muted loop playsinline preload="metadata"></video><div>선 자세 앞 0.5 m/s <span>0.74 m · 0°</span></div></div>
   <div class="vid"><video src="media/z058_p30_fwd030.mp4" controls muted loop playsinline preload="metadata"></video><div>쪼그려 앞 0.3 <span>0.58 m · 30°</span></div></div>
@@ -244,7 +244,7 @@ a{color:var(--acc)}
   <tr><td>스타일 보상 · 대상</td><td>0.025/스텝 (dev9 의 1/10), 걷기 명령에서만, 속도 램프 뒤 1.5 s 부터</td></tr>
   <tr><td>판별기</td><td>MLP 1024·512, lr 1e-4, 기울기 벌점 5, 거울판도 학습</td></tr>
  </table></div>
- <div class="note"><b>결정 필요 — AMP 높이.</b> 스모크에서 AMP 가 한 번도 돌지 않았다. 시작 단계 걷기 높이 0.77 m 가 모음 최고 0.74 m 밖이라 정답이 없다(0.745–0.77 m). 권고: 정답을 찾을 때만 높이를 0.74 m 로 눌러 쓰기(3 cm, 모음은 높이에 거의 선형). 다른 안: 모음에 0.76·0.77 m 줄 추가.</div>
+ <div class="note"><b>0.77 m 줄 추가 (10-23).</b> 스모크에서 AMP 가 한 번도 돌지 않았다 — 시작 걷기 높이 0.77 m 가 모음 최고 0.74 m 밖. 0.77 m 줄 379칸을 풀어(평평한 발 대체 0, 판정 379/379) 0.745–0.77 m 에 정답이 생겼다. 남은 빈칸: 앞 0.7 m/s 이상은 섞은 정답의 발 미끄럼이 1.1–1.3 cm/걸음이라 1 cm 기준에 걸려 모든 높이에서 빠진다.</div>
  <div class="cap">원자료 <code>to/</code> (library_v2.py · lib_eval.py) · <code>out/lib_amp_v2</code> 8,236개 · 영상 전체 <code>docs/to_media/</code> 6,053개 · <code>reports/2026-10-22_to_review/</code> · <code>reports/dev12 자연스러운 보행 방법 비교.md</code></div>
 </section>
 
@@ -304,7 +304,7 @@ a{color:var(--acc)}
   <tr><td>보상 크기 (dev2 대비)</td><td>19 항목 중 18 개가 같은 자릿수</td><td><span class="chip done">통과</span></td></tr>
   <tr><td>추종 r1 · r2</td><td class="mono">0.010 → 0.32 · 0.009 → 0.32</td><td><span class="chip done">통과</span></td></tr>
   <tr><td>인코더가 보상보다 먼저</td><td>높이 9 회 · 무게중심 10 · 속도 26 · 무게 66 회에 절반</td><td><span class="chip done">통과</span></td></tr>
-  <tr><td>판별기</td><td>유효 전이 0 — 0.77 m 정답 없음 (4절)</td><td><span class="chip risk">실패</span></td></tr>
+  <tr><td>판별기</td><td>유효 전이 0 — 0.77 m 정답 없음 → 0.77 m 줄 추가로 고침 (4절), 다음 스모크에서 확인</td><td><span class="chip wait">재확인</span></td></tr>
   <tr><td>속도</td><td class="mono">53,800 fps (dev2 187,000)</td><td><span class="chip wait">확인</span></td></tr>
  </table></div>
  <div class="cap">끝난 에피소드의 73 % 는 자세 이탈 종료, 골반 접촉 1 %, 시간 초과 26 %. 원자료 <code>docs/p2_smoke_report.md</code> · <code>logs/k1_pelvis/smoke_01/</code> · 시험 <code>tests/</code> (scripts/run_tests.sh)</div>
@@ -341,12 +341,12 @@ a{color:var(--acc)}
  </table></div>
  <h3>결정 대기</h3>
  <div class="tbl"><table>
-  <tr><td><span class="chip risk">AMP 높이</span></td><td>0.745–0.77 m 정답 — 높이 눌러 쓰기(권고) 또는 모음 확장</td></tr>
+  <tr><td><span class="chip wait">재스모크</span></td><td>0.77 m 줄 추가 뒤 AMP 가 도는지 300 회 다시 (10 분)</td></tr>
   <tr><td><span class="chip wait">P1</span></td><td>느린 명령 서 있기 이득 — 가중치 그대로(권고)</td></tr>
   <tr><td><span class="chip wait">속도</span></td><td>게인 무작위화 끈 30 회 fps 비교 여부</td></tr>
   <tr><td><span class="chip wait">P3</span></td><td>본 학습 15,000 회 (약 7.6 h) 시작</td></tr>
  </table></div>
- <div class="cap">10-16 재설계 · 10-21 AMP 조사·궤적최적화 · 10-22 걸음 모음 v2·계획 검토·T1–T11 · 10-23 T12–T14. 원자료 <code>계획.md</code> §7 · <code>docs/superpowers/plans/2026-10-21-dev12-env-amp.md</code> · 진행 기록 <code>.superpowers/sdd/…/progress.md</code> · 설계 데이터 <code>dev12_design.json</code> (판 31)</div>
+ <div class="cap">10-16 재설계 · 10-21 AMP 조사·궤적최적화 · 10-22 걸음 모음 v2·계획 검토·T1–T11 · 10-23 T12–T14·걸음 모음 0.77 m 줄. 원자료 <code>계획.md</code> §7 · <code>docs/superpowers/plans/2026-10-21-dev12-env-amp.md</code> · 진행 기록 <code>.superpowers/sdd/…/progress.md</code> · 설계 데이터 <code>dev12_design.json</code> (판 31)</div>
 </section>
 
 <footer>dev12 · 저장소 chanyong0211/k1-pelvis-tracker · 이 페이지 하나가 dev12 문서의 전부입니다(옛 페이지는 dev12/trash/docs_pages_20261023/).</footer>
