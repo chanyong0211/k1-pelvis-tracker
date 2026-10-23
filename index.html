@@ -72,7 +72,7 @@ a{color:var(--acc)}
 <div class="page" id="top">
  <div class="kick">dev12 · K1 rev1 · 2026-10-16 시작</div>
  <h1>K1 골반 명령 추종 하체 정책</h1>
- <div class="auth">설계 판 31 · 과제 14/15 · 마지막 갱신 2026-10-23</div>
+ <div class="auth">설계 판 32 · 과제 14/15 · 마지막 갱신 2026-10-23</div>
  <p class="abs"><b>개요.</b> 상위 층(카메라·깊이)이 골반 명령 6개와 상체 목표 11개를 내면, 하체 정책이 다리 12관절로 그 골반을 따라간다. 자연스러운 걸음은 궤적최적화로 만든 걸음 모음 4,528칸을 정답으로 한 다리 AMP로 배운다. 높이는 0.77 m에서 0.335 m까지 커리큘럼으로 연다.</p>
 
  <div class="fig"><svg viewBox="0 0 1000 330" width="100%" role="img" aria-label="그림 1 dev12 구성">
@@ -141,7 +141,7 @@ a{color:var(--acc)}
   <tr><td>높이</td><td class="mono">서기 0.335–0.77 · 걷기 0.42–0.77 m</td><td>3–5 s 마다, 0.2 m/s 로 옮김, 하한은 커리큘럼</td></tr>
   <tr><td>숙임 pitch</td><td class="mono">θ_min(z) … 45° · 뒤 −45°</td><td>30°/s, 뽑을 때 뒤쪽 20 %</td></tr>
   <tr><td>roll</td><td class="mono">서기만 ≤ 10°</td><td>0.67 m 아래는 1.5 × 숙임 여유까지</td></tr>
-  <tr><td>상체 목표 11</td><td class="mono">허리 ±270° · 팔 소프트 한계</td><td>1.8 s 마다, 저역 0.2, 숙임 40° 이상은 팔 앞쪽</td></tr>
+  <tr><td>상체 목표 11</td><td class="mono">허리 ±270° · 팔 소프트 한계</td><td>1.8 → 1.0 s 마다(cu3 2 단계), 저역 0.2, 숙임 40° 이상은 팔 앞쪽</td></tr>
   <tr><td>모드</td><td class="mono">걷기 75 % · 서기 25 %</td><td>걷기의 15 % 는 몸통 기준 이동(허리가 골반 회전을 상쇄)</td></tr>
   <tr><td>지연·갱신</td><td class="mono">0–100 ms · 10–30 Hz</td><td>정책이 보는 명령에만</td></tr>
  </table></div>
@@ -273,10 +273,10 @@ a{color:var(--acc)}
      <rect x="10" y="66" width="450" height="46" rx="6" fill="#131a23" stroke="#7fb0e0"/><text x="22" y="86" font-weight="700">cu2a 서기 높이 하한</text><text x="22" y="103" font-size="11" class="m">0.77 → 0.335 m · 경계 5 cm 판정 통과면 −1 cm</text>
      <rect x="10" y="122" width="450" height="46" rx="6" fill="#131a23" stroke="#8fc47c"/><text x="22" y="142" font-weight="700">cu2b 걷기 높이 하한</text><text x="22" y="159" font-size="11" class="m">0.77 → 0.42 m · 높이·속도·넘어짐 판정</text>
      <rect x="10" y="178" width="450" height="46" rx="6" fill="#131a23" stroke="#3a4a5e"/><text x="22" y="198" font-weight="700">cu2c 숙임 여유 · roll</text><text x="22" y="215" font-size="11" class="m">+2° · roll 상한 +1° (최대 10°)</text>
-     <rect x="10" y="234" width="450" height="46" rx="6" fill="#1a2a3b" stroke="#7fb0e0"/><text x="22" y="254" font-weight="700">cu3 상체 수준 0 → 1</text><text x="22" y="271" font-size="11" class="m">배율 ≥ 0.9 · 걷기 하한이 내려간 뒤 · ±0.01, 최소 5,000 회</text>
+     <rect x="10" y="234" width="450" height="46" rx="6" fill="#1a2a3b" stroke="#7fb0e0"/><text x="22" y="254" font-weight="700">cu3 상체 3 단계 · 범위 → 속도 → 손 하중</text><text x="22" y="271" font-size="11" class="m">목표 1.8 → 1.0 s 마다 · 허리 2 → 4 rad/s · 0 → 5 kg · 단계당 최소 2,500 회</text>
     </g>
    </svg>
-   <div class="cap"><b>그림 5.</b> 커리큘럼. 판정은 50 회마다, 넘어짐 &gt; 20 % 면 하한을 되돌린다. 이어학습 때 상태를 체크포인트에서 되살린다.</div>
+   <div class="cap"><b>그림 5.</b> 커리큘럼. 판정은 50 회마다, 넘어짐 &gt; 20 % 면 하한을 되돌린다. cu3 은 단계 안 진도 ±0.02, 진도 1 이면 다음 단계(되돌아가지 않음). 이어학습 때 상태를 체크포인트에서 되살린다.</div>
   </div>
  </div>
  <div class="cap">원자료 <code>source/k1_pelvis/tasks/env_cfg.py</code> · <code>tasks/mdp/{events,curriculum,commands}.py</code> · 학습 <code>scripts/train.py</code></div>
@@ -338,6 +338,7 @@ a{color:var(--acc)}
   <tr><td class="mono">D11·D13·D14</td><td>걷기 숙임 상한, 뒤로 기울이기 −45°, 숙임 하한 = 소프트 0.98 실측</td></tr>
   <tr><td class="mono">D12</td><td>허리 ±270°, 걷기 15 % 몸통 기준 이동</td></tr>
   <tr><td class="mono">E1</td><td>인코더 = 명시 추정 8만</td></tr>
+  <tr><td class="mono">10-23</td><td>상체 커리큘럼 3 단계(범위 → 속도: 어깨 목표 p90 2.7 → 5.2 rad/s → 손 하중), 걸음 모음 0.77 m 줄 379칸</td></tr>
  </table></div>
  <h3>결정 대기</h3>
  <div class="tbl"><table>
@@ -345,7 +346,7 @@ a{color:var(--acc)}
   <tr><td><span class="chip wait">속도</span></td><td>게인 무작위화 끈 30 회 fps 비교 여부</td></tr>
   <tr><td><span class="chip wait">P3</span></td><td>본 학습 15,000 회 (약 10 h) 시작</td></tr>
  </table></div>
- <div class="cap">10-16 재설계 · 10-21 AMP 조사·궤적최적화 · 10-22 걸음 모음 v2·계획 검토·T1–T11 · 10-23 T12–T14·걸음 모음 0.77 m 줄. 원자료 <code>계획.md</code> §7 · <code>docs/superpowers/plans/2026-10-21-dev12-env-amp.md</code> · 진행 기록 <code>.superpowers/sdd/…/progress.md</code> · 설계 데이터 <code>dev12_design.json</code> (판 31)</div>
+ <div class="cap">10-16 재설계 · 10-21 AMP 조사·궤적최적화 · 10-22 걸음 모음 v2·계획 검토·T1–T11 · 10-23 T12–T14·걸음 모음 0.77 m 줄. 원자료 <code>계획.md</code> §7 · <code>docs/superpowers/plans/2026-10-21-dev12-env-amp.md</code> · 진행 기록 <code>.superpowers/sdd/…/progress.md</code> · 설계 데이터 <code>dev12_design.json</code> (판 32)</div>
 </section>
 
 <footer>dev12 · 저장소 chanyong0211/k1-pelvis-tracker · 이 페이지 하나가 dev12 문서의 전부입니다(옛 페이지는 dev12/trash/docs_pages_20261023/).</footer>
