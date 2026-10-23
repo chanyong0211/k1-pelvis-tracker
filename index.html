@@ -1,584 +1,353 @@
 <!doctype html>
-<html lang="ko">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>dev12 학습 환경 계획</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>K1 골반 명령 추종 dev12</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* 색·글꼴 토큰은 설계 페이지(design.html)와 같다 */
-:root {
-  color-scheme: light;
-  --bg: #f7f6f3; --surface: #fdfdfc; --surface-2: #efeee9; --border: #dedcd5; --border-2: #c9c7bf;
-  --text: #121211; --text-2: #4d4c48; --text-3: #7a7973;
-  --accent: #2a78d6; --accent-soft: #e5effb;
-  --warn: #9a5600; --warn-soft: #fbf0de;
-  --bad: #b3261e; --bad-soft: #fbe5e3;
-  --good: #1b7a4b; --good-soft: #e3f3ea;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-    --bg: #121211; --surface: #1a1a19; --surface-2: #242422; --border: #34332f; --border-2: #4a4944;
-    --text: #f0efec; --text-2: #c6c5bb; --text-3: #929087;
-    --accent: #5a9cec; --accent-soft: #1c2a3c;
-    --warn: #e0a24a; --warn-soft: #33281a;
-    --bad: #f08a80; --bad-soft: #3a1d1a;
-    --good: #5cc28f; --good-soft: #17291f;
-  }
-}
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --bg: #121211; --surface: #1a1a19; --surface-2: #242422; --border: #34332f; --border-2: #4a4944;
-  --text: #f0efec; --text-2: #c6c5bb; --text-3: #929087;
-  --accent: #5a9cec; --accent-soft: #1c2a3c;
-  --warn: #e0a24a; --warn-soft: #33281a;
-  --bad: #f08a80; --bad-soft: #3a1d1a;
-  --good: #5cc28f; --good-soft: #17291f;
-}
-* { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
-body { margin: 0; background: var(--bg); color: var(--text);
-  font: 15px/1.6 "IBM Plex Sans KR", system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
-a { color: var(--accent); }
-code, .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12.5px; }
-[id] { scroll-margin-top: 64px; }
-.topbar { position: sticky; top: 0; z-index: 20; background: var(--surface); border-bottom: 1px solid var(--border); }
-.topbar .in { max-width: 1240px; margin: 0 auto; padding: 8px 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
-.topbar b { font-size: 15px; }
-.topbar nav { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 13.5px; }
-.topbar nav a { color: var(--text-2); text-decoration: none; }
-.topbar nav a:hover { color: var(--accent); }
-.status { font-size: 13px; color: var(--text-2); flex: 1 1 200px; }
-.status.err { color: var(--bad); }
-.btn { border: 1px solid var(--border-2); background: var(--surface); border-radius: 8px; padding: 5px 12px; font-size: 14px; color: var(--text); text-decoration: none; }
-.btn:hover { border-color: var(--accent); }
-main { max-width: 1240px; margin: 0 auto; padding: 24px 16px 96px; }
-h1 { font-size: 26px; margin: 0 0 4px; }
-h2 { font-size: 20px; margin: 0 0 4px; }
-h3 { font-size: 15.5px; margin: 0; }
-h4 { font-size: 14px; margin: 18px 0 6px; }
-.sub { color: var(--text-2); font-size: 15.5px; margin: 0; }
-.next { margin: 10px 0 0; padding: 8px 14px; border-radius: 10px; background: var(--accent-soft); font-size: 14px; }
-.next b { margin-right: 6px; }
-.next ol { margin: 4px 0 0; padding-left: 20px; }
-.meta { font-size: 12.5px; color: var(--text-3); }
-section { margin-top: 34px; }
-.hint { font-size: 13.5px; color: var(--text-2); margin: 2px 0 12px; }
-.banner { border-radius: 10px; padding: 10px 14px; background: var(--warn-soft); color: var(--text); margin: 14px 0; font-size: 14px; }
-.banner[hidden] { display: none; }
-.banner ul { margin: 4px 0 0; padding-left: 20px; }
+/* 한 칼럼 논문형: 머리말 · 개요 · 그림 1 · 목차 → 1–7 절(그림 하나 + 표 하나) */
+:root{color-scheme:dark;--bg:#0d1218;--paper:#131a23;--panel:#18212c;--ink:#e3e8ef;--soft:#cdd5df;--muted:#93a0b2;--line:#2a3543;--line2:#3a4a5e;
+--acc:#7fb0e0;--acc-bg:#1a2a3b;--green:#8fc47c;--green-bg:#1b2b1d;--warm:#e2a65a;--warm-bg:#2e2416;--red:#ee8a84;--red-bg:#3a1f22;
+--serif:"Noto Serif KR",Georgia,serif;--sans:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,monospace}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:16px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6}
+.wrap{max-width:1040px;margin:0 auto;padding-block:36px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:22px}
+.page{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:34px clamp(18px,4vw,40px)}
+.kick{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+h1{font-family:var(--serif);font-size:clamp(23px,3vw,29px);margin:6px 0 4px;letter-spacing:-.01em;text-wrap:balance}
+h2{font-family:var(--serif);font-size:21px;margin:0;text-wrap:balance}
+h3{font-family:var(--serif);font-size:15.5px;margin:22px 0 8px;color:var(--soft)}
+.sec-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.sec-head .num{font-family:var(--mono);color:var(--acc);font-size:15px}
+.lede{color:var(--soft);max-width:72ch;margin:4px 0 14px}
+.auth{color:var(--muted);font-size:13px;margin-bottom:18px}
+.abs{border-left:2px solid var(--acc);padding:2px 0 2px 14px;max-width:72ch;margin:0 0 22px;color:var(--soft)}
+.abs b{font-family:var(--serif);color:var(--ink)}
+.cap{font-size:13px;color:var(--muted);margin:8px 0 4px;max-width:80ch}
+.cap b{color:var(--ink);font-family:var(--serif)}
+.toc{display:grid;grid-template-columns:28px minmax(0,1fr) auto;border-top:1px solid var(--line);margin-top:18px}
+.toc a{display:contents;color:inherit;text-decoration:none}
+.toc a>*{padding:11px 0;border-bottom:1px solid var(--line)}
+.toc a:hover>*,.toc a:focus-visible>*{background:var(--panel)}
+.toc .n{font-family:var(--mono);color:var(--acc);padding-left:4px}
+.toc .t b{font-family:var(--serif)}
+.toc .t span{color:var(--muted)}
+.toc .st{display:flex;align-items:center;justify-content:flex-end}
+.chip{display:inline-block;font-size:12px;padding:2px 9px;border-radius:99px;white-space:nowrap;align-self:center;margin-right:4px;font-weight:500}
+.done{background:var(--green-bg);color:var(--green)}.wait{background:var(--warm-bg);color:var(--warm)}.todo{background:var(--panel);color:var(--muted);border:1px solid var(--line)}.risk{background:var(--red-bg);color:var(--red)}
+.tbl{overflow-x:auto;margin:6px 0}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-weight:500;color:var(--muted);font-size:12px;letter-spacing:.04em;padding:6px 12px 6px 0;border-bottom:1px solid var(--line2);white-space:nowrap}
+td{padding:7px 12px 7px 0;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:13px;white-space:nowrap}
+.mono,code{font-family:var(--mono);font-size:13px}
+code{background:var(--panel);padding:0 5px;border-radius:3px;color:var(--soft)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.vids{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:8px}
+.vid{border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--panel)}
+.vid video{display:block;width:100%;aspect-ratio:16/9;background:#000;max-width:100%}
+.vid div{padding:6px 10px;font-size:13px}
+.vid div span{color:var(--muted);font-family:var(--mono);font-size:12px}
+.note{border:1px solid var(--line2);border-radius:6px;padding:10px 14px;margin-top:12px;background:var(--panel);max-width:80ch}
+.note b{color:var(--warm)}
+.strip{display:grid;gap:4px}
+.strip .c{border-radius:4px;padding:7px 0;text-align:center;font-family:var(--mono);font-size:12px}
+.c.d{background:var(--green-bg);color:var(--green)}.c.n{background:var(--green);color:var(--paper);font-weight:500}.c.w{background:var(--warm-bg);color:var(--warm)}.c.t{background:var(--panel);color:var(--muted);border:1px solid var(--line)}
+svg{display:block;max-width:100%;height:auto}
+.fig{overflow-x:auto}
+@media (max-width:720px){.fig svg{min-width:700px;max-width:none}}
+svg text{font-family:var(--sans);fill:var(--ink)}
+svg .m{fill:var(--muted)} svg .lab{fill:var(--muted);font-weight:700;letter-spacing:.06em}
+svg a rect{transition:stroke-width .15s} svg a:hover rect,svg a:focus rect{stroke-width:2.4}
+.top{font-family:var(--mono);font-size:12px;color:var(--muted);text-decoration:none;float:right}
+.top:hover{color:var(--acc)}
+footer{color:var(--muted);font-size:12.5px;font-family:var(--mono);line-height:1.7}
+a{color:var(--acc)}
+@media (max-width:720px){.grid2{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style></head>
+<body><div class="wrap">
 
-/* ---------- 요약 타일 ---------- */
-.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; margin-top: 18px; }
-.tile { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; text-decoration: none; color: inherit; display: block; }
-a.tile:hover { border-color: var(--accent); }
-.tile .k { font-size: 12.5px; color: var(--text-3); }
-.tile .v { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.25; }
-.tile .f { font-size: 12.5px; color: var(--text-2); }
+<!-- ─────────────── 대문 ─────────────── -->
+<div class="page" id="top">
+ <div class="kick">dev12 · K1 rev1 · 2026-10-16 시작</div>
+ <h1>K1 골반 명령 추종 하체 정책</h1>
+ <div class="auth">설계 판 31 · 과제 14/15 · 마지막 갱신 2026-10-23</div>
+ <p class="abs"><b>개요.</b> 상위 층(카메라·깊이)이 골반 명령 6개와 상체 목표 11개를 내면, 하체 정책이 다리 12관절로 그 골반을 따라간다. 자연스러운 걸음은 궤적최적화로 만든 걸음 모음 4,149칸을 정답으로 한 다리 AMP로 배운다. 높이는 0.77 m에서 0.335 m까지 커리큘럼으로 연다.</p>
 
-/* ---------- 상태 표시: 색 + 아이콘 + 글자 ---------- */
-.pill { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 500; padding: 1px 8px; border-radius: 99px; background: var(--surface-2); color: var(--text-2); white-space: nowrap; }
-.pill.good { background: var(--good-soft); color: var(--good); }
-.pill.warn { background: var(--warn-soft); color: var(--warn); }
-.pill.bad { background: var(--bad-soft); color: var(--bad); }
-.pill.now { background: var(--accent-soft); color: var(--accent); }
+ <div class="fig"><svg viewBox="0 0 1000 330" width="100%" role="img" aria-label="그림 1 dev12 구성">
+  <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#93a0b2"/></marker></defs>
+  <text x="10" y="18" font-size="11.5" class="lab">실기에서 · 배포</text>
+  <g font-size="12.5">
+   <rect x="10" y="30" width="150" height="70" rx="6" fill="#18212c" stroke="#3a4a5e" stroke-dasharray="4 3"/><text x="85" y="58" text-anchor="middle" font-weight="700">상위 층</text><text x="85" y="78" text-anchor="middle" class="m" font-size="11.5">카메라·깊이 (다음 단계)</text>
+   <a href="#s1"><rect x="200" y="30" width="170" height="70" rx="6" fill="#131a23" stroke="#e2a65a"/><text x="285" y="54" text-anchor="middle" font-weight="700">명령</text><text x="285" y="72" text-anchor="middle" font-size="11.5">골반 vx·vy·ωz·높이·pitch·roll</text><text x="285" y="88" text-anchor="middle" font-size="11.5">+ 상체 목표 11</text></a>
+   <a href="#s2"><rect x="410" y="20" width="250" height="90" rx="6" fill="#1a2a3b" stroke="#7fb0e0" stroke-width="1.6"/><text x="535" y="42" text-anchor="middle" font-weight="700">하체 정책</text>
+   <rect x="425" y="52" width="105" height="46" rx="4" fill="#131a23" stroke="#3a4a5e"/><text x="477" y="70" text-anchor="middle" font-size="11.5">인코더</text><text x="477" y="88" text-anchor="middle" font-size="11" class="m">이력 405 → 추정 8</text>
+   <rect x="540" y="52" width="105" height="46" rx="4" fill="#131a23" stroke="#3a4a5e"/><text x="592" y="70" text-anchor="middle" font-size="11.5">actor</text><text x="592" y="88" text-anchor="middle" font-size="11" class="m">100 → 다리 12</text></a>
+   <a href="#s5"><rect x="700" y="30" width="130" height="70" rx="6" fill="#131a23" stroke="#3a4a5e"/><text x="765" y="58" text-anchor="middle" font-weight="700">PD·모터</text><text x="765" y="78" text-anchor="middle" font-size="11" class="m">QC080 72.6 N·m</text></a>
+   <a href="#s6"><rect x="860" y="30" width="130" height="70" rx="6" fill="#131a23" stroke="#3a4a5e"/><text x="925" y="58" text-anchor="middle" font-weight="700">K1</text><text x="925" y="78" text-anchor="middle" font-size="11" class="m">35.7 kg · 23 관절</text></a>
+  </g>
+  <g stroke="#93a0b2" stroke-width="1.4" fill="none" marker-end="url(#ar)"><path d="M160 65H198"/><path d="M370 65H408"/><path d="M660 65H698"/><path d="M830 65H858"/></g>
+  <text x="10" y="150" font-size="11.5" class="lab">시뮬에서 · 학습</text>
+  <g font-size="12">
+   <a href="#s1"><rect x="10" y="162" width="185" height="64" rx="6" fill="#131a23" stroke="#e2a65a"/><text x="102" y="186" text-anchor="middle" font-weight="700">명령 생성 · 가능 영역</text><text x="102" y="206" text-anchor="middle" font-size="11" class="m">높이–숙임 지도 · 걷기 75 %</text></a>
+   <a href="#s5"><rect x="210" y="162" width="185" height="64" rx="6" fill="#131a23" stroke="#e2a65a"/><text x="302" y="186" text-anchor="middle" font-weight="700">무작위화</text><text x="302" y="206" text-anchor="middle" font-size="11" class="m">마찰·게인·손 하중 0–5 kg·지연</text></a>
+   <a href="#s3"><rect x="410" y="162" width="185" height="64" rx="6" fill="#131a23" stroke="#e2a65a"/><text x="502" y="186" text-anchor="middle" font-weight="700">보상 r1–r27</text><text x="502" y="206" text-anchor="middle" font-size="11" class="m">두 걸음 평균 추종</text></a>
+   <a href="#s4"><rect x="610" y="162" width="185" height="64" rx="6" fill="#131a23" stroke="#8fc47c"/><text x="702" y="186" text-anchor="middle" font-weight="700">다리 AMP 판별기</text><text x="702" y="206" text-anchor="middle" font-size="11" class="m">스타일 0.025/스텝</text></a>
+   <a href="#s5"><rect x="810" y="162" width="180" height="64" rx="6" fill="#131a23" stroke="#e2a65a"/><text x="900" y="186" text-anchor="middle" font-weight="700">커리큘럼</text><text x="900" y="206" text-anchor="middle" font-size="11" class="m">높이 0.77 → 0.335 m</text></a>
+   <a href="#s4"><rect x="610" y="256" width="185" height="58" rx="6" fill="#1b2b1d" stroke="#8fc47c"/><text x="702" y="279" text-anchor="middle" font-weight="700">걸음 모음 4,149칸</text><text x="702" y="298" text-anchor="middle" font-size="11" class="m">궤적최적화 (Aligator)</text></a>
+   <a href="#s2"><rect x="300" y="256" width="250" height="58" rx="6" fill="#1a2a3b" stroke="#7fb0e0"/><text x="425" y="279" text-anchor="middle" font-weight="700">PPO + 대칭 + 인코더 회귀</text><text x="425" y="298" text-anchor="middle" font-size="11" class="m">critic 126 (특권 정보)</text></a>
+  </g>
+  <g stroke="#93a0b2" stroke-width="1.2" fill="none" marker-end="url(#ar)"><path d="M702 256V228"/><path d="M425 254V228" stroke-dasharray="3 3"/><path d="M545 254V242H602V114" stroke-dasharray="3 3"/></g>
+ </svg></div>
+ <div class="cap"><b>그림 1.</b> dev12 구성. 위는 실기에서 정책이 하는 일, 아래는 시뮬 학습에 들어가는 것. 블록을 누르면 그 절로 갑니다.</div>
 
-/* ---------- 칩: 설계 항목·과제·결정 ---------- */
-.chips { display: inline-flex; flex-wrap: wrap; gap: 4px; vertical-align: middle; }
-.ref, .tk, .dc { display: inline-block; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11.5px; line-height: 1.5; padding: 0 6px; border-radius: 5px; text-decoration: none; border: 1px solid var(--border); background: var(--surface); color: var(--text-2); white-space: nowrap; }
-.ref:hover, .tk:hover, .dc:hover { border-color: var(--accent); color: var(--accent); }
-.ref.off { text-decoration: line-through; }
-.ref.missing { border-color: var(--bad); color: var(--bad); }
-.tk { font-weight: 500; color: var(--text); }
-.tk.s-done { border-color: var(--good); color: var(--good); }
-.tk.s-now { border-color: var(--accent); color: var(--accent); }
-.dc { border-style: dashed; }
-.dc.wait { border-color: var(--warn); color: var(--warn); }
+ <div class="toc">
+  <a href="#s1"><span class="n">1</span><span class="t"><b>명령 공간과 가능 영역</b> <span>낮은 자세 한계, roll·속도 배율</span></span><span class="st"><span class="chip done">정함</span></span></a>
+  <a href="#s2"><span class="n">2</span><span class="t"><b>정책 구조</b> <span>명시 추정 인코더 8, 좌우 대칭</span></span><span class="st"><span class="chip done">구현</span></span></a>
+  <a href="#s3"><span class="n">3</span><span class="t"><b>보상과 판정 기준</b> <span>두 걸음 창, 서 있기 손익(P1)</span></span><span class="st"><span class="chip wait">결정 대기</span></span></a>
+  <a href="#s4"><span class="n">4</span><span class="t"><b>자연스러운 걸음</b> <span>궤적최적화 걸음 모음, 다리 AMP</span></span><span class="st"><span class="chip risk">AMP 높이 결정</span></span></a>
+  <a href="#s5"><span class="n">5</span><span class="t"><b>학습 환경</b> <span>무작위화, 커리큘럼</span></span><span class="st"><span class="chip done">구현</span></span></a>
+  <a href="#s6"><span class="n">6</span><span class="t"><b>검증과 스모크</b> <span>시험 118, Isaac Lab 버그 3, P2 스모크</span></span><span class="st"><span class="chip done">스모크 끝</span></span></a>
+  <a href="#s7"><span class="n">7</span><span class="t"><b>진행과 결정 기록</b> <span>단계 P0–P6, 과제 T1–T15, 결정 D1–D15</span></span><span class="st"><span class="chip todo">14/15</span></span></a>
+ </div>
+</div>
 
-/* ---------- 단계 ---------- */
-.steps { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; counter-reset: st; }
-.step { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px 10px; font-size: 13px; }
-.step.now { border: 2px solid var(--accent); padding: 7px 9px 9px; }
-.step .nm { font-weight: 700; font-size: 14px; display: block; margin: 2px 0 2px; }
-.step .gate { color: var(--text-2); font-size: 12.5px; }
-.step .gate b { color: var(--text-3); font-weight: 500; }
-.step .prog { margin-top: 6px; }
-@media (max-width: 1080px) { .steps { grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); } }
+<!-- ─────────────── 1 ─────────────── -->
+<section class="page" id="s1">
+ <a class="top" href="#top">↑ 대문</a>
+ <div class="sec-head"><span class="num">1</span><h2>명령 공간과 가능 영역</h2></div>
+ <p class="lede">정책은 골반 속도와 자세만 받는다. 위치 고리는 상위 층 몫이다. 명령은 K1 이 실제로 버틸 수 있는 영역 안에서만 뽑는다.</p>
+ <svg viewBox="0 0 700 350" width="100%" role="img" aria-label="그림 2 높이–숙임 지도">
+  <g stroke="#2a3543" stroke-width="1">
+   <path d="M40 19.4H666M40 66.2H666M40 113.1H666M40 206.9H666M40 253.8H666M40 300.6H666"/><path d="M40 160H666" stroke="#3a4a5e"/>
+   <path d="M46.9 10V310M164 10V310M274.2 10V310M412 10V310M549.8 10V310M646.2 10V310"/>
+  </g>
+  <path fill="#7fb0e0" fill-opacity=".14" stroke="#7fb0e0" stroke-width="1.2" d="M46.9,19.4 L646.2,19.4 L646.2,245.9 L639.3,253.8 L632.4,269.4 L625.6,285.0 L618.7,292.8 L611.8,300.6 L549.8,300.6 L542.9,280.5 L536.0,260.4 L529.1,240.4 L522.2,220.3 L515.3,200.2 L508.4,180.1 L501.6,160.0 L460.2,160.0 L453.3,154.8 L439.6,144.4 L425.8,134.0 L412.0,124.8 L398.2,117.0 L384.4,110.0 L370.7,103.7 L356.9,97.5 L343.1,91.2 L329.3,85.0 L315.6,79.6 L301.8,75.2 L288.0,70.7 L274.2,66.2 L260.4,61.8 L246.7,57.3 L232.9,52.9 L219.1,49.2 L205.3,46.4 L191.6,43.5 L177.8,40.7 L164.0,37.8 L150.2,35.0 L136.4,32.9 L122.7,30.8 L108.9,28.8 L95.1,26.7 L81.3,24.6 L67.6,22.5 L53.8,20.4 Z"/>
+  <path fill="#8fc47c" fill-opacity=".22" stroke="#8fc47c" stroke-width="1.4" d="M164.0,25.6 L219.1,25.6 L274.2,19.4 L384.4,35.0 L494.7,81.9 L604.9,97.5 L646.2,97.5 L646.2,245.9 L639.3,253.8 L577.3,253.8 L570.4,245.9 L536.0,206.9 L501.6,167.8 L494.7,160.0 L460.2,160.0 L453.3,154.8 L439.6,144.4 L425.8,134.0 L412.0,124.8 L398.2,117.0 L384.4,110.0 L370.7,103.7 L356.9,97.5 L343.1,91.2 L329.3,85.0 L315.6,79.6 L301.8,75.2 L288.0,70.7 L274.2,66.2 L260.4,61.8 L246.7,57.3 L232.9,52.9 L219.1,49.2 L205.3,46.4 L191.6,43.5 L177.8,40.7 L164.0,37.8 Z"/>
+  <g font-size="11.5" class="m">
+   <text x="34" y="23" text-anchor="end">45°</text><text x="34" y="70" text-anchor="end">30°</text><text x="34" y="117" text-anchor="end">15°</text><text x="34" y="164" text-anchor="end">0°</text><text x="34" y="211" text-anchor="end">−15°</text><text x="34" y="258" text-anchor="end">−30°</text><text x="34" y="305" text-anchor="end">−45°</text>
+   <text x="46.9" y="328" text-anchor="middle">0.335</text><text x="164" y="328" text-anchor="middle">0.42</text><text x="274.2" y="328" text-anchor="middle">0.50</text><text x="412" y="328" text-anchor="middle">0.60</text><text x="549.8" y="328" text-anchor="middle">0.70</text><text x="646.2" y="328" text-anchor="middle">0.77</text>
+   <text x="350" y="346" text-anchor="middle">골반 높이 [m]</text>
+  </g>
+  <text x="12" y="165" font-size="11.5" class="m" transform="rotate(-90 12 165)" text-anchor="middle">숙임 pitch (앞 +)</text>
+  <g font-size="12.5" font-weight="700"><text x="90" y="60" fill="#7fb0e0">서기</text><text x="300" y="52" fill="#8fc47c">걷기</text></g>
+  <g font-size="11" class="m"><text x="196" y="80">숙임 하한 θ_min(z)</text><text x="560" y="140">뒤로 기울이기</text></g>
+ </svg>
+ <div class="cap"><b>그림 2.</b> 높이–숙임 지도. 파랑 = 서기 영역, 초록 = 걷기 영역. 발목 pitch ±45° 때문에 낮을수록 더 숙여야 서고(0.635 m 아래 θ_min), 걷기는 걸음 모음 숙임 상한(0.74 m 20° … 0.50 m 45°)까지. 소프트 관절 한계 0.98 로 잰 새 모델 값.</div>
+ <div class="tbl"><table>
+  <tr><th>명령</th><th>범위</th><th>규칙</th></tr>
+  <tr><td>앞뒤 vx · 옆 vy · 회전 ωz</td><td class="mono">±0.8·s · ±0.4·s · ±1.0·s</td><td>s(z) = 0.77 m 1.0 → 0.42 m 0.375, 10 s 마다, |v| &lt; 0.1 이면 0, 0.5 s 램프</td></tr>
+  <tr><td>높이</td><td class="mono">서기 0.335–0.77 · 걷기 0.42–0.77 m</td><td>3–5 s 마다, 0.2 m/s 로 옮김, 하한은 커리큘럼</td></tr>
+  <tr><td>숙임 pitch</td><td class="mono">θ_min(z) … 45° · 뒤 −45°</td><td>30°/s, 뽑을 때 뒤쪽 20 %</td></tr>
+  <tr><td>roll</td><td class="mono">서기만 ≤ 10°</td><td>0.67 m 아래는 1.5 × 숙임 여유까지</td></tr>
+  <tr><td>상체 목표 11</td><td class="mono">허리 ±270° · 팔 소프트 한계</td><td>1.8 s 마다, 저역 0.2, 숙임 40° 이상은 팔 앞쪽</td></tr>
+  <tr><td>모드</td><td class="mono">걷기 75 % · 서기 25 %</td><td>걷기의 15 % 는 몸통 기준 이동(허리가 골반 회전을 상쇄)</td></tr>
+  <tr><td>지연·갱신</td><td class="mono">0–100 ms · 10–30 Hz</td><td>정책이 보는 명령에만</td></tr>
+ </table></div>
+ <div class="cap">원자료 <code>source/k1_pelvis/feasibility.py</code> · <code>scripts/lowest_posture_main_soft098_20261022.txt</code> · 설계 표 cm1–cm16</div>
+</section>
 
-/* ---------- 진행 막대 ---------- */
-.bar { height: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; margin: 3px 0 2px; }
-.bar i { display: block; height: 100%; background: var(--good); border-radius: 3px; }
-.barlabel { font-size: 12px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+<!-- ─────────────── 2 ─────────────── -->
+<section class="page" id="s2">
+ <a class="top" href="#top">↑ 대문</a>
+ <div class="sec-head"><span class="num">2</span><h2>정책 구조</h2></div>
+ <p class="lede">인코더는 잠재 변수 없이 몸 상태 8개를 직접 추정한다. actor 는 그 추정과 관측을 보고, critic 은 참값을 본다.</p>
+ <div class="fig"><svg viewBox="0 0 1000 250" width="100%" role="img" aria-label="그림 3 정책 텐서 흐름">
+  <defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#93a0b2"/></marker></defs>
+  <g font-size="12.5">
+   <rect x="10" y="20" width="190" height="62" rx="6" fill="#131a23" stroke="#3a4a5e"/><text x="105" y="44" text-anchor="middle" font-weight="700">관측 이력 405</text><text x="105" y="64" text-anchor="middle" font-size="11" class="m">5 스텝 × 81 (잡음 있음)</text>
+   <rect x="250" y="20" width="160" height="62" rx="6" fill="#1a2a3b" stroke="#7fb0e0"/><text x="330" y="44" text-anchor="middle" font-weight="700">인코더</text><text x="330" y="64" text-anchor="middle" font-size="11" class="m">MLP 128·64 · 별도 Adam</text>
+   <rect x="460" y="20" width="200" height="62" rx="6" fill="#131a23" stroke="#7fb0e0"/><text x="560" y="44" text-anchor="middle" font-weight="700">추정 8</text><text x="560" y="64" text-anchor="middle" font-size="11" class="m">속도 3 · 높이 1 · 무게중심 3 · 무게 1</text>
+   <rect x="10" y="118" width="190" height="62" rx="6" fill="#131a23" stroke="#3a4a5e"/><text x="105" y="142" text-anchor="middle" font-weight="700">관측 92</text><text x="105" y="162" text-anchor="middle" font-size="11" class="m">명령 6 · 상체 22 · 고유감각 64</text>
+   <rect x="460" y="118" width="200" height="62" rx="6" fill="#1a2a3b" stroke="#7fb0e0" stroke-width="1.6"/><text x="560" y="142" text-anchor="middle" font-weight="700">actor 100 → 12</text><text x="560" y="162" text-anchor="middle" font-size="11" class="m">MLP 512·256·128 · 추정은 detach</text>
+   <rect x="720" y="118" width="130" height="62" rx="6" fill="#131a23" stroke="#3a4a5e"/><text x="785" y="142" text-anchor="middle" font-weight="700">다리 목표</text><text x="785" y="162" text-anchor="middle" font-size="11" class="m">기본 + 0.25 × 행동</text>
+   <rect x="10" y="196" width="190" height="46" rx="6" fill="#131a23" stroke="#e2a65a"/><text x="105" y="224" text-anchor="middle" font-weight="700">critic 126</text>
+   <rect x="250" y="196" width="410" height="46" rx="6" fill="#18212c" stroke="#3a4a5e" stroke-dasharray="4 3"/><text x="455" y="216" text-anchor="middle" font-size="11.5">critic[92:100] = 추정 8 의 정답 · 두 걸음 창 7 · 마찰·질량·손 힘·지연</text><text x="455" y="233" text-anchor="middle" font-size="11" class="m">회귀 손실 + 거울 일관성 → 인코더 · 대칭 손실 0.5 → actor</text>
+  </g>
+  <g stroke="#93a0b2" stroke-width="1.4" fill="none" marker-end="url(#ar2)"><path d="M200 51H248"/><path d="M410 51H458"/><path d="M560 82V116"/><path d="M200 149H458"/><path d="M660 149H718"/><path d="M200 219H248" stroke-dasharray="3 3"/></g>
+ </svg></div>
+ <div class="cap"><b>그림 3.</b> 텐서 흐름. 추정 code 는 rollout 때 한 번 계산해 저장하고 actor 갱신에도 그것을 쓴다 → 첫 미니배치 확률비 = 1, PPO 기울기가 인코더로 안 간다.</div>
+ <div class="tbl"><table>
+  <tr><th>결정</th><th>내용</th><th>근거</th></tr>
+  <tr><td class="mono">E1</td><td>β-VAE 잠재 16·디코더·KL 을 빼고 명시 추정 8 만</td><td>dev2 잠재 σ 1.0000 (죽어 있음), actor 잠재 열 노름 0.04</td></tr>
+  <tr><td class="mono">S5</td><td>거울을 인코더·판별기에도</td><td>OpenHomie him_ppo</td></tr>
+  <tr><td class="mono">sy1</td><td>좌우 대칭 손실 ‖π(o) − M π(M o)‖² × 0.5</td><td>HugWBC</td></tr>
+  <tr><td class="mono">S6</td><td>critic 에 두 걸음 창 7칸 (actor 엔 없음)</td><td>이동 추종 보상이 창 평균이라</td></tr>
+ </table></div>
+ <div class="cap">원자료 <code>reports/dev12 고유감각 추정기 대안.md</code> · <code>source/k1_pelvis/rl/</code> · 텐서 배치는 계획서 §텐서 배치</div>
+</section>
 
-/* ---------- 학습 흐름 ---------- */
-.lane { background: var(--surface-2); border-radius: 14px; padding: 12px 14px 14px; }
-.lane + .lane, .lanes2 { margin-top: 12px; }
-.lane-h { font-size: 13.5px; color: var(--text-2); margin: 0 0 10px; }
-.lane-h b { color: var(--text); font-size: 15px; margin-right: 6px; }
-.cycle { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px 30px; }
-.node { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 9px 12px 10px; }
-.node .hd { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
-.node .no { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 12px; font-weight: 700; flex: none; align-self: center; }
-.node .tt { font-weight: 700; font-size: 14.5px; }
-.node ul { margin: 5px 0 6px; padding-left: 16px; font-size: 13px; color: var(--text-2); }
-.node ul li { margin: 1px 0; }
-.node .foot { display: flex; flex-wrap: wrap; gap: 4px; }
-.cycle .n1 { grid-area: 1 / 1; } .cycle .n2 { grid-area: 1 / 2; } .cycle .n3 { grid-area: 1 / 3; } .cycle .n4 { grid-area: 1 / 4; }
-.cycle .n5 { grid-area: 2 / 4; } .cycle .n6 { grid-area: 2 / 3; } .cycle .n7 { grid-area: 2 / 2; } .cycle .back { grid-area: 2 / 1; }
-.arr { position: absolute; color: var(--text-3); font-size: 18px; line-height: 1; }
-.arr.r { right: -24px; top: 50%; transform: translateY(-50%); }
-.arr.l { left: -24px; top: 50%; transform: translateY(-50%); }
-.arr.d { bottom: -19px; left: 50%; transform: translateX(-50%); }
-.arr.u { top: -19px; left: 50%; transform: translateX(-50%); }
-.back { border: 1px dashed var(--border-2); border-radius: 12px; padding: 10px 12px; font-size: 13px; color: var(--text-2); align-self: center; position: relative; }
-.back b { color: var(--text); }
-.lanes2 { display: grid; grid-template-columns: 1fr; gap: 12px; }
-.lanes2 .lane { margin: 0; }
-.upd { display: grid; grid-template-columns: minmax(0, 1fr) 16px minmax(0, 1fr) 16px minmax(0, 1fr) 22px minmax(0, 1fr); align-items: center; }
-.upd .op { text-align: center; color: var(--text-3); font-size: 17px; }
-.upd .node { height: 100%; }
-.curl { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 6px; }
-@media (max-width: 420px) { .curl { grid-template-columns: 1fr; } }
-.curl li { background: var(--surface); border: 1px solid var(--border); border-radius: 9px; padding: 5px 10px; font-size: 13px; display: flex; gap: 8px; align-items: baseline; }
-@media (max-width: 960px) {
-  .cycle { grid-template-columns: 1fr; gap: 22px; }
-  .cycle > * { grid-area: auto !important; }
-  .cycle .arr { display: none; }
-  .cycle .node::after { content: "↓"; position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); color: var(--text-3); font-size: 18px; line-height: 1; }
-  .lanes2 { grid-template-columns: 1fr; }
-  .upd { grid-template-columns: 1fr; gap: 4px; }
-  .upd .op { transform: rotate(90deg); }
-}
+<!-- ─────────────── 3 ─────────────── -->
+<section class="page" id="s3">
+ <a class="top" href="#top">↑ 대문</a>
+ <div class="sec-head"><span class="num">3</span><h2>보상과 판정 기준</h2></div>
+ <p class="lede">이동 중 추종은 두 걸음 평균끼리 비교한다(걸음마다 출렁이는 골반을 벌하지 않게). 정지 중에는 순간 값을 쓴다.</p>
+ <div class="grid2">
+  <div class="tbl"><table>
+   <tr><th>보상</th><th class="num">가중치</th></tr>
+   <tr><td>r1 선속도 · r2 각속도 추종</td><td class="num">+1.0 · +1.0</td></tr>
+   <tr><td>r3 높이 · r4 자세 (×배율)</td><td class="num">−40 · −10</td></tr>
+   <tr><td>r5 공중 시간 · r6 한 발 · r7 발 높이</td><td class="num">+1 · +0.1 · +0.3</td></tr>
+   <tr><td>r8 발 미끄럼 · r9 디딘 발 기울기</td><td class="num">−0.2 · −0.2</td></tr>
+   <tr><td>r11 서기 두 발 · r12 서기 발 정지</td><td class="num">+0.5 · −1.0</td></tr>
+   <tr><td>r13 z 속도 · r14 xy 각속도 (×)</td><td class="num">−2.0 · −0.1</td></tr>
+   <tr><td>r15 행동 변화 · r16 가속·토크 (×)</td><td class="num">−0.1 · −5e-7 · −3e-6</td></tr>
+   <tr><td>r17 관절 한계 · r27 70 N·m 초과</td><td class="num">−5.0 · −0.01</td></tr>
+   <tr><td>r18 고관절 편차 · r19 다른 접촉</td><td class="num">−0.5 · −1.0</td></tr>
+   <tr><td>r20 살아 있음 · 종료</td><td class="num">+0.15 · −200</td></tr>
+  </table></div>
+  <div>
+   <div class="tbl"><table>
+    <tr><th>판정 (커리큘럼·평가)</th><th class="num">p90 문턱</th></tr>
+    <tr><td>정지 높이 오차 (순간)</td><td class="num">1.5 cm</td></tr>
+    <tr><td>정지 pitch·roll (순간)</td><td class="num">1.5°</td></tr>
+    <tr><td>이동 높이 어긋남 (두 걸음)</td><td class="num">3 cm</td></tr>
+    <tr><td>이동 pitch (두 걸음)</td><td class="num">3°</td></tr>
+    <tr><td>정상 속도 오차 (두 걸음)</td><td class="num">0.12 m/s</td></tr>
+   </table></div>
+   <div class="cap">판정 구간 = 명령이 새 값에 닿고 2 s 뒤, 밀기 뒤 2 s 는 뺌. 두 걸음 창 = 같은 발 두 번 닿은 사이(0.5–2.0 s, 처음엔 1.2 s).</div>
+   <div class="note"><b>P1 결정 대기.</b> 느린 명령(0.2 m/s 이하) 76칸 중 21칸은 서 있는 쪽이 초당 보상이 더 크다(주범 r15). 권고: 가중치 그대로, 학습에서 서 버리는지 확인.</div>
+  </div>
+ </div>
+ <div class="cap">× = 벌점 배율(cu1, 0.2 → 1.0)을 곱하는 항. 원자료 <code>source/k1_pelvis/tasks/mdp/rewards.py</code> · <code>docs/p1_stand_still_ledger.txt</code></div>
+</section>
 
-/* ---------- 표 ---------- */
-.tbl-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
-table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
-th { text-align: left; font-weight: 500; font-size: 12.5px; color: var(--text-2); padding: 7px 10px; border-bottom: 1px solid var(--border); background: var(--surface-2); white-space: nowrap; }
-td { padding: 7px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
-tr:last-child td { border-bottom: none; }
-td.id { font-family: "IBM Plex Mono", ui-monospace, monospace; font-weight: 500; white-space: nowrap; }
-td.w { min-width: 240px; }
-td.what { min-width: 130px; }
-td.own { min-width: 104px; }
-.gpanel td:first-child { white-space: nowrap; }
-td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
-td.na { color: var(--text-3); }
-tr.flash td { background: var(--accent-soft); }
-.choice { margin-top: 4px; font-size: 12.5px; color: var(--good); }
+<!-- ─────────────── 4 ─────────────── -->
+<section class="page" id="s4">
+ <a class="top" href="#top">↑ 대문</a>
+ <div class="sec-head"><span class="num">4</span><h2>자연스러운 걸음</h2></div>
+ <p class="lede">K1 이 낼 수 있는 참조 걸음이 선 자세에만 있어서(한강), 낮은 자세까지 궤적최적화로 직접 풀어 걸음 모음을 만들고 다리 AMP 의 정답으로 쓴다.</p>
+ <div class="fig"><svg viewBox="0 0 1000 120" width="100%" role="img" aria-label="그림 4 걸음 모음에서 판별기까지">
+  <defs><marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#93a0b2"/></marker></defs>
+  <g font-size="12.5">
+   <rect x="5" y="25" width="170" height="70" rx="6" fill="#131a23" stroke="#3a4a5e"/><text x="90" y="52" text-anchor="middle" font-weight="700">궤적최적화</text><text x="90" y="72" text-anchor="middle" font-size="11" class="m">Aligator · 뒤꿈치–발끝</text>
+   <rect x="205" y="25" width="170" height="70" rx="6" fill="#1b2b1d" stroke="#8fc47c"/><text x="290" y="52" text-anchor="middle" font-weight="700">걸음 모음 v2</text><text x="290" y="72" text-anchor="middle" font-size="11" class="m">4,149칸 · 4,118 통과</text>
+   <rect x="405" y="25" width="170" height="70" rx="6" fill="#131a23" stroke="#3a4a5e"/><text x="490" y="52" text-anchor="middle" font-weight="700">정렬 주기 표</text><text x="490" y="72" text-anchor="middle" font-size="11" class="m">왼발 뜨는 시점 · 48 프레임</text>
+   <rect x="605" y="25" width="170" height="70" rx="6" fill="#131a23" stroke="#3a4a5e"/><text x="690" y="52" text-anchor="middle" font-weight="700">명령별 정답</text><text x="690" y="72" text-anchor="middle" font-size="11" class="m">보간·덧셈 · 미끄럼 거름</text>
+   <rect x="805" y="25" width="190" height="70" rx="6" fill="#131a23" stroke="#8fc47c"/><text x="900" y="52" text-anchor="middle" font-weight="700">다리 판별기</text><text x="900" y="72" text-anchor="middle" font-size="11" class="m">33 × 10 프레임 + 명령</text>
+  </g>
+  <g stroke="#93a0b2" stroke-width="1.4" fill="none" marker-end="url(#ar3)"><path d="M175 60H203"/><path d="M375 60H403"/><path d="M575 60H603"/><path d="M775 60H803"/></g>
+ </svg></div>
+ <div class="cap"><b>그림 4.</b> 걸음 모음 422 → 3,054 → v2 4,149칸(새 모델 35.71 kg, 딛기 전 발끝 긁기·뒤로 관통 고침). 칸 = 높이 0.02 m · 숙임 5단 × 속도 0.05 m/s · 회전 0.125 rad/s. 한 걸음 0.48 s 고정.</div>
+ <div class="vids">
+  <div class="vid"><video src="media/z074_p00_fwd050.mp4" controls muted loop playsinline preload="metadata"></video><div>선 자세 앞 0.5 m/s <span>0.74 m · 0°</span></div></div>
+  <div class="vid"><video src="media/z058_p30_fwd030.mp4" controls muted loop playsinline preload="metadata"></video><div>쪼그려 앞 0.3 <span>0.58 m · 30°</span></div></div>
+  <div class="vid"><video src="media/z050_p45_fwd020.mp4" controls muted loop playsinline preload="metadata"></video><div>가장 낮게 앞 0.2 <span>0.50 m · 45°</span></div></div>
+  <div class="vid"><video src="media/z066_p12_lat030.mp4" controls muted loop playsinline preload="metadata"></video><div>옆 0.3 <span>0.66 m · 12°</span></div></div>
+  <div class="vid"><video src="media/z070_p00_bwd040.mp4" controls muted loop playsinline preload="metadata"></video><div>뒤 0.4 <span>0.70 m · 0°</span></div></div>
+  <div class="vid"><video src="media/z062_p21_trn050.mp4" controls muted loop playsinline preload="metadata"></video><div>제자리 회전 0.5 rad/s <span>0.62 m · 21°</span></div></div>
+  <div class="vid"><video src="media/z058_p40_lt020wm062.mp4" controls muted loop playsinline preload="metadata"></video><div>걸으며 돌기 <span>0.58 m · 40°</span></div></div>
+ </div>
+ <div class="tbl" style="margin-top:14px"><table>
+  <tr><th>AMP 설정</th><th>값</th></tr>
+  <tr><td>스타일 보상 · 대상</td><td>0.025/스텝 (dev9 의 1/10), 걷기 명령에서만, 속도 램프 뒤 1.5 s 부터</td></tr>
+  <tr><td>판별기</td><td>MLP 1024·512, lr 1e-4, 기울기 벌점 5, 거울판도 학습</td></tr>
+ </table></div>
+ <div class="note"><b>결정 필요 — AMP 높이.</b> 스모크에서 AMP 가 한 번도 돌지 않았다. 시작 단계 걷기 높이 0.77 m 가 모음 최고 0.74 m 밖이라 정답이 없다(0.745–0.77 m). 권고: 정답을 찾을 때만 높이를 0.74 m 로 눌러 쓰기(3 cm, 모음은 높이에 거의 선형). 다른 안: 모음에 0.76·0.77 m 줄 추가.</div>
+ <div class="cap">원자료 <code>to/</code> (library_v2.py · lib_eval.py) · <code>out/lib_amp_v2</code> 8,236개 · 영상 전체 <code>docs/to_media/</code> 6,053개 · <code>reports/2026-10-22_to_review/</code> · <code>reports/dev12 자연스러운 보행 방법 비교.md</code></div>
+</section>
 
-/* ---------- 과제 ---------- */
-.part { margin-top: 18px; }
-.part > .ph { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
-.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 10px; }
-@media (max-width: 420px) { .cards { grid-template-columns: 1fr; } }
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px 12px; font-size: 13.5px; }
-.card.flash { outline: 2px solid var(--accent); }
-.card .hd { display: flex; align-items: baseline; gap: 8px; }
-.card .tid { font-family: "IBM Plex Mono", ui-monospace, monospace; font-weight: 500; color: var(--text-3); }
-.card .hd .pill { margin-left: auto; }
-.card .what { color: var(--text-2); margin: 4px 0 6px; }
-.kv { display: grid; grid-template-columns: 64px 1fr; gap: 3px 8px; font-size: 12.5px; align-items: baseline; }
-.kv > span:nth-child(odd) { color: var(--text-3); }
-.kv .outs { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11.5px; color: var(--text-2); }
-.note { margin-top: 6px; font-size: 12.5px; background: var(--warn-soft); border-radius: 7px; padding: 3px 8px; }
-.gatebox { margin-top: 6px; font-size: 12.5px; border-left: 3px solid var(--accent); padding: 1px 8px; color: var(--text-2); }
-.card .tests { margin-top: 8px; }
-details summary { cursor: pointer; font-size: 12.5px; color: var(--text-2); }
-details ul { margin: 4px 0 0; padding-left: 4px; list-style: none; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11.5px; }
-details li .ic { display: inline-block; width: 16px; }
-details li.pass .ic { color: var(--good); }
-details li.fail .ic { color: var(--bad); }
-.resbox { margin-top: 8px; border-radius: 8px; background: var(--good-soft); padding: 5px 9px; font-size: 12.5px; }
+<!-- ─────────────── 5 ─────────────── -->
+<section class="page" id="s5">
+ <a class="top" href="#top">↑ 대문</a>
+ <div class="sec-head"><span class="num">5</span><h2>학습 환경</h2></div>
+ <p class="lede">Isaac Lab 3.0 · Newton(MuJoCo-Warp), 50 Hz, 에피소드 20 s, env 4,096. 실기 조건(모터 곡선·지연·접촉 여유)을 기본으로 넣었다.</p>
+ <div class="grid2">
+  <div class="tbl"><table>
+   <tr><th>무작위화</th><th>범위</th></tr>
+   <tr><td>마찰 (env 마다 하나)</td><td class="mono">0.4–1.2</td></tr>
+   <tr><td>몸통 질량 · 무게중심</td><td class="mono">±5 kg · x·y ±5 cm</td></tr>
+   <tr><td>PD 게인 (23 관절)</td><td class="mono">±20 %</td></tr>
+   <tr><td>모터 전압 · 최대 토크</td><td class="mono">×0.93–1.10 · ×0.9–1.1</td></tr>
+   <tr><td>밀기</td><td class="mono">10–15 s · ±0.5 m/s</td></tr>
+   <tr><td>손 하중 (양손 반씩)</td><td class="mono">0–5 kg · 숙임 30°+ 걷기 2 kg</td></tr>
+   <tr><td>무부하 env</td><td class="mono">20 %</td></tr>
+   <tr><td>동작 지연 · 명령 지연</td><td class="mono">0–20 · 0–100 ms</td></tr>
+   <tr><td>접촉 여유 · 소프트 한계</td><td class="mono">2 mm · 0.98 / 0.9</td></tr>
+  </table></div>
+  <div>
+   <svg viewBox="0 0 470 290" width="100%" role="img" aria-label="그림 5 커리큘럼">
+    <g font-size="12">
+     <rect x="10" y="10" width="450" height="46" rx="6" fill="#131a23" stroke="#e2a65a"/><text x="22" y="30" font-weight="700">cu1 벌점 배율</text><text x="22" y="47" font-size="11" class="m">0.2 → 1.0 · 100 회마다 ^0.8 (1,000 회 0.84)</text>
+     <rect x="10" y="66" width="450" height="46" rx="6" fill="#131a23" stroke="#7fb0e0"/><text x="22" y="86" font-weight="700">cu2a 서기 높이 하한</text><text x="22" y="103" font-size="11" class="m">0.77 → 0.335 m · 경계 5 cm 판정 통과면 −1 cm</text>
+     <rect x="10" y="122" width="450" height="46" rx="6" fill="#131a23" stroke="#8fc47c"/><text x="22" y="142" font-weight="700">cu2b 걷기 높이 하한</text><text x="22" y="159" font-size="11" class="m">0.77 → 0.42 m · 높이·속도·넘어짐 판정</text>
+     <rect x="10" y="178" width="450" height="46" rx="6" fill="#131a23" stroke="#3a4a5e"/><text x="22" y="198" font-weight="700">cu2c 숙임 여유 · roll</text><text x="22" y="215" font-size="11" class="m">+2° · roll 상한 +1° (최대 10°)</text>
+     <rect x="10" y="234" width="450" height="46" rx="6" fill="#1a2a3b" stroke="#7fb0e0"/><text x="22" y="254" font-weight="700">cu3 상체 수준 0 → 1</text><text x="22" y="271" font-size="11" class="m">배율 ≥ 0.9 · 걷기 하한이 내려간 뒤 · ±0.01, 최소 5,000 회</text>
+    </g>
+   </svg>
+   <div class="cap"><b>그림 5.</b> 커리큘럼. 판정은 50 회마다, 넘어짐 &gt; 20 % 면 하한을 되돌린다. 이어학습 때 상태를 체크포인트에서 되살린다.</div>
+  </div>
+ </div>
+ <div class="cap">원자료 <code>source/k1_pelvis/tasks/env_cfg.py</code> · <code>tasks/mdp/{events,curriculum,commands}.py</code> · 학습 <code>scripts/train.py</code></div>
+</section>
 
-/* ---------- 결과 ---------- */
-.ev { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
-.evc { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px 12px; font-size: 13px; }
-.evc .hd { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
-.evc .hd .meta { margin-left: auto; }
-.evc ul { margin: 6px 0; padding-left: 16px; color: var(--text-2); }
-.evc .sn { font-size: 12px; color: var(--text-3); margin-top: 4px; overflow-wrap: anywhere; }
-.gate-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 12px; }
-.gpanel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px 12px; }
-.gpanel .tbl-wrap { border-radius: 8px; margin-top: 6px; }
-.gpanel table { font-size: 12.5px; }
-.gpanel td, .gpanel th { padding: 5px 8px; }
-.empty { font-size: 13px; color: var(--text-3); margin: 6px 0 0; }
-footer { margin-top: 44px; font-size: 12.5px; color: var(--text-3); }
+<!-- ─────────────── 6 ─────────────── -->
+<section class="page" id="s6">
+ <a class="top" href="#top">↑ 대문</a>
+ <div class="sec-head"><span class="num">6</span><h2>검증과 스모크</h2></div>
+ <p class="lede">시험 118개 통과. 구현 중 Isaac Lab 사본(28a37ce) 버그 셋을 찾아 dev12 쪽에서 막았다. P2 스모크(4,096 env × 300 회, 10 분)를 마쳤다.</p>
+ <h3>찾아서 고친 문제</h3>
+ <div class="tbl"><table>
+  <tr><th>문제</th><th>그대로 뒀다면</th><th>고침</th></tr>
+  <tr><td>외력이 하위 스텝 4개 중 첫 번째에만 <span class="mono">(#8268)</span></td><td>손 하중 1/4</td><td><span class="chip done">패치</span></td></tr>
+  <tr><td>외력이 몸체 자세만큼 돌아서 걸림</td><td>무게 5 % 덜 받침, 손 하중 방향 틀어짐</td><td><span class="chip done">우회</span></td></tr>
+  <tr><td>게인 무작위화 기준표 뒤섞임 <span class="mono">(#6839)</span></td><td>env 1부터 다리 kp 0</td><td><span class="chip done">자체 구현</span></td></tr>
+  <tr><td>마찰을 충돌 모양마다 따로</td><td>실효 마찰 0.65–0.95</td><td><span class="chip done">env 마다 하나</span></td></tr>
+  <tr><td>NaN 가드 구멍 3곳</td><td>학습 1회에 정책 전체 NaN</td><td><span class="chip done">막음</span></td></tr>
+  <tr><td>커리큘럼 판정 오염(밀기 뒤) 외 3건</td><td>하한이 늦게 내려감</td><td><span class="chip done">검토 반영</span></td></tr>
+ </table></div>
+ <h3>P2 스모크 smoke_01</h3>
+ <div class="tbl"><table>
+  <tr><th>판정</th><th>결과</th><th></th></tr>
+  <tr><td>NaN · 종료 폭주</td><td>없음 · 에피소드 46 → 670 스텝</td><td><span class="chip done">통과</span></td></tr>
+  <tr><td>보상 크기 (dev2 대비)</td><td>19 항목 중 18 개가 같은 자릿수</td><td><span class="chip done">통과</span></td></tr>
+  <tr><td>추종 r1 · r2</td><td class="mono">0.010 → 0.32 · 0.009 → 0.32</td><td><span class="chip done">통과</span></td></tr>
+  <tr><td>인코더가 보상보다 먼저</td><td>높이 9 회 · 무게중심 10 · 속도 26 · 무게 66 회에 절반</td><td><span class="chip done">통과</span></td></tr>
+  <tr><td>판별기</td><td>유효 전이 0 — 0.77 m 정답 없음 (4절)</td><td><span class="chip risk">실패</span></td></tr>
+  <tr><td>속도</td><td class="mono">53,800 fps (dev2 187,000)</td><td><span class="chip wait">확인</span></td></tr>
+ </table></div>
+ <div class="cap">끝난 에피소드의 73 % 는 자세 이탈 종료, 골반 접촉 1 %, 시간 초과 26 %. 원자료 <code>docs/p2_smoke_report.md</code> · <code>logs/k1_pelvis/smoke_01/</code> · 시험 <code>tests/</code> (scripts/run_tests.sh)</div>
+</section>
 
-/* ---------- 하위 페이지 ---------- */
-.pages { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; margin-top: 18px; }
-.pg { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 12px; padding: 12px 16px 14px; font-size: 13.5px; }
-.pg h2 { font-size: 19px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.pg h2 a { color: var(--text); text-decoration: none; }
-.pg h2 a:hover { color: var(--accent); text-decoration: underline; }
-.pg h2 .go { color: var(--accent); }
-.pg p { margin: 4px 0 6px; color: var(--text-2); }
-.pg ul { margin: 4px 0 6px; padding-left: 16px; color: var(--text-2); }
-.pg .nums { font-size: 12.5px; color: var(--text-3); font-variant-numeric: tabular-nums; }
-.pg .subs { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 13px; margin: 6px 0 2px; }
-</style>
-</head>
-<body>
-<div class="topbar"><div class="in">
-  <b>dev12 학습 환경 계획</b>
-  <span class="status" id="status">불러오는 중…</span>
-  <nav><a href="#phases">단계</a><a href="#flow">학습 흐름</a><a href="#decisions">결정</a><a href="#tasks">과제</a><a href="#results">결과</a></nav>
-  <a class="btn" href="design.html">학습 설계</a>
-  <a class="btn" id="toNav" href="gait_library.html">궤적 최적화</a>
-</div></div>
+<!-- ─────────────── 7 ─────────────── -->
+<section class="page" id="s7">
+ <a class="top" href="#top">↑ 대문</a>
+ <div class="sec-head"><span class="num">7</span><h2>진행과 결정 기록</h2></div>
+ <h3>단계</h3>
+ <div class="strip" style="grid-template-columns:repeat(7,minmax(0,1fr))">
+  <div class="c d">P0 설계</div><div class="c d">P1 환경</div><div class="c n">P2 스모크</div><div class="c w">P3 학습</div><div class="c t">P4 평가</div><div class="c t">P5 시연</div><div class="c t">P6 실기</div>
+ </div>
+ <h3>과제</h3>
+ <div class="strip" style="grid-template-columns:repeat(15,minmax(0,1fr))">
+  <div class="c d">1</div><div class="c d">2</div><div class="c d">3</div><div class="c d">4</div><div class="c d">5</div><div class="c d">6</div><div class="c d">7</div><div class="c d">8</div><div class="c d">9</div><div class="c d">10</div><div class="c d">11</div><div class="c n">12</div><div class="c n">13</div><div class="c n">14</div><div class="c t">15</div>
+ </div>
+ <div class="cap">T1–T6 바탕(저장소·가능 영역·자세 표·거울·학습기·AMP) · T7–T11 환경(로봇·명령·행동·관측·보상) · T12 무작위화·커리큘럼 · T13 train.py · T14 스모크 · T15 MuJoCo 평가 도구</div>
+ <h3>주요 결정</h3>
+ <div class="tbl"><table>
+  <tr><th></th><th>결정</th></tr>
+  <tr><td class="mono">D1·D15</td><td>손 하중 = 손 외력, 0–5 kg 양손 반씩, 숙임 30° 이상 걷기 2 kg</td></tr>
+  <tr><td class="mono">D2·D3</td><td>하한·숙임 판정 50 회마다, 상체 수준은 HugWBC 규칙(±0.01)</td></tr>
+  <tr><td class="mono">D4</td><td>앞뒤·옆·회전에 같은 높이 배율, 뒤 = 앞 최대</td></tr>
+  <tr><td class="mono">D5</td><td>이동 추종은 두 걸음 평균끼리 (스모크에서 확인)</td></tr>
+  <tr><td class="mono">D6</td><td>AMP 0.025/스텝, 걷기 명령에서만</td></tr>
+  <tr><td class="mono">D7</td><td>몸통 무게중심 ±5 cm 켬 (set_coms ≡ URDF 시험 통과)</td></tr>
+  <tr><td class="mono">D8</td><td>모터 개체 차 env 마다 (dev9 와 같음)</td></tr>
+  <tr><td class="mono">D9</td><td>새 모델 35.71 kg, 범용 충돌체, 접촉 여유 2 mm</td></tr>
+  <tr><td class="mono">D10</td><td>AMP 정답 = 걸음 모음 v2 보간·덧셈</td></tr>
+  <tr><td class="mono">D11·D13·D14</td><td>걷기 숙임 상한, 뒤로 기울이기 −45°, 숙임 하한 = 소프트 0.98 실측</td></tr>
+  <tr><td class="mono">D12</td><td>허리 ±270°, 걷기 15 % 몸통 기준 이동</td></tr>
+  <tr><td class="mono">E1</td><td>인코더 = 명시 추정 8만</td></tr>
+ </table></div>
+ <h3>결정 대기</h3>
+ <div class="tbl"><table>
+  <tr><td><span class="chip risk">AMP 높이</span></td><td>0.745–0.77 m 정답 — 높이 눌러 쓰기(권고) 또는 모음 확장</td></tr>
+  <tr><td><span class="chip wait">P1</span></td><td>느린 명령 서 있기 이득 — 가중치 그대로(권고)</td></tr>
+  <tr><td><span class="chip wait">속도</span></td><td>게인 무작위화 끈 30 회 fps 비교 여부</td></tr>
+  <tr><td><span class="chip wait">P3</span></td><td>본 학습 15,000 회 (약 7.6 h) 시작</td></tr>
+ </table></div>
+ <div class="cap">10-16 재설계 · 10-21 AMP 조사·궤적최적화 · 10-22 걸음 모음 v2·계획 검토·T1–T11 · 10-23 T12–T14. 원자료 <code>계획.md</code> §7 · <code>docs/superpowers/plans/2026-10-21-dev12-env-amp.md</code> · 진행 기록 <code>.superpowers/sdd/…/progress.md</code> · 설계 데이터 <code>dev12_design.json</code> (판 31)</div>
+</section>
 
-<main>
-  <header>
-    <div class="meta" id="meta"></div>
-    <h1 id="title">dev12 학습 환경 계획</h1>
-    <p class="sub" id="subtitle"></p>
-    <div class="next" id="next" hidden></div>
-  </header>
-  <section class="pages" id="pages"></section>
-  <div class="banner" id="warn" hidden></div>
-  <div class="tiles" id="tiles"></div>
-
-  <section id="phases">
-    <h2>단계·관문</h2>
-    <p class="hint">설계 페이지의 단계 표를 그대로 읽는다. 이 계획은 P1(과제 1–12)과 P2(과제 13–14)를 맡고, P2 스모크 보고에서 멈춘다.</p>
-    <div class="steps" id="steps"></div>
-  </section>
-
-  <section id="flow">
-    <h2>학습 흐름</h2>
-    <p class="hint">한 번의 학습 반복 = 4,096 env 가 24 스텝을 모으고(①–⑦), 모인 전이로 한 번 갱신한다. 판정에 따라 커리큘럼이 명령 범위와 벌점을 바꾼다. <span class="tk">T8</span> 은 그 일을 만드는 과제, <span class="ref">cm1</span> 은 설계 페이지 항목(누르면 그 행으로 간다)이다.</p>
-    <div id="flowBox"></div>
-  </section>
-
-  <section id="decisions">
-    <h2>결정</h2>
-    <p class="hint">계획서를 쓸 때 기본값으로 정해 둔 것. 다르게 정하면 "과제" 열의 과제만 바뀐다. D9·D10 은 10-22 검토에서 더했다.</p>
-    <div class="tbl-wrap"><table id="decTbl"></table></div>
-  </section>
-
-  <section id="tasks">
-    <h2>과제</h2>
-    <p class="hint">과제마다 실패하는 테스트를 먼저 쓰고 통과시킨 뒤 커밋한다. 테스트 이름을 누르면 목록이 열린다. 세부 구현 명세는 <code id="planPath"></code>.</p>
-    <div id="taskBox"></div>
-  </section>
-
-  <section id="results">
-    <h2>결과</h2>
-    <h4>지금까지 나온 결과 — 이 계획의 근거</h4>
-    <div class="ev" id="evidence"></div>
-    <h4>단계별 결과</h4>
-    <div class="gate-grid" id="gates"></div>
-    <h4 id="metricsH">P4 평가 지표 (설계 페이지의 지표 표)</h4>
-    <div class="tbl-wrap"><table id="metricTbl"></table></div>
-  </section>
-
-  <footer id="foot"></footer>
-</main>
-
-<script>
-(function () {
-  "use strict";
-  var PLAN_URL = "dev12_env_plan.json", DESIGN_URL = "dev12_design.json";
-  var P = null, D = null, ROWS = {}, ITEMS = {};
-  var $ = function (id) { return document.getElementById(id); };
-  var CIRC = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨"];
-
-  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
-  function byId(list, id) { for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i]; return null; }
-
-  // ---------- 상태 표시 ----------
-  var STATUS = {
-    "계획": ["", "○"], "진행": ["now", "◐"], "끝": ["good", "✓"], "막힘": ["bad", "✕"],
-    "대기": ["warn", "?"], "결정": ["good", "✓"], "다른 세션": ["", "↗"],
-    "다시 풂": ["warn", "↻"], "반영 대기": ["warn", "…"], "반영됨": ["good", "✓"]
-  };
-  function pill(s) { var m = STATUS[s] || ["", "•"]; return '<span class="pill ' + m[0] + '">' + m[1] + " " + esc(s) + "</span>"; }
-
-  // ---------- 설계 항목 색인 ----------
-  function indexDesign() {
-    ROWS = {}; ITEMS = {};
-    if (!D) return;
-    Object.keys(D.tables).forEach(function (k) {
-      var t = D.tables[k];
-      t.rows.forEach(function (r) { ROWS[r.id] = { table: t.title, row: r }; });
-    });
-    D.items.forEach(function (it) { ITEMS[it.id] = it; });
-  }
-  function rowSummary(r) {
-    var v = r.value || r.weight || r.formula || r.cond || r.target || r.task || r.start || "";
-    return (r.name || "") + (v ? " — " + v : "");
-  }
-  var missingRefs = {};
-  function refChip(id) {
-    var rr = ROWS[id], it = ITEMS[id];
-    if (rr) {
-      var off = rr.row.on === false;
-      return '<a class="ref' + (off ? " off" : "") + '" href="design.html#row_' + esc(id) + '" title="' + esc(rr.table + " · " + rowSummary(rr.row) + (off ? " (설계에서 꺼짐)" : "")) + '">' + esc(id) + "</a>";
-    }
-    if (it) {
-      return '<a class="ref' + (it.on ? "" : " off") + '" href="design.html#item_' + esc(id) + '" title="' + esc(it.name + " · " + it.dim + " 칸" + (it.range ? " · " + it.range : "") + (it.on ? "" : " (설계에서 뺌)")) + '">' + esc(id) + "</a>";
-    }
-    if (D) missingRefs[id] = true;
-    return '<span class="ref missing" title="설계 페이지에 이 항목이 없음">' + esc(id) + "</span>";
-  }
-  function refChips(ids) { return ids && ids.length ? '<span class="chips">' + ids.map(refChip).join("") + "</span>" : ""; }
-  function taskStatus(id) { var t = byId(P.tasks, id); return t ? t.status : ""; }
-  function taskChip(id) {
-    var s = taskStatus(id), cls = s === "끝" ? " s-done" : s === "진행" ? " s-now" : "";
-    var t = byId(P.tasks, id);
-    return '<a class="tk' + cls + '" href="#' + esc(id) + '" title="' + esc(t ? t.title + " · " + s : id) + '">' + esc(id) + "</a>";
-  }
-  function taskChips(ids) { return ids && ids.length ? '<span class="chips">' + ids.map(taskChip).join("") + "</span>" : ""; }
-  function decChip(id) {
-    var d = byId(P.decisions, id);
-    return '<a class="dc' + (d && d.status === "대기" ? " wait" : "") + '" href="#' + esc(id) + '" title="' + esc(d ? d.what + " · " + d.status : id) + '">' + esc(id) + "</a>";
-  }
-
-  // ---------- 계산 ----------
-  function testKey(tid, name) { return tid + "/" + name; }
-  function testCounts(t) {
-    var n = t.tests.length, pass = 0, fail = 0;
-    t.tests.forEach(function (x) { var r = P.testResults[testKey(t.id, x)]; if (r === "pass") pass++; else if (r === "fail") fail++; });
-    return { n: n, pass: pass, fail: fail };
-  }
-  function allTests() {
-    var c = { n: 0, pass: 0, fail: 0 };
-    P.tasks.forEach(function (t) { var k = testCounts(t); c.n += k.n; c.pass += k.pass; c.fail += k.fail; });
-    return c;
-  }
-  function designDims() {
-    if (!D) return null;
-    var on = function (g) { return D.items.filter(function (it) { return it.on && it.group === g; }); };
-    var sum = function (l) { return l.reduce(function (a, it) { return a + (parseInt(it.dim, 10) || 0); }, 0); };
-    var cmd = sum(on("cmd")), prop = sum(on("prop")), code = sum(on("code")), priv = sum(on("priv")), act = sum(on("act"));
-    var histPer = sum(D.items.filter(function (it) { return it.on && (it.group === "cmd" || it.group === "prop") && it.hist; }));
-    var steps = parseInt(D.net.histSteps, 10) || 0;
-    return { policy: cmd + prop, obsHist: steps * histPer, critic: cmd + prop + priv, code: code, actorIn: cmd + prop + code, actions: act };
-  }
-  var DIM_NAMES = { policy: "policy", obsHist: "obs_hist", critic: "critic", code: "인코더 출력", actorIn: "actor 입력", actions: "행동" };
-  function dimCheck() {
-    var dd = designDims(); if (!dd) return null;
-    var keys = Object.keys(DIM_NAMES), bad = [];
-    keys.forEach(function (k) { if (dd[k] !== P.dims[k]) bad.push(DIM_NAMES[k] + " 계획 " + P.dims[k] + " ↔ 설계 " + dd[k]); });
-    return { n: keys.length, ok: keys.length - bad.length, bad: bad };
-  }
-  function phaseRows() { return D && D.tables.phases ? D.tables.phases.rows : []; }
-  function currentPhase() {
-    var rows = phaseRows();
-    for (var i = 0; i < rows.length; i++) if (rows[i].status === "진행") return rows[i];
-    return byId(rows, P.meta.currentPhase);
-  }
-
-  // ---------- 하위 페이지 ----------
-  // 이 PC 결과 서버(8097)의 페이지는 GitHub Pages 에서는 안 열리므로 그때는 저장소 사본(fallback)으로 보낸다
-  function isLocal() { return !/github\.io$/.test(location.hostname); }
-  function pageHref(p) { return p.port && isLocal() ? location.protocol + "//" + location.hostname + ":" + p.port + "/" + p.path : (p.fallback || p.path); }
-  function pageCard(p, nums) {
-    var subs = (p.subs || []).filter(function (s) { return !s.port || isLocal(); });
-    return '<div class="pg"><h2><a href="' + esc(pageHref(p)) + '">' + esc(p.title) + ' <span class="go">→</span></a>' + (p.status ? pill(p.status) : "") + "</h2>" +
-      "<p>" + esc(p.desc) + "</p>" + (nums ? '<div class="nums">' + esc(nums) + "</div>" : "") +
-      (p.lines && p.lines.length ? "<ul>" + p.lines.map(function (l) { return "<li>" + esc(l) + "</li>"; }).join("") + "</ul>" : "") +
-      (subs.length ? '<div class="subs">' + subs.map(function (s) { return '<a href="' + esc(pageHref(s)) + '">' + esc(s.label) + "</a>"; }).join("") + "</div>" : "") +
-      (p.note && isLocal() ? '<div class="nums">' + esc(p.note) + "</div>" : "") + "</div>";
-  }
-  function renderPages() {
-    var ds = P.pages.design, nums = "";
-    if (D) {
-      var dd = designDims(), on = function (k) { return D.tables[k] ? D.tables[k].rows.filter(function (r) { return r.on !== false; }).length : 0; };
-      nums = "판 " + D.meta.rev + " · " + new Date(D.meta.savedAt).toLocaleDateString("ko-KR") + " 저장 · actor 입력 " + dd.actorIn + " · critic " + dd.critic + " · 행동 " + dd.actions +
-        " · 보상 " + on("rewards") + " · 무작위화 " + on("dr") + " · 평가 지표 " + on("metrics");
-    }
-    $("pages").innerHTML = pageCard(ds, nums) + pageCard(P.pages.to, "");
-    $("toNav").href = pageHref(P.pages.to);
-  }
-
-  // ---------- 그리기 ----------
-  function renderHeader() {
-    document.title = P.meta.title;
-    $("title").textContent = P.meta.title;
-    $("subtitle").textContent = P.meta.subtitle;
-    var nx = P.meta.next || [];
-    $("next").innerHTML = nx.length ? "<b>다음 할 일</b><ol>" + nx.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + "</ol>" : "";
-    $("next").hidden = !nx.length;
-    $("meta").textContent = "계획 판 " + P.meta.rev + " · " + P.meta.state + " · 처음 쓴 날 " + P.meta.written + " · 설계 판 " + P.meta.designRev + " 기준";
-    $("planPath").textContent = P.meta.planFile;
-    $("status").textContent = "계획 판 " + P.meta.rev + " · " + new Date(P.meta.updatedAt).toLocaleString("ko-KR") + " 갱신" + (D ? " · 설계 판 " + D.meta.rev : " · 설계 못 읽음");
-  }
-  function renderTiles() {
-    var ph = currentPhase(), rows = phaseRows(), next = null;
-    if (ph) { var i = rows.indexOf(ph); next = rows[i + 1]; }
-    var done = P.tasks.filter(function (t) { return t.status === "끝"; }).length;
-    var tc = allTests();
-    var wait = P.decisions.filter(function (d) { return d.status === "대기"; }).length;
-    var other = P.decisions.filter(function (d) { return d.status === "다른 세션"; }).length;
-    var dc = dimCheck();
-    var nMiss = Object.keys(missingRefs).length;
-    var tiles = [
-      ["#phases", "지금 단계", ph ? ph.name : "—", next ? "다음 관문: " + next.name : ""],
-      ["#tasks", "과제", done + " / " + P.tasks.length, "끝난 과제"],
-      ["#tasks", "테스트", tc.pass + " / " + tc.n, "통과" + (tc.fail ? " · 실패 " + tc.fail : "")],
-      ["#decisions", "결정 대기", String(wait), "다른 세션에 맡김 " + other],
-      ["#warn", "설계와 맞춤", dc ? (dc.bad.length || nMiss ? "⚠ " : "✓ ") + dc.ok + " / " + dc.n : "—", dc ? "텐서 크기" + (nMiss ? " · 없는 항목 " + nMiss : " · 인용 항목 모두 있음") : "설계 못 읽음"]
-    ];
-    $("tiles").innerHTML = tiles.map(function (t) {
-      return '<a class="tile" href="' + t[0] + '"><div class="k">' + esc(t[1]) + '</div><div class="v">' + esc(t[2]) + '</div><div class="f">' + esc(t[3]) + "</div></a>";
-    }).join("");
-  }
-  function renderWarn() {
-    var msgs = [];
-    if (!D) msgs.push("dev12_design.json 을 못 읽어 설계 항목 연결·크기 확인을 못 했다.");
-    else {
-      if (D.meta.rev !== P.meta.designRev) msgs.push("설계가 판 " + P.meta.designRev + " 에서 판 " + D.meta.rev + " 로 바뀌었다. 계획을 다시 맞춰야 할 수 있다.");
-      var dc = dimCheck(); if (dc && dc.bad.length) msgs.push("텐서 크기가 설계와 다르다: " + dc.bad.join(", "));
-      var miss = Object.keys(missingRefs); if (miss.length) msgs.push("계획이 인용한 설계 항목 중 설계 페이지에 없는 것: " + miss.join(", "));
-    }
-    var b = $("warn");
-    if (!msgs.length) { b.hidden = true; return; }
-    b.innerHTML = "<b>확인할 것</b><ul>" + msgs.map(function (m) { return "<li>" + esc(m) + "</li>"; }).join("") + "</ul>";
-    b.hidden = false;
-  }
-  function renderPhases() {
-    var rows = phaseRows();
-    if (!rows.length) { $("steps").innerHTML = '<p class="empty">설계 페이지의 단계 표를 못 읽었다.</p>'; return; }
-    $("steps").innerHTML = rows.map(function (r) {
-      var tids = P.phaseTasks[r.id] || [];
-      var prog = "";
-      if (tids.length) {
-        var ts = tids.map(function (id) { return byId(P.tasks, id); }).filter(Boolean);
-        var done = ts.filter(function (t) { return t.status === "끝"; }).length;
-        prog = '<div class="prog"><div class="bar"><i style="width:' + (100 * done / ts.length) + '%"></i></div><span class="barlabel">과제 ' + done + " / " + ts.length + "</span> " + taskChips(tids.length > 4 ? [tids[0], tids[tids.length - 1]] : tids).replace("</a><a", '</a>–<a') + "</div>";
-      }
-      var st = r.status === "진행" ? "진행" : r.status === "끝" ? "끝" : "계획";
-      return '<div class="step' + (st === "진행" ? " now" : "") + '">' + pill(st) + '<span class="nm">' + esc(r.name) + "</span>" +
-        '<div class="gate">' + esc(r.task) + "</div>" + '<div class="gate"><b>관문</b> ' + esc(r.gate) + "</div>" + prog + "</div>";
-    }).join("");
-  }
-  function nodeHtml(n, i, cls, arrow) {
-    return '<div class="node ' + cls + '"><div class="hd"><span class="no">' + (i + 1) + '</span><span class="tt">' + esc(n.title) + "</span>" + taskChips(n.tasks) + "</div>" +
-      "<ul>" + n.lines.map(function (l) { return "<li>" + esc(l) + "</li>"; }).join("") + "</ul>" +
-      (n.refs.length ? '<div class="foot">' + n.refs.map(refChip).join("") + "</div>" : "") + (arrow || "") + "</div>";
-  }
-  function renderFlow() {
-    var f = P.flow, ro = f.rollout;
-    var arrows = ['<span class="arr r">→</span>', '<span class="arr r">→</span>', '<span class="arr r">→</span>', '<span class="arr d">↓</span>',
-      '<span class="arr l">←</span>', '<span class="arr l">←</span>', '<span class="arr l">←</span>'];
-    var html = '<div class="lane"><div class="lane-h"><b>모으기</b>스텝마다 50 Hz · env 4,096 개가 동시에 · 24 스텝 모이면 갱신</div><div class="cycle">' +
-      ro.map(function (n, i) { return nodeHtml(n, i, "n" + (i + 1), arrows[i]); }).join("") +
-      '<div class="back"><span class="arr u">↑</span><b>다음 스텝</b>은 다시 ① 로 (20 ms). 끝난 env 만 ⑦ 에서 리셋된다.</div></div></div>';
-    var up = f.update, ops = ["+", "+", "→"];
-    html += '<div class="lanes2"><div class="lane"><div class="lane-h"><b>갱신</b>24 스텝마다 · 전이 4,096 × 24 = 98,304 개</div><div class="upd">' +
-      up.map(function (n, i) { return nodeHtml(n, i, "") + (i < ops.length ? '<span class="op">' + ops[i] + "</span>" : ""); }).join("") + "</div></div>" +
-      '<div class="lane"><div class="lane-h"><b>커리큘럼</b>50·100 회마다 판정 ' + taskChip("T12") + '</div><ul class="curl">' +
-      f.curriculum.map(function (c) { return "<li>" + refChip(c.ref) + "<span>" + esc(c.text) + "</span></li>"; }).join("") + "</ul></div></div>";
-    $("flowBox").innerHTML = html;
-  }
-  function renderDecisions() {
-    var html = "<thead><tr><th>결정</th><th>무엇</th><th>설계 상태</th><th>기본값 (권고)</th><th>과제</th><th>설계 항목</th><th>맡은 곳</th><th>상태</th></tr></thead><tbody>";
-    P.decisions.forEach(function (d) {
-      html += '<tr id="' + esc(d.id) + '"><td class="id">' + esc(d.id) + '</td><td class="what">' + esc(d.what) + '</td><td class="w">' + esc(d.design) + '</td><td class="w">' + esc(d.default) + "</td><td>" + taskChips(d.tasks) + "</td><td>" + refChips(d.refs) +
-        '</td><td class="own">' + esc(P.owners[d.owner] || d.owner) + "</td><td>" + pill(d.status) + (d.choice ? '<div class="choice">' + esc(d.choice) + "</div>" : "") + "</td></tr>";
-    });
-    $("decTbl").innerHTML = html + "</tbody>";
-  }
-  var PARTS = { 1: ["1부 바탕", "CPU 테스트"], 2: ["2부 환경", "컨테이너 Isaac 테스트, env 16 개"], 3: ["3부 연결·스모크", "P2 스모크 보고에서 멈춘다"] };
-  function renderTasks() {
-    var html = "";
-    [1, 2, 3].forEach(function (p) {
-      var ts = P.tasks.filter(function (t) { return t.part === p; });
-      var done = ts.filter(function (t) { return t.status === "끝"; }).length;
-      html += '<div class="part"><div class="ph"><h3>' + esc(PARTS[p][0]) + '</h3><span class="meta">' + esc(PARTS[p][1]) + " · 끝 " + done + " / " + ts.length + '</span></div><div class="cards">';
-      ts.forEach(function (t) {
-        var c = testCounts(t);
-        var kv = '<span>만드는 것</span><span class="outs">' + t.outputs.map(esc).join(" · ") + "</span>";
-        if (t.deps.length) kv += "<span>먼저</span><span>" + taskChips(t.deps) + "</span>";
-        if (t.refs.length) kv += "<span>설계</span><span>" + refChips(t.refs) + "</span>";
-        if (t.decisions.length) kv += '<span>결정</span><span class="chips">' + t.decisions.map(decChip).join("") + "</span>";
-        var tests = "";
-        if (c.n) {
-          tests = '<div class="tests"><div class="bar"><i style="width:' + (100 * c.pass / c.n) + '%"></i></div>' +
-            "<details><summary>테스트 " + c.pass + " / " + c.n + " 통과" + (c.fail ? " · 실패 " + c.fail : "") + "</summary><ul>" +
-            t.tests.map(function (x) {
-              var r = P.testResults[testKey(t.id, x)];
-              return '<li class="' + (r || "") + '"><span class="ic">' + (r === "pass" ? "✓" : r === "fail" ? "✕" : "○") + "</span>" + esc(x) + "</li>";
-            }).join("") + "</ul></details></div>";
-        }
-        html += '<div class="card" id="' + esc(t.id) + '"><div class="hd"><span class="tid">' + esc(t.id) + "</span><h3>" + esc(t.title) + "</h3>" + pill(t.status) + "</div>" +
-          '<div class="what">' + esc(t.what) + '</div><div class="kv">' + kv + "</div>" +
-          (t.note ? '<div class="note">' + esc(t.note) + "</div>" : "") +
-          (t.gate ? '<div class="gatebox"><b>관문</b> ' + esc(t.gate) + "</div>" : "") + tests +
-          (t.result ? '<div class="resbox">' + esc(t.result) + "</div>" : "") + "</div>";
-      });
-      html += "</div></div>";
-    });
-    $("taskBox").innerHTML = html;
-  }
-  function renderResults() {
-    var R = P.results;
-    $("evidence").innerHTML = R.evidence.map(function (e) {
-      var where = e.link && (!e.port || isLocal()) ? '<a href="' + esc(pageHref({ path: e.link, port: e.port })) + '">' + esc(e.link) + " 열기</a>" : "";
-      if (e.path) where += (where ? " · " : "") + "<code>" + esc(e.path) + "</code>";
-      return '<div class="evc"><div class="hd"><h3>' + esc(e.title) + "</h3>" + pill(e.status) + '<span class="meta">' + esc(e.date) + "</span></div>" +
-        "<ul>" + e.lines.map(function (l) { return "<li>" + esc(l) + "</li>"; }).join("") + "</ul>" +
-        '<div class="sn">' + esc(e.statusNote) + (where ? " · " + where : "") + "</div></div>";
-    }).join("");
-
-    var tc = allTests(), g = "";
-    // P1: 테스트 + 정지 손익
-    var L = R.ledger;
-    var lt = '<div class="tbl-wrap"><table><thead><tr><th>높이 \\ 속도</th>' + L.speeds.map(function (v) { return '<th class="num">' + v + "</th>"; }).join("") + "</tr></thead><tbody>" +
-      L.heights.map(function (z, zi) {
-        return "<tr><td>" + z + " m</td>" + L.speeds.map(function (v, vi) {
-          var c = L.cells && L.cells[zi] ? L.cells[zi][vi] : null;
-          return c == null ? '<td class="num na">—</td>' : '<td class="num">' + esc(c) + "</td>";
-        }).join("") + "</tr>";
-      }).join("") + "</tbody></table></div>";
-    g += '<div class="gpanel"><div class="hd"><h3>P1 환경</h3></div>' +
-      '<div class="bar"><i style="width:' + (100 * tc.pass / tc.n) + '%"></i></div><span class="barlabel">테스트 ' + tc.pass + " / " + tc.n + " 통과" + (tc.fail ? " · 실패 " + tc.fail : "") + "</span>" +
-      '<p class="empty" style="color:var(--text-2)">명령을 두고 서 있기 손익 ' + taskChip("T11") + " — 칸마다 (걷기 − 서 있기) 초당 보상, 모든 칸이 + 여야 통과</p>" + lt +
-      (L.cells ? "" : '<p class="empty">아직 계산 안 함. ' + esc(L.desc) + "</p>") + "</div>";
-    // P2: 스모크 판정
-    g += '<div class="gpanel"><h3>P2 스모크 ' + taskChip("T14") + '</h3><div class="tbl-wrap"><table><thead><tr><th>판정</th><th>기준</th><th>결과</th></tr></thead><tbody>' +
-      R.smoke.map(function (s) { return "<tr><td>" + esc(s.name) + "</td><td>" + esc(s.target) + "</td>" + (s.result == null ? '<td class="na">—</td>' : "<td>" + esc(s.result) + "</td>") + "</tr>"; }).join("") +
-      "</tbody></table></div>" + (R.smoke.some(function (s) { return s.result != null; }) ? "" : '<p class="empty">스모크 전 (과제 13 뒤 GPU 가 비었을 때).</p>') + "</div>";
-    // P3: 학습
-    g += '<div class="gpanel"><h3>P3 학습</h3>' + (R.training.runs.length ?
-      '<div class="tbl-wrap"><table><thead><tr><th>run</th><th>반복</th><th>메모</th></tr></thead><tbody>' + R.training.runs.map(function (r) { return "<tr><td><code>" + esc(r.name) + '</code></td><td class="num">' + esc(r.iters) + "</td><td>" + esc(r.note) + "</td></tr>"; }).join("") + "</tbody></table></div>"
-      : '<p class="empty">' + esc(R.training.desc) + "</p>") + "</div>";
-    $("gates").innerHTML = g;
-
-    // P4: 설계의 지표 표 + 결과
-    var mt = D && D.tables.metrics ? D.tables.metrics : null;
-    if (!mt) { $("metricTbl").innerHTML = '<tbody><tr><td class="na">설계 페이지의 지표 표를 못 읽었다.</td></tr></tbody>'; return; }
-    $("metricTbl").innerHTML = "<thead><tr><th></th><th>지표</th><th>목표</th><th>재는 법</th><th>결과</th></tr></thead><tbody>" +
-      mt.rows.filter(function (r) { return r.on !== false; }).map(function (r) {
-        var res = R.metrics[r.id];
-        return "<tr><td>" + refChip(r.id) + "</td><td>" + esc(r.name) + "</td><td>" + esc(r.target) + '</td><td class="w">' + esc(r.how) + "</td>" + (res == null ? '<td class="na">—</td>' : "<td>" + esc(res) + "</td>") + "</tr>";
-      }).join("") + "</tbody>";
-  }
-  function renderFoot() {
-    $("foot").innerHTML = "이 페이지는 읽기 전용이다. 상태·결정·결과는 <code>dev12_env_plan.json</code>(계획 판 " + esc(P.meta.rev) + ")을 고쳐 갱신하고, 설계 항목은 <code>dev12_design.json</code>" + (D ? "(판 " + esc(D.meta.rev) + ")" : "") + " 에서 그때그때 읽는다. 세부 구현 명세: <code>" + esc(P.meta.planFile) + "</code>.";
-  }
-  function focusHash() {
-    var id = decodeURIComponent(location.hash.slice(1)); if (!id) return;
-    var el = document.getElementById(id); if (!el) return;
-    el.scrollIntoView({ block: "start" });
-    el.classList.add("flash"); setTimeout(function () { el.classList.remove("flash"); }, 1800);
-  }
-  function renderAll() {
-    indexDesign(); missingRefs = {};
-    renderHeader(); renderPages(); renderPhases(); renderFlow(); renderDecisions(); renderTasks(); renderResults(); renderFoot();
-    renderTiles(); renderWarn();
-  }
-
-  function getJSON(u) { return fetch(u, { cache: "no-store" }).then(function (r) { if (!r.ok) throw new Error(u + " " + r.status); return r.json(); }); }
-  Promise.all([getJSON(PLAN_URL), getJSON(DESIGN_URL).catch(function () { return null; })])
-    .then(function (res) { P = res[0]; D = res[1]; renderAll(); focusHash(); })
-    .catch(function (e) { $("status").textContent = "불러오기 실패: " + e.message + " — docs_server.py 로 연 주소에서 보세요."; $("status").className = "status err"; });
-  window.addEventListener("hashchange", focusHash);
-})();
-</script>
-</body>
-</html>
+<footer>dev12 · 저장소 chanyong0211/k1-pelvis-tracker · 이 페이지 하나가 dev12 문서의 전부입니다(옛 페이지는 dev12/trash/docs_pages_20261023/).</footer>
+</div></body></html>
