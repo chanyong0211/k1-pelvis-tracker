@@ -72,7 +72,7 @@ a{color:var(--acc)}
 <div class="page" id="top">
  <div class="kick">dev12 · K1 rev1 · 2026-10-16 시작</div>
  <h1>K1 골반 명령 추종 하체 정책</h1>
- <div class="auth">설계 판 38 · 과제 14/15 · P3 학습 중 · 마지막 갱신 2026-10-24</div>
+ <div class="auth">설계 판 38 · 과제 14/15 · P3 끝(20,000회) · 마지막 갱신 2026-10-24</div>
  <p class="abs"><b>개요.</b> 상위 층(카메라·깊이)이 골반 명령 6개와 상체 목표 11개를 내면, 하체 정책이 다리 12관절로 그 골반을 따라간다. 자연스러운 걸음은 궤적최적화로 만든 걸음 모음 4,528칸을 정답으로 한 다리 AMP로 배운다. 높이는 0.77 m에서 0.335 m까지 커리큘럼으로 연다.</p>
 
  <div class="fig"><svg viewBox="0 0 1000 330" width="100%" role="img" aria-label="그림 1 dev12 구성">
@@ -299,6 +299,16 @@ a{color:var(--acc)}
   <tr><td>NaN 가드 구멍 3곳</td><td>학습 1회에 정책 전체 NaN</td><td><span class="chip done">막음</span></td></tr>
   <tr><td>커리큘럼 판정 오염(밀기 뒤) 외 3건</td><td>하한이 늦게 내려감</td><td><span class="chip done">검토 반영</span></td></tr>
  </table></div>
+ <h3>P3 본 학습 (10-23 21:17 – 10-24 15:58, 20,000회)</h3>
+ <div class="tbl"><table>
+  <tr><th>항목</th><th>최종</th></tr>
+  <tr><td>커리큘럼</td><td>서기 0.335 m · 걷기 0.42 m (끝값), 숙임 45° · roll 10° (최대), 상체 3단계 0.74</td></tr>
+  <tr><td>추종 선 / 각</td><td class="mono">0.79 / 0.67</td></tr>
+  <tr><td>에피소드</td><td>길이 997/1000, 넘어짐 1 %</td></tr>
+  <tr><td>판별기</td><td>+0.57 / −0.57, 정답 있는 걷기 17 %</td></tr>
+  <tr><td>도중 수정 7</td><td>추종 폭 · 판정 잡음 여유 · 높이·자세 지수꼴(2) · 서기 높이 폭 · 팔 자기 접촉 종료 · r27 상한</td></tr>
+ </table></div>
+ <div class="cap">체크포인트 <code>logs/k1_pelvis/p3_10/model_19999.pt</code> (p3_01–p3_10 이어 붙임). 남은 것: T15 MuJoCo 평가, 잡음 없는 판정 측정.</div>
  <h3>P2 스모크 smoke_01</h3>
  <div class="tbl"><table>
   <tr><th>판정</th><th>결과</th><th></th></tr>
@@ -318,7 +328,7 @@ a{color:var(--acc)}
  <div class="sec-head"><span class="num">7</span><h2>진행과 결정 기록</h2></div>
  <h3>단계</h3>
  <div class="strip" style="grid-template-columns:repeat(7,minmax(0,1fr))">
-  <div class="c d">P0 설계</div><div class="c d">P1 환경</div><div class="c d">P2 스모크</div><div class="c n">P3 학습</div><div class="c t">P4 평가</div><div class="c t">P5 시연</div><div class="c t">P6 실기</div>
+  <div class="c d">P0 설계</div><div class="c d">P1 환경</div><div class="c d">P2 스모크</div><div class="c d">P3 학습</div><div class="c w">P4 평가</div><div class="c t">P5 시연</div><div class="c t">P6 실기</div>
  </div>
  <h3>과제</h3>
  <div class="strip" style="grid-template-columns:repeat(15,minmax(0,1fr))">
@@ -350,8 +360,7 @@ a{color:var(--acc)}
  </table></div>
  <h3>결정 대기</h3>
  <div class="tbl"><table>
-  <tr><td><span class="chip wait">P1</span></td><td>느린 명령 서 있기 이득 — 가중치 그대로(권고)</td></tr>
-  <tr><td><span class="chip wait">속도</span></td><td>게인 무작위화 끈 30 회 fps 비교 여부</td></tr>
+  <tr><td><span class="chip wait">P4</span></td><td>T15 MuJoCo 평가 하네스, 실기 조건 평가</td></tr>
  </table></div>
  <div class="cap">10-16 재설계 · 10-21 AMP 조사·궤적최적화 · 10-22 걸음 모음 v2·계획 검토·T1–T11 · 10-23 T12–T14·걸음 모음 0.77 m 줄. 원자료 <code>계획.md</code> §7 · <code>docs/superpowers/plans/2026-10-21-dev12-env-amp.md</code> · 진행 기록 <code>.superpowers/sdd/…/progress.md</code> · 설계 데이터 <code>dev12_design.json</code> (판 38)</div>
 </section>
