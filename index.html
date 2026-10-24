@@ -72,7 +72,7 @@ a{color:var(--acc)}
 <div class="page" id="top">
  <div class="kick">dev12 · K1 rev1 · 2026-10-16 시작</div>
  <h1>K1 골반 명령 추종 하체 정책</h1>
- <div class="auth">설계 판 38 · 과제 14/15 · P3 끝(20,000회) · 마지막 갱신 2026-10-24</div>
+ <div class="auth">설계 판 38 · 과제 15/15 · P4 평가 끝(model_19750) · 마지막 갱신 2026-10-24</div>
  <p class="abs"><b>개요.</b> 상위 층(카메라·깊이)이 골반 명령 6개와 상체 목표 11개를 내면, 하체 정책이 다리 12관절로 그 골반을 따라간다. 자연스러운 걸음은 궤적최적화로 만든 걸음 모음 4,528칸을 정답으로 한 다리 AMP로 배운다. 높이는 0.77 m에서 0.335 m까지 커리큘럼으로 연다.</p>
 
  <div class="fig"><svg viewBox="0 0 1000 330" width="100%" role="img" aria-label="그림 1 dev12 구성">
@@ -108,8 +108,8 @@ a{color:var(--acc)}
   <a href="#s3"><span class="n">3</span><span class="t"><b>보상과 판정 기준</b> <span>두 걸음 창, 서 있기 손익(P1)</span></span><span class="st"><span class="chip wait">결정 대기</span></span></a>
   <a href="#s4"><span class="n">4</span><span class="t"><b>자연스러운 걸음</b> <span>궤적최적화 걸음 모음, 다리 AMP</span></span><span class="st"><span class="chip done">0.77 m 추가</span></span></a>
   <a href="#s5"><span class="n">5</span><span class="t"><b>학습 환경</b> <span>무작위화, 커리큘럼</span></span><span class="st"><span class="chip done">구현</span></span></a>
-  <a href="#s6"><span class="n">6</span><span class="t"><b>검증과 스모크</b> <span>시험 118, Isaac Lab 버그 3, P2 스모크</span></span><span class="st"><span class="chip done">스모크 통과</span></span></a>
-  <a href="#s7"><span class="n">7</span><span class="t"><b>진행과 결정 기록</b> <span>단계 P0–P6, 과제 T1–T15, 결정 D1–D15</span></span><span class="st"><span class="chip todo">14/15</span></span></a>
+  <a href="#s6"><span class="n">6</span><span class="t"><b>검증과 스모크</b> <span>시험 118, Isaac Lab 버그 3, P2 스모크, P4 평가</span></span><span class="st"><span class="chip done">P4 19750</span></span></a>
+  <a href="#s7"><span class="n">7</span><span class="t"><b>진행과 결정 기록</b> <span>단계 P0–P6, 과제 T1–T15, 결정 D1–D15</span></span><span class="st"><span class="chip done">15/15</span></span></a>
  </div>
 </div>
 
@@ -288,7 +288,7 @@ a{color:var(--acc)}
 <section class="page" id="s6">
  <a class="top" href="#top">↑ 대문</a>
  <div class="sec-head"><span class="num">6</span><h2>검증과 스모크</h2></div>
- <p class="lede">시험 118개 통과. 구현 중 Isaac Lab 사본(28a37ce) 버그 셋을 찾아 dev12 쪽에서 막았다. P2 스모크(4,096 env × 300 회, 10 분)를 마쳤다.</p>
+ <p class="lede">시험 118개 통과. 구현 중 Isaac Lab 사본(28a37ce) 버그 셋을 찾아 dev12 쪽에서 막았다. P2 스모크(4,096 env × 300 회, 10 분)를 마쳤다. P4 MuJoCo 평가로 실기 후보 model_19750 을 골랐다.</p>
  <h3>찾아서 고친 문제</h3>
  <div class="tbl"><table>
   <tr><th>문제</th><th>그대로 뒀다면</th><th>고침</th></tr>
@@ -298,7 +298,19 @@ a{color:var(--acc)}
   <tr><td>마찰을 충돌 모양마다 따로</td><td>실효 마찰 0.65–0.95</td><td><span class="chip done">env 마다 하나</span></td></tr>
   <tr><td>NaN 가드 구멍 3곳</td><td>학습 1회에 정책 전체 NaN</td><td><span class="chip done">막음</span></td></tr>
   <tr><td>커리큘럼 판정 오염(밀기 뒤) 외 3건</td><td>하한이 늦게 내려감</td><td><span class="chip done">검토 반영</span></td></tr>
+  <tr><td>접촉 여유: cfg 2 mm 인데 Newton 이 상자 충돌체가 있으면 실행 중 0</td><td>MuJoCo 하네스가 학습과 달리 20 s 서기에 발 132 번 뗌</td><td><span class="chip done">하네스 0</span></td></tr>
  </table></div>
+ <h3>P4 MuJoCo 평가 (10-24, 실기 조건)</h3>
+ <div class="tbl"><table>
+  <tr><th>저장본</th><th class="num">손 5 kg 넘어짐 /99</th><th class="num">속도 p90</th><th class="num">회전 p90</th><th class="num">높이 정지</th><th class="num">자세 이동 / 정지</th><th class="num">직진 yaw (0·10·20 ms)</th></tr>
+  <tr><td class="mono">19000</td><td class="num">8</td><td class="num">0.158</td><td class="num">0.226</td><td class="num">0.94 cm</td><td class="num">2.24 / 3.59°</td><td class="num">51 · 68 · 49°</td></tr>
+  <tr><td class="mono">19250</td><td class="num">7</td><td class="num">0.158</td><td class="num">0.236</td><td class="num">1.13 cm</td><td class="num">2.13 / 3.65°</td><td class="num">37 · 79 · 45°</td></tr>
+  <tr><td class="mono">19500</td><td class="num">6</td><td class="num">0.163</td><td class="num">0.233</td><td class="num">0.94 cm</td><td class="num">2.30 / 3.79°</td><td class="num">44 · 50 · 40°</td></tr>
+  <tr><td class="mono"><b>19750</b> <span class="chip done">고름</span></td><td class="num">4</td><td class="num">0.171</td><td class="num">0.203</td><td class="num">1.06 cm</td><td class="num">2.01 / 3.83°</td><td class="num">−8 · −18 · −13°</td></tr>
+  <tr><td class="mono">19999</td><td class="num">5</td><td class="num">0.162</td><td class="num">0.193</td><td class="num">1.67 cm</td><td class="num">2.30 / 4.06°</td><td class="num">21 · 32 · 31°</td></tr>
+ </table></div>
+ <div class="cap">MuJoCo 하네스(모터 곡선·개체 차·접촉 여유 0·35.7 kg) · 저장본 5 × 동작 지연 0·10·20 ms · 무작위 명령 100 편. 15 건 모두 넘어짐 0 %, 높이 × 속도 18칸 성공, 지연 20 ms 까지 추종 오차 변화는 속도 0.01 m/s 안. 값은 10 ms(손 하중·yaw 는 세 지연). 목표: 속도 ≤ 0.1, 회전 ≤ 0.15, 정지 높이 ≤ 1 cm, 자세 ≤ 3 / 1°. 19750 = 직진 표류 가장 작음 + 손 하중 넘어짐 가장 적음(잡음 안) + 19999 보다 정지 높이 0.6 cm 작음. 원자료 <code>docs/p4_eval_report.md</code></div>
+ <div class="note"><b>다섯 저장본 공통 약점.</b> 옆으로만 걷기 0.2–0.3 m/s 는 명령의 0–21 % (Isaac 영상 40–55 %). 앞 0.2 m/s 이하는 대부분 서 버림(0.77 m 는 모두 0). 정지 자세각 3.6–4.1°(목표 1°). 직진 yaw 는 이웃 저장본 사이에 −18°에서 +79°까지 흔들려, 19750 의 작은 표류도 실기에서 그대로 나온다는 보장은 없다.</div>
  <h3>P3 본 학습 (10-23 21:17 – 10-24 15:58, 20,000회)</h3>
  <div class="tbl"><table>
   <tr><th>항목</th><th>최종</th></tr>
@@ -308,7 +320,7 @@ a{color:var(--acc)}
   <tr><td>판별기</td><td>+0.57 / −0.57, 정답 있는 걷기 17 %</td></tr>
   <tr><td>도중 수정 7</td><td>추종 폭 · 판정 잡음 여유 · 높이·자세 지수꼴(2) · 서기 높이 폭 · 팔 자기 접촉 종료 · r27 상한</td></tr>
  </table></div>
- <div class="cap">체크포인트 <code>logs/k1_pelvis/p3_10/model_19999.pt</code> (p3_01–p3_10 이어 붙임). 남은 것: T15 MuJoCo 평가, 잡음 없는 판정 측정.</div>
+ <div class="cap">체크포인트 <code>logs/k1_pelvis/p3_10/model_19999.pt</code> (p3_01–p3_10 이어 붙임). 남은 것: 잡음 없는 판정 측정.</div>
  <h3>P2 스모크 smoke_01</h3>
  <div class="tbl"><table>
   <tr><th>판정</th><th>결과</th><th></th></tr>
@@ -328,13 +340,13 @@ a{color:var(--acc)}
  <div class="sec-head"><span class="num">7</span><h2>진행과 결정 기록</h2></div>
  <h3>단계</h3>
  <div class="strip" style="grid-template-columns:repeat(7,minmax(0,1fr))">
-  <div class="c d">P0 설계</div><div class="c d">P1 환경</div><div class="c d">P2 스모크</div><div class="c d">P3 학습</div><div class="c w">P4 평가</div><div class="c t">P5 시연</div><div class="c t">P6 실기</div>
+  <div class="c d">P0 설계</div><div class="c d">P1 환경</div><div class="c d">P2 스모크</div><div class="c d">P3 학습</div><div class="c d">P4 평가</div><div class="c t">P5 시연</div><div class="c t">P6 실기</div>
  </div>
  <h3>과제</h3>
  <div class="strip" style="grid-template-columns:repeat(15,minmax(0,1fr))">
-  <div class="c d">1</div><div class="c d">2</div><div class="c d">3</div><div class="c d">4</div><div class="c d">5</div><div class="c d">6</div><div class="c d">7</div><div class="c d">8</div><div class="c d">9</div><div class="c d">10</div><div class="c d">11</div><div class="c n">12</div><div class="c n">13</div><div class="c n">14</div><div class="c t">15</div>
+  <div class="c d">1</div><div class="c d">2</div><div class="c d">3</div><div class="c d">4</div><div class="c d">5</div><div class="c d">6</div><div class="c d">7</div><div class="c d">8</div><div class="c d">9</div><div class="c d">10</div><div class="c d">11</div><div class="c n">12</div><div class="c n">13</div><div class="c n">14</div><div class="c n">15</div>
  </div>
- <div class="cap">T1–T6 바탕(저장소·가능 영역·자세 표·거울·학습기·AMP) · T7–T11 환경(로봇·명령·행동·관측·보상) · T12 무작위화·커리큘럼 · T13 train.py · T14 스모크 · T15 MuJoCo 평가 도구</div>
+ <div class="cap">T1–T6 바탕(저장소·가능 영역·자세 표·거울·학습기·AMP) · T7–T11 환경(로봇·명령·행동·관측·보상) · T12 무작위화·커리큘럼 · T13 train.py · T14 스모크 · T15 MuJoCo 평가</div>
  <h3>주요 결정</h3>
  <div class="tbl"><table>
   <tr><th></th><th>결정</th></tr>
@@ -345,7 +357,7 @@ a{color:var(--acc)}
   <tr><td class="mono">D6</td><td>AMP 0.025/스텝, 걷기 명령에서만</td></tr>
   <tr><td class="mono">D7</td><td>몸통 무게중심 ±5 cm 켬 (set_coms ≡ URDF 시험 통과)</td></tr>
   <tr><td class="mono">D8</td><td>모터 개체 차 env 마다 (dev9 와 같음)</td></tr>
-  <tr><td class="mono">D9</td><td>새 모델 35.71 kg, 범용 충돌체, 접촉 여유 2 mm</td></tr>
+  <tr><td class="mono">D9</td><td>새 모델 35.71 kg, 범용 충돌체, 접촉 여유 2 mm (실행 중 0 — P4 에서 확인)</td></tr>
   <tr><td class="mono">D10</td><td>AMP 정답 = 걸음 모음 v2 보간·덧셈</td></tr>
   <tr><td class="mono">D11·D13·D14</td><td>걷기 숙임 상한, 뒤로 기울이기 −45°, 숙임 하한 = 소프트 0.98 실측</td></tr>
   <tr><td class="mono">D12</td><td>허리 ±270°, 걷기 15 % 몸통 기준 이동</td></tr>
@@ -360,9 +372,10 @@ a{color:var(--acc)}
  </table></div>
  <h3>결정 대기</h3>
  <div class="tbl"><table>
-  <tr><td><span class="chip wait">P4</span></td><td>T15 MuJoCo 평가 하네스, 실기 조건 평가</td></tr>
+  <tr><td><span class="chip wait">P6</span></td><td>실기 준비: 19750 배포 번들 · ROS 노드 (아직 없음), yaw 보정, 앞 0.3 m/s 이상 명령</td></tr>
+  <tr><td><span class="chip wait">학습</span></td><td>추가 학습 권고: 옆걸음, 느린 명령 손익, 손 하중(상체 3단계 0.74 에서 끝남)</td></tr>
  </table></div>
- <div class="cap">10-16 재설계 · 10-21 AMP 조사·궤적최적화 · 10-22 걸음 모음 v2·계획 검토·T1–T11 · 10-23 T12–T14·걸음 모음 0.77 m 줄. 원자료 <code>계획.md</code> §7 · <code>docs/superpowers/plans/2026-10-21-dev12-env-amp.md</code> · 진행 기록 <code>.superpowers/sdd/…/progress.md</code> · 설계 데이터 <code>dev12_design.json</code> (판 38)</div>
+ <div class="cap">10-16 재설계 · 10-21 AMP 조사·궤적최적화 · 10-22 걸음 모음 v2·계획 검토·T1–T11 · 10-23 T12–T14·걸음 모음 0.77 m 줄 · 10-24 P3 학습·P4 평가. 원자료 <code>계획.md</code> §7 · <code>docs/superpowers/plans/2026-10-21-dev12-env-amp.md</code> · 진행 기록 <code>.superpowers/sdd/…/progress.md</code> · 설계 데이터 <code>dev12_design.json</code> (판 38)</div>
 </section>
 
 <footer>dev12 · 저장소 chanyong0211/k1-pelvis-tracker · 이 페이지 하나가 dev12 문서의 전부입니다(옛 페이지는 dev12/trash/docs_pages_20261023/).</footer>
